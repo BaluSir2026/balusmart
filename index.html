@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Quiz Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Import libraries for file processing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #f97316;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --surface: #f8fafc;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .brand-text h1 {
+            font-size: 1.8em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-text p {
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .mode-selector {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-right: 20px;
+        }
+
+        .mode-selector label {
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .mode-selector select {
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary), #fb923c);
+            color: white;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #34d399);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #f87171);
+            color: white;
+        }
+
+        .trainer-only {
+            display: inline-flex !important;
+        }
+
+        .student-mode .trainer-only {
+            display: none !important;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: var(--text);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: white;
+            border-color: transparent;
+        }
+
+        .tab-btn:hover:not(.active) {
+            border-color: var(--secondary);
+        }
+
+        /* Card */
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 1.6em;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 25px;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        /* Setup Guide Styles */
+        .step {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .step h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .step-number {
+            background: var(--secondary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        .code-block {
+            background: var(--primary);
+            color: #10b981;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+            margin: 15px 0;
+            position: relative;
+            white-space: pre-wrap;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(16, 185, 129, 0.1));
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(249, 115, 22, 0.1));
+            border: 2px solid var(--warning);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.1));
+            border: 2px solid var(--success);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        /* Import Section */
+        .file-upload-zone {
+            border: 3px dashed var(--border);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload-zone.dragover {
+            border-color: var(--secondary);
+            background: rgba(249, 115, 22, 0.05);
+        }
+
+        .file-upload-zone input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        /* Question List */
+        .question-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .question-item {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .question-item:hover {
+            border-color: var(--secondary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .question-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .question-num {
+            background: var(--secondary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85em;
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .icon-btn:hover {
+            border-color: var(--secondary);
+        }
+
+        /* Quiz Styles */
+        .question-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .question-card:hover {
+            border-color: var(--secondary);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.15em;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-item {
+            position: relative;
+        }
+
+        .option-item input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 16px 20px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-item input[type="radio"]:checked + .option-label {
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(6, 182, 212, 0.1));
+            border-color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent);
+            background: var(--surface);
+        }
+
+        .option-marker {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .option-item input[type="radio"]:checked + .option-label .option-marker {
+            background: var(--secondary);
+            border-color: var(--secondary);
+        }
+
+        .option-item input[type="radio"]:checked + .option-label .option-marker::after {
+            content: '✓';
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .timer-section {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .timer {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--danger);
+        }
+
+        /* Results */
+        .results-section {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .score-display {
+            width: 200px;
+            height: 200px;
+            margin: 30px auto;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            box-shadow: 0 20px 60px rgba(249, 115, 22, 0.3);
+            position: relative;
+        }
+
+        .score-display::before {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            opacity: 0.2;
+            z-index: -1;
+        }
+
+        .score-number {
+            font-size: 4em;
+            font-weight: 800;
+            color: white;
+            line-height: 1;
+        }
+
+        .score-label {
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+        }
+
+        .result-message {
+            font-size: 2em;
+            font-weight: 700;
+            margin: 30px 0 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-left: 4px solid var(--success);
+            z-index: 10000;
+            display: none;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+
+        .toast.warning {
+            border-left-color: var(--warning);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .brand-text h1 {
+                font-size: 1.4em;
+            }
+            .card {
+                padding: 25px;
+            }
+            .tab-nav {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast" id="toast"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="brand">
+                    <div class="brand-icon">☁️</div>
+                    <div class="brand-text">
+                        <h1>Tech Quiz Platform</h1>
+                        <p>Balu Sir Aditya</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="mode-selector">
+                        <label>Mode:</label>
+                        <select id="modeSelector" onchange="toggleMode()">
+                            <option value="trainer">👨‍🏫 Trainer</option>
+                            <option value="student">🎓 Student</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary trainer-only" onclick="switchTab('setup')">
+                        ⚙️ Setup
+                    </button>
+                    <button class="btn btn-primary trainer-only" onclick="testConnection()" id="testBtn">
+                        🔌 Test Connection
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn trainer-only active" onclick="switchTab('setup')" data-tab="setup">
+                📖 Setup Guide
+            </button>
+            <button class="tab-btn trainer-only" onclick="switchTab('import')" data-tab="import">
+                📥 Import Questions
+            </button>
+            <button class="tab-btn trainer-only" onclick="switchTab('manage')" data-tab="manage">
+                📋 Manage Questions
+            </button>
+            <button class="tab-btn" onclick="switchTab('quiz')" data-tab="quiz">
+                🎯 Take Quiz
+            </button>
+        </div>
+
+        <!-- Setup Tab -->
+        <div class="card tab-content active" id="setupTab">
+            <h2>🚀 Setup Guide - Connect to Google Sheets</h2>
+            
+            <div class="success-box" style="border-color: var(--accent);">
+                <strong>💡 PRO TIP: Permanent Configuration</strong>
+                <p style="margin-top: 10px;">Instead of configuring every time you open this file, you can hardcode your Web App URL directly in the HTML file!</p>
+                <p style="margin-top: 10px;"><strong>How to do it:</strong></p>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>Open this HTML file in a text editor (Notepad, VS Code, etc.)</li>
+                    <li>Find the section at the top that says: <code style="background: var(--primary); color: #10b981; padding: 2px 6px; border-radius: 4px;">🔧 PERMANENT CONFIGURATION</code></li>
+                    <li>Paste your Web App URL between the quotes: <code style="background: var(--primary); color: #10b981; padding: 2px 6px; border-radius: 4px;">const PERMANENT_WEB_APP_URL = 'YOUR_URL_HERE';</code></li>
+                    <li>Save the file</li>
+                    <li>Now it's configured permanently! ✅</li>
+                </ol>
+            </div>
+            
+            <div class="warning-box">
+                <strong>⚠️ First Time Setup Required</strong>
+                <p style="margin-top: 10px;">Follow these steps to connect your quiz to Google Sheets. You only need to do this once!</p>
+            </div>
+
+            <div class="step">
+                <h3><span class="step-number">1</span> Create Google Spreadsheet</h3>
+                <p>1. Go to <a href="https://sheets.google.com" target="_blank" style="color: var(--accent); font-weight: 600;">Google Sheets</a></p>
+                <p>2. Create new spreadsheet: <strong>"Quiz Platform"</strong></p>
+                <p>3. Create two sheets (tabs):</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Questions</strong> - stores all quiz questions</li>
+                    <li><strong>Results</strong> - stores student results</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h3><span class="step-number">2</span> Setup Questions Sheet</h3>
+                <p>In <strong>"Questions"</strong> sheet, add headers in Row 1:</p>
+                <div class="code-block">Question | OptionA | OptionB | OptionC | OptionD | CorrectAnswer | QuizID</div>
+                <p style="margin-top: 15px;">Add your questions (example):</p>
+                <div class="code-block">What is 2+2? | 3 | 4 | 5 | 6 | B | QUIZ001</div>
+            </div>
+
+            <div class="step">
+                <h3><span class="step-number">3</span> Setup Results Sheet</h3>
+                <p>In <strong>"Results"</strong> sheet, add headers in Row 1:</p>
+                <div class="code-block">Timestamp | Name | Email | StudentID | Batch | QuizID | Score | TotalQuestions | Percentage | Status | TimeTaken</div>
+            </div>
+
+            <div class="step">
+                <h3><span class="step-number">4</span> Create Apps Script</h3>
+                <p>1. Click <strong>Extensions → Apps Script</strong></p>
+                <p>2. Delete existing code</p>
+                <p>3. Copy this code:</p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('scriptCode')">📋 Copy</button>
+                    <pre id="scriptCode">function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet();
+  
+  if (e.parameter.action === 'getQuestions') {
+    var quizId = e.parameter.quizId || 'QUIZ001';
+    var questionsSheet = sheet.getSheetByName('Questions');
+    var data = questionsSheet.getDataRange().getValues();
+    
+    var questions = [];
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][6] === quizId) {
+        questions.push({
+          question: data[i][0],
+          options: [data[i][1], data[i][2], data[i][3], data[i][4]],
+          correct: data[i][5]
+        });
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'success',
+      questions: questions
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  return ContentService.createTextOutput('Quiz API Active');
+}
+
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet();
+  var resultsSheet = sheet.getSheetByName('Results');
+  var data = JSON.parse(e.postData.contents);
+  
+  resultsSheet.appendRow([
+    new Date(),
+    data.name,
+    data.email,
+    data.studentId,
+    data.batch,
+    data.quizId,
+    data.score,
+    data.totalQuestions,
+    data.percentage,
+    data.status,
+    data.timeTaken
+  ]);
+  
+  return ContentService.createTextOutput(JSON.stringify({
+    status: 'success'
+  })).setMimeType(ContentService.MimeType.JSON);
+}</pre>
+                </div>
+                <p>4. Save as "Quiz API"</p>
+            </div>
+
+            <div class="step">
+                <h3><span class="step-number">5</span> Deploy Web App</h3>
+                <p>1. <strong>Deploy → New deployment</strong></p>
+                <p>2. Select <strong>"Web app"</strong></p>
+                <p>3. Settings:</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Execute as:</strong> Me</li>
+                    <li><strong>Who has access:</strong> Anyone</li>
+                </ul>
+                <p>4. <strong>Deploy</strong> and authorize</p>
+                <p>5. <strong>COPY THE WEB APP URL</strong></p>
+            </div>
+
+            <div class="step">
+                <h3><span class="step-number">6</span> Configure Platform</h3>
+                <div class="form-group">
+                    <label for="webAppUrl">Web App URL:</label>
+                    <input type="text" id="webAppUrl" placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
+                </div>
+                <div class="form-group">
+                    <label for="defaultQuizId">Default Quiz ID:</label>
+                    <input type="text" id="defaultQuizId" placeholder="QUIZ001" value="QUIZ001">
+                </div>
+                <button class="btn btn-success" onclick="saveConfiguration()">
+                    💾 Save Configuration
+                </button>
+            </div>
+
+            <div class="success-box hidden" id="successMessage">
+                <strong>✅ Configuration Saved!</strong>
+                <p style="margin-top: 10px;">You can now import questions or start the quiz!</p>
+            </div>
+        </div>
+
+        <!-- Import Tab -->
+        <div class="card tab-content" id="importTab">
+            <h2>📥 Import Questions</h2>
+            
+            <div class="info-box">
+                <strong>💡 Import Methods:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Upload PDF, Word, Excel, or Text files</li>
+                    <li>Paste questions manually</li>
+                    <li>Questions will be uploaded to Google Sheets</li>
+                </ul>
+            </div>
+
+            <div class="file-upload-zone" id="dropZone">
+                <div class="upload-icon">📎</div>
+                <div class="upload-text">Drag & Drop your file here</div>
+                <div style="color: var(--text-light); margin: 10px 0;">or click to browse</div>
+                <div style="color: var(--text-light); font-size: 0.9em;">
+                    Supported: PDF, DOCX, TXT, XLSX, CSV
+                </div>
+                <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.xlsx,.csv">
+            </div>
+
+            <div class="loading hidden" id="loadingIndicator">
+                <div class="spinner"></div>
+                <div>Processing file...</div>
+            </div>
+
+            <div style="margin-top: 30px;">
+                <h3>✍️ Or Paste Questions</h3>
+                <div class="form-group">
+                    <textarea id="manualQuestionsInput" rows="10" placeholder="Paste your questions here..."></textarea>
+                </div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="parseManualQuestions()">
+                        ✅ Import Questions
+                    </button>
+                    <button class="btn btn-secondary" onclick="testQuestionUpload()">
+                        🧪 Test Upload (1 Question)
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-box" style="margin-top: 30px;">
+                <strong>📖 Question Format:</strong>
+                <div class="code-block" style="margin-top: 15px;">Q1. What is the capital of France?
+A) London
+B) Paris
+C) Berlin
+D) Madrid
+Correct: B
+
+Q2. Which planet is red?
+A) Venus
+B) Mars
+C) Jupiter
+D) Saturn
+Correct: B</div>
+            </div>
+        </div>
+
+        <!-- Manage Tab -->
+        <div class="card tab-content" id="manageTab">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+                <h2>📋 Question Bank</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-success" onclick="loadQuestionsFromSheets()">
+                        🔄 Reload from Sheets
+                    </button>
+                    <button class="btn btn-danger" onclick="clearLocalQuestions()">
+                        🗑️ Clear Local Cache
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>☁️ Cloud-Based Questions:</strong>
+                <p style="margin-top: 10px;">Questions are stored in Google Sheets. Click "Reload from Sheets" to see the latest questions from your Google Sheet.</p>
+            </div>
+            
+            <div class="question-list" id="questionList">
+                <div class="loading">
+                    <div>Click "Reload from Sheets" to view questions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Tab -->
+        <div class="card tab-content" id="quizTab">
+            <!-- Student Info -->
+            <div id="studentInfo">
+                <h2>📋 Student Information</h2>
+                <form id="studentForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="studentName">Full Name *</label>
+                            <input type="text" id="studentName" required placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
+                            <label for="studentEmail">Email *</label>
+                            <input type="email" id="studentEmail" required placeholder="your.email@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="studentId">Student/Employee ID</label>
+                            <input type="text" id="studentId" placeholder="Optional">
+                        </div>
+                        <div class="form-group">
+                            <label for="studentBatch">Batch/Department</label>
+                            <select id="studentBatch">
+                                <option value="">Select Batch</option>
+                                <option value="Batch A">Batch A</option>
+                                <option value="Batch B">Batch B</option>
+                                <option value="Batch C">Batch C</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">▶️ Start Quiz</button>
+                </form>
+            </div>
+
+            <!-- Quiz Content -->
+            <div id="quizContent" class="hidden">
+                <div class="timer-section">
+                    <div><strong>⏱️ Time:</strong> <span class="timer" id="timer">45:00</span></div>
+                    <div><strong>Progress:</strong> <span id="answeredCount">0</span> / <span id="totalCount">0</span></div>
+                </div>
+
+                <div class="loading" id="loadingQuestions">
+                    <div class="spinner"></div>
+                    <div>Loading questions from Google Sheets...</div>
+                </div>
+
+                <form id="quizForm"></form>
+
+                <button type="button" class="btn btn-primary hidden" onclick="submitQuiz()" id="submitBtn" style="width: 100%; justify-content: center; margin-top: 20px;">
+                    ✅ Submit Quiz
+                </button>
+            </div>
+
+            <!-- Results -->
+            <div id="resultsSection" class="hidden">
+                <div class="results-section">
+                    <div class="score-display">
+                        <div class="score-number" id="scoreNumber">0</div>
+                        <div class="score-label">Score</div>
+                    </div>
+                    <div class="result-message" id="resultMessage"></div>
+                    <p style="font-size: 1.1em; color: var(--text-light); margin: 20px 0;">
+                        ✅ Results saved to Google Sheets
+                    </p>
+                    <div style="background: var(--surface); padding: 30px; border-radius: 16px; max-width: 500px; margin: 20px auto; border: 2px solid var(--border);">
+                        <h3 style="margin-bottom: 20px;">📊 Your Results</h3>
+                        <div style="display: grid; gap: 12px;">
+                            <div style="display: flex; justify-content: space-between; padding: 12px; background: white; border-radius: 8px;">
+                                <span>Score:</span>
+                                <strong id="finalScore"></strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 12px; background: white; border-radius: 8px;">
+                                <span>Percentage:</span>
+                                <strong id="finalPercentage"></strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 12px; background: white; border-radius: 8px;">
+                                <span>Status:</span>
+                                <strong id="finalStatus"></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 🔧 PERMANENT CONFIGURATION - EDIT THIS ONCE
+        // ============================================
+        
+        // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE:
+        const PERMANENT_WEB_APP_URL = '';
+        // Example: 'https://script.google.com/macros/s/AKfycbxxx.../exec'
+        
+        // DEFAULT QUIZ ID (you can change this anytime):
+        const PERMANENT_QUIZ_ID = 'QUIZ001';
+        
+        // ============================================
+        // DO NOT EDIT BELOW THIS LINE
+        // ============================================
+
+        // Initialize PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        let webAppUrl = PERMANENT_WEB_APP_URL;
+        let quizId = PERMANENT_QUIZ_ID;
+        let questions = [];
+        let studentData = {};
+        let startTime;
+        let timerInterval;
+        let timeRemaining = 45 * 60;
+        const PASSING_SCORE = 60;
+
+        // Load configuration
+        window.addEventListener('DOMContentLoaded', function() {
+            // Check if permanent config is set
+            if (PERMANENT_WEB_APP_URL && PERMANENT_WEB_APP_URL.includes('script.google.com')) {
+                // Use permanent configuration
+                webAppUrl = PERMANENT_WEB_APP_URL;
+                quizId = PERMANENT_QUIZ_ID;
+                
+                // Auto-populate setup form
+                document.getElementById('webAppUrl').value = webAppUrl;
+                document.getElementById('defaultQuizId').value = quizId;
+                document.getElementById('successMessage').classList.remove('hidden');
+                
+                // Auto-hide setup tab and show quiz for students
+                const mode = document.getElementById('modeSelector').value;
+                if (mode === 'student') {
+                    switchTab('quiz');
+                }
+            } else {
+                // Check localStorage for manual configuration
+                const savedUrl = localStorage.getItem('webAppUrl');
+                const savedQuizId = localStorage.getItem('quizId');
+                
+                if (savedUrl && savedQuizId) {
+                    webAppUrl = savedUrl;
+                    quizId = savedQuizId;
+                    document.getElementById('webAppUrl').value = savedUrl;
+                    document.getElementById('defaultQuizId').value = savedQuizId;
+                    document.getElementById('successMessage').classList.remove('hidden');
+                }
+            }
+
+            toggleMode();
+        });
+
+        // Mode toggle
+        function toggleMode() {
+            const mode = document.getElementById('modeSelector').value;
+            const body = document.body;
+            
+            if (mode === 'student') {
+                body.classList.add('student-mode');
+                switchTab('quiz');
+            } else {
+                body.classList.remove('student-mode');
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        function copyCode(id) {
+            const code = document.getElementById(id).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('Code copied!', 'success');
+            });
+        }
+
+        function saveConfiguration() {
+            const url = document.getElementById('webAppUrl').value.trim();
+            const qId = document.getElementById('defaultQuizId').value.trim();
+
+            if (!url || !url.includes('script.google.com')) {
+                showToast('Invalid Google Apps Script URL', 'error');
+                return;
+            }
+
+            if (!qId) {
+                showToast('Please enter a Quiz ID', 'error');
+                return;
+            }
+
+            webAppUrl = url;
+            quizId = qId;
+            
+            localStorage.setItem('webAppUrl', url);
+            localStorage.setItem('quizId', qId);
+
+            document.getElementById('successMessage').classList.remove('hidden');
+            showToast('Configuration saved!', 'success');
+        }
+
+        function testConnection() {
+            if (!webAppUrl) {
+                showToast('Please configure first', 'warning');
+                return;
+            }
+
+            showToast('Testing...', 'warning');
+            
+            fetch(webAppUrl)
+                .then(response => response.text())
+                .then(data => {
+                    if (data.includes('Quiz API Active')) {
+                        showToast('✅ Connection successful!', 'success');
+                    } else {
+                        showToast('Unexpected response', 'warning');
+                    }
+                })
+                .catch(error => {
+                    showToast('❌ Connection failed', 'error');
+                });
+        }
+
+        // File upload
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        async function handleFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            document.getElementById('loadingIndicator').classList.remove('hidden');
+
+            try {
+                let text = '';
+                if (ext === 'pdf') {
+                    text = await extractTextFromPDF(file);
+                } else if (ext === 'docx') {
+                    text = await extractTextFromDOCX(file);
+                } else if (ext === 'txt') {
+                    text = await file.text();
+                } else if (ext === 'xlsx' || ext === 'csv') {
+                    text = await extractTextFromExcel(file);
+                } else {
+                    throw new Error('Unsupported format');
+                }
+
+                parseQuestions(text);
+                document.getElementById('loadingIndicator').classList.add('hidden');
+            } catch (error) {
+                document.getElementById('loadingIndicator').classList.add('hidden');
+                showToast('Error: ' + error.message, 'error');
+            }
+        }
+
+        async function extractTextFromPDF(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+            let text = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                text += content.items.map(item => item.str).join(' ') + '\n';
+            }
+            return text;
+        }
+
+        async function extractTextFromDOCX(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer });
+            return result.value;
+        }
+
+        async function extractTextFromExcel(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            return XLSX.utils.sheet_to_csv(sheet);
+        }
+
+        function parseManualQuestions() {
+            const text = document.getElementById('manualQuestionsInput').value;
+            if (text.trim()) {
+                parseQuestions(text);
+                document.getElementById('manualQuestionsInput').value = '';
+            } else {
+                showToast('Please enter questions', 'warning');
+            }
+        }
+
+        async function testQuestionUpload() {
+            if (!webAppUrl) {
+                showToast('Please configure Google Sheets first', 'error');
+                return;
+            }
+
+            const testQuestion = [{
+                question: 'Test Question - What is 2+2?',
+                optionA: '3',
+                optionB: '4',
+                optionC: '5',
+                optionD: '6',
+                correct: 'B',
+                quizId: quizId
+            }];
+
+            showToast('Testing upload...', 'warning');
+
+            try {
+                const response = await fetch(webAppUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'uploadQuestions',
+                        questions: testQuestion
+                    })
+                });
+
+                showToast('✅ Test upload sent! Check your Google Sheet "Questions" tab.', 'success');
+                
+                setTimeout(() => {
+                    alert('📊 Check your Google Sheet:\n\n1. Open your Google Sheet\n2. Go to "Questions" tab\n3. Look for: "Test Question - What is 2+2?"\n\nIf you see it, the upload is working! ✅\nIf not, check your Apps Script deployment. ❌');
+                }, 2000);
+
+            } catch (error) {
+                showToast('❌ Upload failed. Check Apps Script deployment.', 'error');
+                console.error('Test upload error:', error);
+            }
+        }
+
+        function parseQuestions(text) {
+            const parsed = [];
+            const blocks = text.split(/Q\d+[\.\)]\s*/i).filter(b => b.trim());
+            
+            blocks.forEach(block => {
+                const lines = block.split('\n').map(l => l.trim()).filter(l => l);
+                if (lines.length < 5) return;
+                
+                const question = lines[0];
+                const options = [];
+                let correct = '';
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const optMatch = lines[i].match(/^([A-D])[.\):]\s*(.+)/i);
+                    if (optMatch) {
+                        options.push(optMatch[2].trim());
+                    }
+                    
+                    const corrMatch = lines[i].match(/Correct:\s*([A-D])/i);
+                    if (corrMatch) {
+                        correct = corrMatch[1].toUpperCase();
+                    }
+                }
+                
+                if (question && options.length === 4 && correct) {
+                    parsed.push({
+                        question,
+                        optionA: options[0],
+                        optionB: options[1],
+                        optionC: options[2],
+                        optionD: options[3],
+                        correct,
+                        quizId
+                    });
+                }
+            });
+            
+            if (parsed.length > 0) {
+                uploadQuestionsToSheets(parsed);
+            } else {
+                showToast('No valid questions found', 'error');
+            }
+        }
+
+        async function uploadQuestionsToSheets(questions) {
+            if (!webAppUrl) {
+                showToast('Please configure Google Sheets first', 'error');
+                return;
+            }
+
+            showToast(`Uploading ${questions.length} questions to Google Sheets...`, 'warning');
+            
+            try {
+                // Use no-cors mode because Google Apps Script doesn't return proper CORS headers
+                const response = await fetch(webAppUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', // Important for Google Apps Script
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'uploadQuestions',
+                        questions: questions
+                    })
+                });
+
+                // With no-cors, we can't read the response, but the request is sent
+                showToast(`✅ Uploaded ${questions.length} questions! Check your Google Sheet.`, 'success');
+                
+                // Wait a moment then reload questions
+                setTimeout(() => {
+                    switchTab('manage');
+                    setTimeout(() => {
+                        loadQuestionsFromSheets();
+                    }, 1000);
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                showToast('❌ Upload failed. See instructions below.', 'error');
+                
+                // Show manual upload instructions
+                let tsv = 'Question\tOptionA\tOptionB\tOptionC\tOptionD\tCorrectAnswer\tQuizID\n';
+                questions.forEach(q => {
+                    tsv += `${q.question}\t${q.optionA}\t${q.optionB}\t${q.optionC}\t${q.optionD}\t${q.correct}\t${q.quizId}\n`;
+                });
+                
+                console.log('=== COPY THIS TO GOOGLE SHEETS ===');
+                console.log(tsv);
+                console.log('===================================');
+                
+                alert('❌ Auto-upload failed.\n\n✅ Manual upload:\n1. Press F12 to open Console\n2. Copy the text between the === lines\n3. Paste into your Google Sheet "Questions" tab\n\nOr check if your Apps Script is correctly deployed.');
+            }
+        }
+
+        async function loadQuestionsFromSheets() {
+            if (!webAppUrl) {
+                showToast('Please configure first', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${webAppUrl}?action=getQuestions&quizId=${quizId}`);
+                const data = await response.json();
+
+                if (data.status === 'success' && data.questions.length > 0) {
+                    displayQuestions(data.questions);
+                    showToast(`Loaded ${data.questions.length} questions`, 'success');
+                } else {
+                    showToast('No questions found', 'warning');
+                }
+            } catch (error) {
+                showToast('Failed to load questions', 'error');
+            }
+        }
+
+        function displayQuestions(qs) {
+            const list = document.getElementById('questionList');
+            list.innerHTML = '';
+            
+            qs.forEach((q, i) => {
+                const item = document.createElement('div');
+                item.className = 'question-item';
+                item.innerHTML = `
+                    <div class="question-item-header">
+                        <div class="question-num">Q${i + 1}</div>
+                    </div>
+                    <div style="font-weight: 600; margin-bottom: 10px;">${q.question}</div>
+                    <div style="display: grid; gap: 5px; margin-left: 20px;">
+                        ${q.options.map((opt, idx) => `
+                            <div style="padding: 5px; ${String.fromCharCode(65 + idx) === q.correct ? 'background: rgba(16, 185, 129, 0.1); font-weight: 600;' : ''}">
+                                ${String.fromCharCode(65 + idx)}) ${opt} ${String.fromCharCode(65 + idx) === q.correct ? '✓' : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function clearLocalQuestions() {
+            document.getElementById('questionList').innerHTML = '<div class="loading"><div>Click "Reload from Sheets" to view questions</div></div>';
+            showToast('Local cache cleared', 'success');
+        }
+
+        // Quiz functions
+        document.getElementById('studentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            studentData = {
+                name: document.getElementById('studentName').value,
+                email: document.getElementById('studentEmail').value,
+                studentId: document.getElementById('studentId').value || 'N/A',
+                batch: document.getElementById('studentBatch').value || 'N/A'
+            };
+
+            document.getElementById('studentInfo').classList.add('hidden');
+            document.getElementById('quizContent').classList.remove('hidden');
+
+            await loadQuizQuestions();
+        });
+
+        async function loadQuizQuestions() {
+            try {
+                const response = await fetch(`${webAppUrl}?action=getQuestions&quizId=${quizId}`);
+                const data = await response.json();
+
+                if (data.status === 'success' && data.questions.length > 0) {
+                    questions = data.questions;
+                    document.getElementById('loadingQuestions').classList.add('hidden');
+                    generateQuestions();
+                    document.getElementById('submitBtn').classList.remove('hidden');
+                    document.getElementById('totalCount').textContent = questions.length;
+                    startTimer();
+                } else {
+                    document.getElementById('loadingQuestions').innerHTML = '<div style="text-align: center; padding: 40px;"><h3 style="color: var(--danger);">❌ No questions found</h3></div>';
+                }
+            } catch (error) {
+                document.getElementById('loadingQuestions').innerHTML = '<div style="text-align: center; padding: 40px;"><h3 style="color: var(--danger);">❌ Connection error</h3></div>';
+            }
+        }
+
+        function generateQuestions() {
+            const form = document.getElementById('quizForm');
+            form.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.innerHTML = `
+                    <div class="question-number">Question ${index + 1} of ${questions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options-grid">
+                        ${q.options.map((opt, i) => `
+                            <div class="option-item">
+                                <input type="radio" 
+                                       id="q${index}_${i}" 
+                                       name="q${index}" 
+                                       value="${String.fromCharCode(65 + i)}"
+                                       data-correct="${q.correct}"
+                                       onchange="updateProgress()">
+                                <label class="option-label" for="q${index}_${i}">
+                                    <div class="option-marker"></div>
+                                    <span>${opt}</span>
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                form.appendChild(card);
+            });
+        }
+
+        function startTimer() {
+            startTime = new Date();
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                const m = Math.floor(timeRemaining / 60);
+                const s = timeRemaining % 60;
+                document.getElementById('timer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz(true);
+                }
+            }, 1000);
+        }
+
+        function updateProgress() {
+            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+            document.getElementById('answeredCount').textContent = answered;
+        }
+
+        async function submitQuiz(timeUp = false) {
+            if (!timeUp) {
+                const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+                if (answered < questions.length && !confirm(`Only answered ${answered}/${questions.length}. Submit?`)) {
+                    return;
+                }
+            }
+
+            clearInterval(timerInterval);
+
+            let score = 0;
+            document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+                if (input.value === input.dataset.correct) {
+                    score++;
+                }
+            });
+
+            const total = questions.length;
+            const percentage = Math.round((score / total) * 100);
+            const passed = percentage >= PASSING_SCORE;
+
+            const endTime = new Date();
+            const timeTaken = Math.floor((endTime - startTime) / 1000);
+            const m = Math.floor(timeTaken / 60);
+            const s = timeTaken % 60;
+            const timeString = `${m}m ${s}s`;
+
+            showToast('Saving...', 'warning');
+
+            try {
+                await fetch(webAppUrl, {
+                    method: 'POST',
+                    mode: 'no-cors', // Important for Google Apps Script
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'submitResults',
+                        name: studentData.name,
+                        email: studentData.email,
+                        studentId: studentData.studentId,
+                        batch: studentData.batch,
+                        quizId: quizId,
+                        score: score,
+                        totalQuestions: total,
+                        percentage: percentage,
+                        status: passed ? 'Passed' : 'Failed',
+                        timeTaken: timeString
+                    })
+                });
+                showToast('✅ Saved!', 'success');
+            } catch (error) {
+                showToast('⚠️ Could not save', 'error');
+            }
+
+            document.getElementById('quizContent').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+
+            document.getElementById('scoreNumber').textContent = score;
+            document.getElementById('finalScore').textContent = `${score}/${total}`;
+            document.getElementById('finalPercentage').textContent = percentage + '%';
+            document.getElementById('finalStatus').textContent = passed ? '✅ Passed' : '❌ Failed';
+
+            let message;
+            if (percentage >= 90) message = '🏆 Outstanding!';
+            else if (percentage >= 75) message = '🎉 Excellent!';
+            else if (percentage >= PASSING_SCORE) message = '✅ Good Job!';
+            else message = '📚 Keep Learning!';
+            
+            document.getElementById('resultMessage').textContent = message;
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+    </script>
+</body>
+</html>
