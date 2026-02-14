@@ -1689,25 +1689,32 @@ Correct: B
         const item = document.createElement('div');
         item.className = 'question-item';
         
-        // Create header
+        // Header
         const header = document.createElement('div');
         header.className = 'question-item-header';
-        header.innerHTML = `<div class="question-num">Q${i + 1}</div>`;
         
-        // Create question text with HTML entity rendering
+        const questionNum = document.createElement('div');
+        questionNum.className = 'question-num';
+        questionNum.textContent = `Q${i + 1}`;
+        header.appendChild(questionNum);
+        
+        item.appendChild(header);
+        
+        // Question text - USE innerHTML to render HTML entities
         const questionDiv = document.createElement('div');
         questionDiv.style.fontWeight = '600';
         questionDiv.style.marginBottom = '12px';
         questionDiv.style.color = 'var(--text)';
-        questionDiv.innerHTML = q.question; // ✅ Render HTML entities
+        questionDiv.style.whiteSpace = 'pre-wrap';  // Preserve line breaks
+        questionDiv.innerHTML = q.question;  // ✅ This renders &lt; as 
+        item.appendChild(questionDiv);
         
-        // Create options container
+        // Options
         const optionsContainer = document.createElement('div');
         optionsContainer.style.display = 'grid';
         optionsContainer.style.gap = '6px';
         optionsContainer.style.marginLeft = '20px';
         
-        // Create each option
         q.options.forEach((opt, idx) => {
             const optionDiv = document.createElement('div');
             const letter = String.fromCharCode(65 + idx);
@@ -1717,28 +1724,24 @@ Correct: B
             optionDiv.style.borderRadius = '8px';
             
             if (isCorrect) {
-                optionDiv.style.background = 'var(--success-light)';
+                optionDiv.style.background = 'rgba(16, 185, 129, 0.1)';
                 optionDiv.style.fontWeight = '600';
-                optionDiv.style.color = 'var(--success)';
+                optionDiv.style.color = '#10b981';
             } else {
-                optionDiv.style.background = 'var(--surface-hover)';
+                optionDiv.style.background = '#f9fafb';
             }
             
-            // Use innerHTML to render HTML entities in options
-            const optionContent = document.createElement('span');
-            optionContent.innerHTML = `${letter}) ${opt} ${isCorrect ? '✓' : ''}`; // ✅ Render HTML entities
+            // USE innerHTML to render HTML entities
+            optionDiv.innerHTML = `${letter}) ${opt} ${isCorrect ? '✓' : ''}`;  // ✅ This renders &lt; as 
             
-            optionDiv.appendChild(optionContent);
             optionsContainer.appendChild(optionDiv);
         });
         
-        // Assemble the item
-        item.appendChild(header);
-        item.appendChild(questionDiv);
         item.appendChild(optionsContainer);
         list.appendChild(item);
     });
 }
+    
         function clearLocalQuestions() {
             document.getElementById('questionList').innerHTML = '<div class="loading"><div>Click "Reload from Sheets"</div></div>';
             showToast('Cache cleared', 'success');
@@ -1776,24 +1779,27 @@ Correct: B
             }
         }
 
-    function generateQuestions() {
+        function generateQuestions() {
     const form = document.getElementById('quizForm');
     form.innerHTML = '';
+    
     questions.forEach((q, index) => {
         const card = document.createElement('div');
         card.className = 'question-card';
         
-        // Create question number
+        // Question number
         const questionNumber = document.createElement('div');
         questionNumber.className = 'question-number';
         questionNumber.textContent = `Question ${index + 1} of ${questions.length}`;
+        card.appendChild(questionNumber);
         
-        // Create question text (preserve HTML entities)
+        // Question text - USE innerHTML to render HTML entities
         const questionText = document.createElement('div');
         questionText.className = 'question-text';
-        questionText.innerHTML = q.question; // Use innerHTML to render HTML entities
+        questionText.innerHTML = q.question;  // ✅ This renders &lt; as 
+        card.appendChild(questionText);
         
-        // Create options grid
+        // Options grid
         const optionsGrid = document.createElement('div');
         optionsGrid.className = 'options-grid';
         
@@ -1801,6 +1807,7 @@ Correct: B
             const optionItem = document.createElement('div');
             optionItem.className = 'option-item';
             
+            // Radio input
             const radio = document.createElement('input');
             radio.type = 'radio';
             radio.id = `q${index}_${i}`;
@@ -1809,15 +1816,18 @@ Correct: B
             radio.setAttribute('data-correct', q.correct);
             radio.onchange = updateProgress;
             
+            // Label
             const label = document.createElement('label');
             label.className = 'option-label';
             label.htmlFor = `q${index}_${i}`;
             
+            // Marker
             const marker = document.createElement('div');
             marker.className = 'option-marker';
             
+            // Option text - USE innerHTML to render HTML entities
             const optionSpan = document.createElement('span');
-            optionSpan.innerHTML = opt; // Use innerHTML to render HTML entities
+            optionSpan.innerHTML = opt;  // ✅ This renders &lt; as 
             
             label.appendChild(marker);
             label.appendChild(optionSpan);
@@ -1826,12 +1836,11 @@ Correct: B
             optionsGrid.appendChild(optionItem);
         });
         
-        card.appendChild(questionNumber);
-        card.appendChild(questionText);
         card.appendChild(optionsGrid);
         form.appendChild(card);
     });
 }
+    
         function startTimer() {
             startTime = new Date();
             timerInterval = setInterval(() => {
