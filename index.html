@@ -1556,7 +1556,13 @@ Correct: B
             }
         }
 
-        function parseQuestions(text) {
+    function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+    }
+        
+    function parseQuestions(text) {
     const parsed = [];
     
     // Split by question markers (Q1., Q2., etc.)
