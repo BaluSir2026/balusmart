@@ -1942,67 +1942,207 @@ Correct: B
             }
         }
 
-// Options grid - VERTICAL LAYOUT
-const optionsGrid = document.createElement('div');
-optionsGrid.style.display = 'flex';
-optionsGrid.style.flexDirection = 'column';  // ✅ Vertical stacking
-optionsGrid.style.gap = '12px';
-optionsGrid.style.marginTop = '20px';
-
-q.options.forEach((opt, i) => {
-    const optionItem = document.createElement('div');
-    optionItem.style.position = 'relative';
-    optionItem.style.width = '100%';
+function generateQuestions() {
+    const form = document.getElementById('quizForm');
+    form.innerHTML = '';
     
-    const radio = document.createElement('input');
-    radio.type = 'radio';
-    radio.id = `q${index}_${i}`;
-    radio.name = `q${index}`;
-    radio.value = String.fromCharCode(65 + i);
-    radio.setAttribute('data-correct', q.correct);
-    radio.onchange = updateProgress;
-    radio.style.position = 'absolute';
-    radio.style.opacity = '0';
+    questions.forEach((q, index) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.id = `question-${index}`;
+        card.style.display = index === 0 ? 'block' : 'none';
+        
+        // Question number
+        const questionNumber = document.createElement('div');
+        questionNumber.className = 'question-number';
+        questionNumber.textContent = `Question ${index + 1} of ${questions.length}`;
+        card.appendChild(questionNumber);
+        
+        // Question text
+        const questionText = document.createElement('div');
+        questionText.className = 'question-text';
+        questionText.style.whiteSpace = 'pre-wrap';
+        questionText.style.fontFamily = "'JetBrains Mono', 'Courier New', monospace";
+        questionText.style.backgroundColor = '#1e293b';
+        questionText.style.color = '#e2e8f0';
+        questionText.style.padding = '20px';
+        questionText.style.borderRadius = '12px';
+        questionText.style.border = '2px solid #334155';
+        questionText.style.overflow = 'auto';
+        questionText.style.fontSize = '0.95em';
+        questionText.style.lineHeight = '1.6';
+        questionText.textContent = q.question;
+        card.appendChild(questionText);
+        
+        // ✅ OPTIONS GRID - VERTICAL LAYOUT
+        const optionsGrid = document.createElement('div');
+        optionsGrid.style.display = 'flex';
+        optionsGrid.style.flexDirection = 'column';  // Vertical stack
+        optionsGrid.style.gap = '12px';
+        optionsGrid.style.marginTop = '20px';
+        
+        q.options.forEach((opt, i) => {
+            const optionItem = document.createElement('div');
+            optionItem.style.position = 'relative';
+            optionItem.style.width = '100%';
+            
+            // Radio input
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.id = `q${index}_${i}`;
+            radio.name = `q${index}`;
+            radio.value = String.fromCharCode(65 + i);
+            radio.setAttribute('data-correct', q.correct);
+            radio.onchange = updateProgress;
+            radio.style.position = 'absolute';
+            radio.style.opacity = '0';
+            
+            // Label
+            const label = document.createElement('label');
+            label.htmlFor = `q${index}_${i}`;
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            label.style.gap = '16px';
+            label.style.padding = '16px 20px';
+            label.style.background = 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)';
+            label.style.border = '2px solid var(--border)';
+            label.style.borderRadius = '14px';
+            label.style.cursor = 'pointer';
+            label.style.transition = 'all 0.3s ease';
+            label.style.width = '100%';
+            label.style.boxSizing = 'border-box';
+            
+            // Add hover effect
+            label.addEventListener('mouseenter', function() {
+                if (!radio.checked) {
+                    this.style.borderColor = 'var(--primary)';
+                    this.style.transform = 'translateX(4px)';
+                }
+            });
+            label.addEventListener('mouseleave', function() {
+                if (!radio.checked) {
+                    this.style.borderColor = 'var(--border)';
+                    this.style.transform = 'translateX(0)';
+                }
+            });
+            
+            // Radio marker
+            const marker = document.createElement('div');
+            marker.style.width = '24px';
+            marker.style.height = '24px';
+            marker.style.border = '2px solid var(--border)';
+            marker.style.borderRadius = '50%';
+            marker.style.display = 'flex';
+            marker.style.alignItems = 'center';
+            marker.style.justifyContent = 'center';
+            marker.style.flexShrink = '0';
+            marker.style.background = 'white';
+            marker.style.transition = 'all 0.3s ease';
+            
+            // Option text
+            const optionSpan = document.createElement('span');
+            optionSpan.style.flex = '1';
+            optionSpan.style.fontSize = '1em';
+            optionSpan.style.lineHeight = '1.5';
+            optionSpan.style.wordWrap = 'break-word';
+            optionSpan.textContent = opt;
+            
+            // Handle selection
+            radio.addEventListener('change', function() {
+                if (this.checked) {
+                    // Update this option's style
+                    label.style.background = 'var(--gradient-primary)';
+                    label.style.borderColor = 'var(--primary)';
+                    label.style.transform = 'scale(1.02)';
+                    label.style.boxShadow = '0 8px 16px rgba(124, 58, 237, 0.3)';
+                    marker.style.background = 'white';
+                    marker.style.borderColor = 'white';
+                    marker.innerHTML = '<span style="color: var(--primary); font-weight: bold;">✓</span>';
+                    optionSpan.style.color = 'white';
+                    
+                    // Reset other options in this question
+                    document.querySelectorAll(`input[name="q${index}"]`).forEach(r => {
+                        if (r !== this) {
+                            const otherLabel = r.nextElementSibling;
+                            if (otherLabel) {
+                                otherLabel.style.background = 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)';
+                                otherLabel.style.borderColor = 'var(--border)';
+                                otherLabel.style.transform = 'scale(1)';
+                                otherLabel.style.boxShadow = 'none';
+                                const otherMarker = otherLabel.querySelector('div');
+                                const otherSpan = otherLabel.querySelector('span');
+                                if (otherMarker) {
+                                    otherMarker.style.background = 'white';
+                                    otherMarker.style.borderColor = 'var(--border)';
+                                    otherMarker.innerHTML = '';
+                                }
+                                if (otherSpan) {
+                                    otherSpan.style.color = 'var(--text)';
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            
+            label.appendChild(marker);
+            label.appendChild(optionSpan);
+            optionItem.appendChild(radio);
+            optionItem.appendChild(label);
+            optionsGrid.appendChild(optionItem);
+        });
+        
+        card.appendChild(optionsGrid);
+        
+        // Navigation buttons
+        const navigationDiv = document.createElement('div');
+        navigationDiv.style.display = 'flex';
+        navigationDiv.style.justifyContent = 'space-between';
+        navigationDiv.style.marginTop = '24px';
+        navigationDiv.style.gap = '12px';
+        navigationDiv.style.paddingTop = '24px';
+        navigationDiv.style.borderTop = '2px solid var(--border)';
+        
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'btn btn-secondary';
+        prevBtn.innerHTML = '⬅️ Previous';
+        prevBtn.style.display = index === 0 ? 'none' : 'inline-flex';
+        prevBtn.onclick = () => navigateToQuestion(index - 1);
+        navigationDiv.appendChild(prevBtn);
+        
+        const indicator = document.createElement('div');
+        indicator.style.fontSize = '0.9em';
+        indicator.style.color = 'var(--text-light)';
+        indicator.style.fontWeight = '600';
+        indicator.innerHTML = `<span style="color: var(--primary); font-size: 1.1em;">${index + 1}</span> / ${questions.length}`;
+        navigationDiv.appendChild(indicator);
+        
+        if (index < questions.length - 1) {
+            const nextBtn = document.createElement('button');
+            nextBtn.type = 'button';
+            nextBtn.className = 'btn btn-primary';
+            nextBtn.innerHTML = 'Next ➡️';
+            nextBtn.onclick = () => navigateToQuestion(index + 1);
+            navigationDiv.appendChild(nextBtn);
+        } else {
+            const submitBtn = document.createElement('button');
+            submitBtn.type = 'button';
+            submitBtn.className = 'btn btn-success';
+            submitBtn.innerHTML = '✅ Submit Quiz';
+            submitBtn.id = 'finalSubmitBtn';
+            submitBtn.onclick = () => submitQuiz(false);
+            navigationDiv.appendChild(submitBtn);
+        }
+        
+        card.appendChild(navigationDiv);
+        form.appendChild(card);
+    });
     
-    const label = document.createElement('label');
-    label.htmlFor = `q${index}_${i}`;
-    label.style.display = 'flex';
-    label.style.alignItems = 'center';
-    label.style.gap = '16px';
-    label.style.padding = '16px 20px';
-    label.style.background = 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)';
-    label.style.border = '2px solid var(--border)';
-    label.style.borderRadius = '14px';
-    label.style.cursor = 'pointer';
-    label.style.transition = 'all 0.3s ease';
-    label.style.width = '100%';
-    label.style.boxSizing = 'border-box';
-    
-    const marker = document.createElement('div');
-    marker.style.width = '24px';
-    marker.style.height = '24px';
-    marker.style.border = '2px solid var(--border)';
-    marker.style.borderRadius = '50%';
-    marker.style.display = 'flex';
-    marker.style.alignItems = 'center';
-    marker.style.justifyContent = 'center';
-    marker.style.flexShrink = '0';
-    marker.style.background = 'white';
-    
-    const optionSpan = document.createElement('span');
-    optionSpan.style.flex = '1';
-    optionSpan.style.fontSize = '1em';
-    optionSpan.style.lineHeight = '1.5';
-    optionSpan.textContent = opt;  // Use textContent
-    
-    label.appendChild(marker);
-    label.appendChild(optionSpan);
-    optionItem.appendChild(radio);
-    optionItem.appendChild(label);
-    optionsGrid.appendChild(optionItem);
-});
-
-card.appendChild(optionsGrid);
+    currentQuestionIndex = 0;
+    generateQuestionPalette();
+    document.getElementById('submitBtn').style.display = 'none';
+}
         
 function startTimer() {
     startTime = new Date();
