@@ -1522,29 +1522,6 @@ Correct: B
         }
     }, 1000);
     
-    // 6. Prevent tab switching
-    let tabSwitchCount = 0;
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-            tabSwitchCount++;
-            if (tabSwitchCount > 3) {
-                alert('⚠️ Too many tab switches. Quiz terminated.');
-                window.location.href = 'about:blank';
-            } else {
-                alert(`⚠️ Tab switching detected (${tabSwitchCount}/3)`);
-            }
-        }
-    });
-    
-    // 7. Detect multiple attempts
-    const attemptKey = 'quiz_attempt_' + window.location.pathname;
-    if (localStorage.getItem(attemptKey)) {
-        alert('⚠️ You have already attempted this quiz');
-        window.location.href = 'about:blank';
-        throw new Error('Multiple attempts');
-    }
-    localStorage.setItem(attemptKey, 'true');
-    
     // 8. Fullscreen enforcement
     function enterFullscreen() {
         if (document.documentElement.requestFullscreen) {
