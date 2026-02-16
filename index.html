@@ -1840,64 +1840,63 @@ Correct: B
     qs.forEach((q, i) => {
         const item = document.createElement('div');
         item.className = 'question-item';
+        item.style.cssText = `
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+        `;
         
-        // Header
+        // Question number
         const header = document.createElement('div');
-        header.className = 'question-item-header';
-        
-        const questionNum = document.createElement('div');
-        questionNum.className = 'question-num';
-        questionNum.textContent = `Q${i + 1}`;
-        header.appendChild(questionNum);
-        
+        header.style.cssText = `
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 16px;
+        `;
+        header.textContent = `Q${i + 1}`;
         item.appendChild(header);
         
-        // Question text - Use textContent
-        const questionDiv = document.createElement('div');
-        questionDiv.style.fontWeight = '600';
-        questionDiv.style.marginBottom = '12px';
-        questionDiv.style.color = 'var(--text)';
-        questionDiv.style.whiteSpace = 'pre-wrap';
-        questionDiv.style.fontFamily = "'JetBrains Mono', monospace";
-        questionDiv.style.backgroundColor = '#f8f9fa';
-        questionDiv.style.padding = '12px';
-        questionDiv.style.borderRadius = '8px';
-        questionDiv.style.overflow = 'auto';
-        
-        // ✅ Use textContent
-        questionDiv.textContent = q.question;
-        
-        item.appendChild(questionDiv);
+        // Question text with code formatting
+        const qText = document.createElement('pre');
+        qText.style.cssText = `
+            font-family: 'JetBrains Mono', monospace;
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.9em;
+            line-height: 1.5;
+        `;
+        qText.textContent = q.question;
+        item.appendChild(qText);
         
         // Options
-        const optionsContainer = document.createElement('div');
-        optionsContainer.style.display = 'grid';
-        optionsContainer.style.gap = '6px';
-        optionsContainer.style.marginLeft = '20px';
-        
         q.options.forEach((opt, idx) => {
-            const optionDiv = document.createElement('div');
+            const optDiv = document.createElement('div');
             const letter = String.fromCharCode(65 + idx);
             const isCorrect = letter === q.correct;
             
-            optionDiv.style.padding = '8px 12px';
-            optionDiv.style.borderRadius = '8px';
-            
-            if (isCorrect) {
-                optionDiv.style.background = 'rgba(16, 185, 129, 0.1)';
-                optionDiv.style.fontWeight = '600';
-                optionDiv.style.color = '#10b981';
-            } else {
-                optionDiv.style.background = '#f9fafb';
-            }
-            
-            // ✅ Use textContent for options
-            optionDiv.textContent = `${letter}) ${opt} ${isCorrect ? '✓' : ''}`;
-            
-            optionsContainer.appendChild(optionDiv);
+            optDiv.textContent = `${letter}) ${opt} ${isCorrect ? '✓' : ''}`;
+            optDiv.style.cssText = `
+                padding: 12px 16px;
+                margin-bottom: 8px;
+                border-radius: 8px;
+                ${isCorrect ? 
+                    'background: rgba(16, 185, 129, 0.1); color: #10b981; font-weight: 600;' : 
+                    'background: #f9fafb;'}
+            `;
+            item.appendChild(optDiv);
         });
         
-        item.appendChild(optionsContainer);
         list.appendChild(item);
     });
 }
@@ -1956,28 +1955,28 @@ function generateQuestions() {
         questionNumber.textContent = `Question ${index + 1} of ${questions.length}`;
         card.appendChild(questionNumber);
         
-        // Question text
-        const questionText = document.createElement('div');
-        questionText.className = 'question-text';
-        questionText.style.whiteSpace = 'pre-wrap';
-        questionText.style.fontFamily = "'JetBrains Mono', 'Courier New', monospace";
-        questionText.style.backgroundColor = '#1e293b';
-        questionText.style.color = '#e2e8f0';
-        questionText.style.padding = '20px';
-        questionText.style.borderRadius = '12px';
-        questionText.style.border = '2px solid #334155';
-        questionText.style.overflow = 'auto';
-        questionText.style.fontSize = '0.95em';
-        questionText.style.lineHeight = '1.6';
-        questionText.style.marginBottom = '24px';
+        // Question text - preserve formatting for code
+        const questionText = document.createElement('pre');
+        questionText.style.cssText = `
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        `;
         questionText.textContent = q.question;
         card.appendChild(questionText);
         
-        // ✅ OPTIONS - EACH OPTION AS SEPARATE BLOCK
+        // Options - each on separate line
         q.options.forEach((opt, i) => {
-            const optionContainer = document.createElement('div');
-            optionContainer.style.marginBottom = '12px'; // Space between options
-            optionContainer.style.width = '100%';
+            const wrapper = document.createElement('div');
+            wrapper.style.marginBottom = '12px';
             
             const radio = document.createElement('input');
             radio.type = 'radio';
@@ -1985,7 +1984,7 @@ function generateQuestions() {
             radio.name = `q${index}`;
             radio.value = String.fromCharCode(65 + i);
             radio.setAttribute('data-correct', q.correct);
-            radio.style.display = 'none'; // Hide radio button
+            radio.style.display = 'none';
             radio.onchange = function() {
                 updateProgress();
                 updateOptionStyles(index);
@@ -1993,101 +1992,101 @@ function generateQuestions() {
             
             const label = document.createElement('label');
             label.htmlFor = `q${index}_${i}`;
-            label.style.display = 'block'; // ✅ BLOCK DISPLAY (each on new line)
-            label.style.padding = '16px 20px';
-            label.style.background = '#ffffff';
-            label.style.border = '2px solid #e2e8f0';
-            label.style.borderRadius = '12px';
-            label.style.cursor = 'pointer';
-            label.style.transition = 'all 0.3s ease';
-            label.style.fontSize = '1em';
-            label.style.lineHeight = '1.6';
-            label.style.width = '100%';
-            label.style.boxSizing = 'border-box';
-            label.setAttribute('data-question', index);
-            label.setAttribute('data-option', i);
+            label.textContent = `${String.fromCharCode(65 + i)}) ${opt}`;
+            label.style.cssText = `
+                display: block;
+                padding: 16px 20px;
+                background: white;
+                border: 2px solid #e2e8f0;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 1em;
+            `;
             
-            // Label text content
-            const optionLetter = String.fromCharCode(65 + i);
-            label.textContent = `${optionLetter}) ${opt}`;
-            
-            // Hover effect
-            label.addEventListener('mouseenter', function() {
+            label.onmouseenter = function() {
                 if (!radio.checked) {
                     this.style.borderColor = '#7c3aed';
                     this.style.background = '#f9fafb';
                 }
-            });
+            };
             
-            label.addEventListener('mouseleave', function() {
+            label.onmouseleave = function() {
                 if (!radio.checked) {
                     this.style.borderColor = '#e2e8f0';
-                    this.style.background = '#ffffff';
+                    this.style.background = 'white';
                 }
-            });
+            };
             
-            optionContainer.appendChild(radio);
-            optionContainer.appendChild(label);
-            card.appendChild(optionContainer);
+            wrapper.appendChild(radio);
+            wrapper.appendChild(label);
+            card.appendChild(wrapper);
         });
         
-        // Navigation section
-        const navigationDiv = document.createElement('div');
-        navigationDiv.style.display = 'flex';
-        navigationDiv.style.justifyContent = 'space-between';
-        navigationDiv.style.alignItems = 'center';
-        navigationDiv.style.marginTop = '32px';
-        navigationDiv.style.paddingTop = '24px';
-        navigationDiv.style.borderTop = '2px solid #e2e8f0';
-        navigationDiv.style.gap = '12px';
+        // Navigation
+        const nav = document.createElement('div');
+        nav.style.cssText = 'display: flex; justify-content: space-between; margin-top: 24px; padding-top: 24px; border-top: 2px solid #e2e8f0;';
         
-        // Previous button
         if (index > 0) {
             const prevBtn = document.createElement('button');
             prevBtn.type = 'button';
             prevBtn.className = 'btn btn-secondary';
             prevBtn.innerHTML = '⬅️ Previous';
             prevBtn.onclick = () => navigateToQuestion(index - 1);
-            navigationDiv.appendChild(prevBtn);
+            nav.appendChild(prevBtn);
         } else {
-            navigationDiv.appendChild(document.createElement('div')); // Spacer
+            nav.appendChild(document.createElement('div'));
         }
         
-        // Question indicator
-        const indicator = document.createElement('div');
-        indicator.style.fontSize = '0.9em';
-        indicator.style.color = '#64748b';
-        indicator.style.fontWeight = '600';
-        indicator.innerHTML = `<span style="color: #7c3aed; font-size: 1.2em; font-weight: 700;">${index + 1}</span> <span style="color: #94a3b8;">/</span> ${questions.length}`;
-        navigationDiv.appendChild(indicator);
+        const counter = document.createElement('div');
+        counter.innerHTML = `<strong style="color: #7c3aed; font-size: 1.2em;">${index + 1}</strong> / ${questions.length}`;
+        nav.appendChild(counter);
         
-        // Next/Submit button
         if (index < questions.length - 1) {
             const nextBtn = document.createElement('button');
             nextBtn.type = 'button';
             nextBtn.className = 'btn btn-primary';
             nextBtn.innerHTML = 'Next ➡️';
             nextBtn.onclick = () => navigateToQuestion(index + 1);
-            navigationDiv.appendChild(nextBtn);
+            nav.appendChild(nextBtn);
         } else {
             const submitBtn = document.createElement('button');
             submitBtn.type = 'button';
             submitBtn.className = 'btn btn-success';
             submitBtn.innerHTML = '✅ Submit Quiz';
-            submitBtn.id = 'finalSubmitBtn';
             submitBtn.onclick = () => submitQuiz(false);
-            navigationDiv.appendChild(submitBtn);
+            nav.appendChild(submitBtn);
         }
         
-        card.appendChild(navigationDiv);
+        card.appendChild(nav);
         form.appendChild(card);
     });
     
     currentQuestionIndex = 0;
-    generateQuestionPalette();
-    document.getElementById('submitBtn').style.display = 'none';
+    if (typeof generateQuestionPalette === 'function') generateQuestionPalette();
+    const mainSubmit = document.getElementById('submitBtn');
+    if (mainSubmit) mainSubmit.style.display = 'none';
 }
 
+function updateOptionStyles(qIndex) {
+    document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r => {
+        const lbl = document.querySelector(`label[for="${r.id}"]`);
+        if (!lbl) return;
+        if (r.checked) {
+            lbl.style.background = 'linear-gradient(135deg, #7c3aed, #a78bfa)';
+            lbl.style.borderColor = '#7c3aed';
+            lbl.style.color = 'white';
+            lbl.style.fontWeight = '600';
+            lbl.style.boxShadow = '0 8px 16px rgba(124, 58, 237, 0.3)';
+        } else {
+            lbl.style.background = 'white';
+            lbl.style.borderColor = '#e2e8f0';
+            lbl.style.color = '#1e293b';
+            lbl.style.fontWeight = '400';
+            lbl.style.boxShadow = 'none';
+        }
+    });
+}
 // Helper function to update option styles when selected
 function updateOptionStyles(questionIndex) {
     const radios = document.querySelectorAll(`input[name="q${questionIndex}"]`);
