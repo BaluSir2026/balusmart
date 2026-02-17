@@ -1063,7 +1063,7 @@
     border-radius: 4px;
 }
 /* Floating Timer */
-/*.timer-floating {
+.timer-floating {
     position: fixed;
     top: 20px;
     right: 20px;
@@ -1137,7 +1137,6 @@
         font-size: 0.85em;
     }
 }
-*/
     /* Force vertical option layout */
 .question-card label[for^="q"] {
     display: block !important;
@@ -1248,11 +1247,11 @@
             <div class="info-box" style="margin-top: 32px;">
                 <strong>📖 Question Format</strong>
                 <div style="margin-top: 16px; padding: 20px; background: rgba(0,0,0,0.03); border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85em;">
-Q1. Which Programming Language is best for Developing Applications?<br>
-A) Java<br>
-B) Python<br>
-C) C++<br>
-D) JavaScript<br>
+Q1. What is the capital of France?<br>
+A) London<br>
+B) Paris<br>
+C) Berlin<br>
+D) Madrid<br>
 Correct: B
                 </div>
             </div>
@@ -1274,12 +1273,12 @@ Correct: B
 
             <div class="success-box">
                 <strong>☁️ Cloud-Based Storage</strong>
-                <p style="margin-top: 10px;">All questions are stored Database. Click "Reload from Database" to view the latest questions.</p>
+                <p style="margin-top: 10px;">All questions are stored in Google Sheets. Click "Reload from Sheets" to view the latest questions.</p>
             </div>
             
             <div class="question-list" id="questionList">
                 <div class="loading">
-                    <div>Click "Reload from Database" to view questions</div>
+                    <div>Click "Reload from Sheets" to view questions</div>
                 </div>
             </div>
         </div>
@@ -1320,7 +1319,15 @@ Correct: B
             </div>
 
             <!-- Quiz Content -->
+            <!-- Floating Timer (Always Visible) -->
+<div class="timer-floating" id="floatingTimer" style="display: none;">
+    <div class="timer-label">⏱️ Time Left</div>
+    <div class="timer" id="floatingTimerDisplay">45:00</div>
+</div>
 
+<div class="progress-floating" id="floatingProgress" style="display: none;">
+    <span id="floatingAnsweredCount">0</span> / <span id="floatingTotalCount">0</span> Answered
+</div>
             <div id="quizContent" class="hidden">
                 <div class="timer-section">
                     <div><strong>⏱️ Time:</strong> <span class="timer" id="timer">45:00</span></div>
@@ -1932,21 +1939,41 @@ Correct: B
 
         async function loadQuizQuestions() {
             try {
-                const response = await fetch(`${webAppUrl}?action=getQuestions&quizId=${quizId}`);
+                // ✅ redirect:'follow' fixes Google Apps Script URL redirect issue
+                const response = await fetch(`${webAppUrl}?action=getQuestions&quizId=${quizId}`, {
+                    redirect: 'follow'
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
                 const data = await response.json();
-                if (data.status === 'success' && data.questions.length > 0) {
-                    document.getElementById('floatingTotalCount').textContent = questions.length;
-                    questions = data.questions;
+
+                if (data.status === 'success' && data.questions && data.questions.length > 0) {
+                    questions = data.questions; // ✅ Set FIRST before using questions.length
                     document.getElementById('loadingQuestions').classList.add('hidden');
+                    document.getElementById('totalCount').textContent = questions.length;
+                    document.getElementById('floatingTotalCount').textContent = questions.length;
                     generateQuestions();
                     document.getElementById('submitBtn').classList.remove('hidden');
-                    document.getElementById('totalCount').textContent = questions.length;
                     startTimer();
                 } else {
-                    document.getElementById('loadingQuestions').innerHTML = '<div style="text-align: center; padding: 40px;"><h3 style="color: var(--danger);">❌ No questions found</h3></div>';
+                    document.getElementById('loadingQuestions').innerHTML = `
+                        <div style="text-align:center;padding:40px;">
+                            <h3 style="color:var(--danger);">❌ No questions found</h3>
+                            <p style="margin-top:12px;color:#64748b;">Quiz ID: <strong>${quizId}</strong><br>
+                            Please check that questions are uploaded for this Quiz ID.</p>
+                        </div>`;
                 }
             } catch (error) {
-                document.getElementById('loadingQuestions').innerHTML = '<div style="text-align: center; padding: 40px;"><h3 style="color: var(--danger);">❌ Connection error</h3></div>';
+                document.getElementById('loadingQuestions').innerHTML = `
+                    <div style="text-align:center;padding:40px;">
+                        <h3 style="color:var(--danger);">❌ Connection Error</h3>
+                        <p style="margin-top:12px;color:#64748b;">Could not load questions.<br>
+                        Please check your internet connection and try again.</p>
+                        <button onclick="loadQuizQuestions()" style="margin-top:16px;padding:10px 24px;background:#7c3aed;color:white;border:none;border-radius:10px;cursor:pointer;font-weight:600;">
+                            🔄 Retry
+                        </button>
+                    </div>`;
             }
         }
 
