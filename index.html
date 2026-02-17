@@ -1247,11 +1247,11 @@
             <div class="info-box" style="margin-top: 32px;">
                 <strong>📖 Question Format</strong>
                 <div style="margin-top: 16px; padding: 20px; background: rgba(0,0,0,0.03); border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85em;">
-Q1. What is the capital of France?<br>
-A) London<br>
-B) Paris<br>
-C) Berlin<br>
-D) Madrid<br>
+Q1. Which Programming Language is best for Developing Applications?<br>
+A) Java<br>
+B) Python<br>
+C) C++<br>
+D) JavaScript<br>
 Correct: B
                 </div>
             </div>
@@ -1273,12 +1273,12 @@ Correct: B
 
             <div class="success-box">
                 <strong>☁️ Cloud-Based Storage</strong>
-                <p style="margin-top: 10px;">All questions are stored in Google Sheets. Click "Reload from Sheets" to view the latest questions.</p>
+                <p style="margin-top: 10px;">All questions are stored Database. Click "Reload from Database" to view the latest questions.</p>
             </div>
             
             <div class="question-list" id="questionList">
                 <div class="loading">
-                    <div>Click "Reload from Sheets" to view questions</div>
+                    <div>Click "Reload from Database" to view questions</div>
                 </div>
             </div>
         </div>
@@ -1337,6 +1337,24 @@ Correct: B
                 <div class="loading" id="loadingQuestions">
                     <div class="spinner"></div>
                     <div>Loading questions from Google Sheets...</div>
+                </div>
+
+                <!-- Question Palette -->
+                <div id="questionPalette" style="display:none; background:white; border-radius:16px; padding:20px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); border:2px solid #e2e8f0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+                        <h3 style="margin:0; color:#7c3aed; font-size:1em;">📋 Question Palette</h3>
+                        <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:0.82em;">
+                            <span style="display:flex; align-items:center; gap:6px;"><span style="width:14px;height:14px;background:#10b981;border-radius:4px;display:inline-block;"></span>Answered</span>
+                            <span style="display:flex; align-items:center; gap:6px;"><span style="width:14px;height:14px;background:white;border:2px solid #ef4444;border-radius:4px;display:inline-block;"></span>Not Answered</span>
+                            <span style="display:flex; align-items:center; gap:6px;"><span style="width:14px;height:14px;background:#7c3aed;border-radius:4px;display:inline-block;"></span>Current</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; background:#f9fafb; padding:12px 16px; border-radius:10px; margin-bottom:16px; font-size:0.9em;">
+                        <span>✅ Answered: <strong id="paletteAnswered" style="color:#10b981;">0</strong></span>
+                        <span>⏳ Remaining: <strong id="paletteRemaining" style="color:#ef4444;">0</strong></span>
+                        <span>📝 Total: <strong id="paletteTotal" style="color:#7c3aed;">0</strong></span>
+                    </div>
+                    <div id="paletteGrid" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
                 </div>
 
                 <form id="quizForm"></form>
@@ -1942,42 +1960,30 @@ Correct: B
 function generateQuestions() {
     const form = document.getElementById('quizForm');
     form.innerHTML = '';
-    
+
     questions.forEach((q, index) => {
         const card = document.createElement('div');
         card.className = 'question-card';
         card.id = `question-${index}`;
         card.style.display = index === 0 ? 'block' : 'none';
-        
-        // Question number
-        const questionNumber = document.createElement('div');
-        questionNumber.className = 'question-number';
-        questionNumber.textContent = `Question ${index + 1} of ${questions.length}`;
-        card.appendChild(questionNumber);
-        
-        // Question text - preserve formatting for code
-        const questionText = document.createElement('pre');
-        questionText.style.cssText = `
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
-            background-color: #1e293b;
-            color: #e2e8f0;
-            padding: 20px;
-            border-radius: 12px;
-            overflow-x: auto;
-            font-size: 0.95em;
-            line-height: 1.6;
-            margin: 20px 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        `;
-        questionText.textContent = q.question;
-        card.appendChild(questionText);
-        
-        // Options - each on separate line
+
+        // Question number badge
+        const qNum = document.createElement('div');
+        qNum.className = 'question-number';
+        qNum.textContent = `Question ${index + 1} of ${questions.length}`;
+        card.appendChild(qNum);
+
+        // Question text (code formatted using pre tag)
+        const qText = document.createElement('pre');
+        qText.style.cssText = `font-family:'JetBrains Mono','Courier New',monospace;background:#1e293b;color:#e2e8f0;padding:20px;border-radius:12px;overflow-x:auto;font-size:0.95em;line-height:1.6;margin:16px 0;white-space:pre-wrap;word-wrap:break-word;`;
+        qText.textContent = q.question;
+        card.appendChild(qText);
+
+        // Options
         q.options.forEach((opt, i) => {
             const wrapper = document.createElement('div');
-            wrapper.style.marginBottom = '12px';
-            
+            wrapper.style.marginBottom = '10px';
+
             const radio = document.createElement('input');
             radio.type = 'radio';
             radio.id = `q${index}_${i}`;
@@ -1985,89 +1991,68 @@ function generateQuestions() {
             radio.value = String.fromCharCode(65 + i);
             radio.setAttribute('data-correct', q.correct);
             radio.style.display = 'none';
-            radio.onchange = function() {
-                updateProgress();
-                updateOptionStyles(index);
-            };
-            
+            radio.onchange = function() { updateProgress(); updateOptionStyles(index); };
+
             const label = document.createElement('label');
             label.htmlFor = `q${index}_${i}`;
             label.textContent = `${String.fromCharCode(65 + i)}) ${opt}`;
-            label.style.cssText = `
-                display: block;
-                padding: 16px 20px;
-                background: white;
-                border: 2px solid #e2e8f0;
-                border-radius: 12px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                font-size: 1em;
-            `;
-            
-            label.onmouseenter = function() {
-                if (!radio.checked) {
-                    this.style.borderColor = '#7c3aed';
-                    this.style.background = '#f9fafb';
-                }
-            };
-            
-            label.onmouseleave = function() {
-                if (!radio.checked) {
-                    this.style.borderColor = '#e2e8f0';
-                    this.style.background = 'white';
-                }
-            };
-            
+            label.style.cssText = `display:block;width:100%;padding:14px 20px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:1em;box-sizing:border-box;white-space:normal;word-wrap:break-word;`;
+
+            label.onmouseenter = function() { if (!radio.checked) { this.style.borderColor='#7c3aed'; this.style.background='#f5f3ff'; } };
+            label.onmouseleave = function() { if (!radio.checked) { this.style.borderColor='#e2e8f0'; this.style.background='white'; } };
+
             wrapper.appendChild(radio);
             wrapper.appendChild(label);
             card.appendChild(wrapper);
         });
-        
-        // Navigation
+
+        // Navigation row: Previous | Counter | Save & Next / Submit
         const nav = document.createElement('div');
-        nav.style.cssText = 'display: flex; justify-content: space-between; margin-top: 24px; padding-top: 24px; border-top: 2px solid #e2e8f0;';
-        
-        if (index > 0) {
-            const prevBtn = document.createElement('button');
-            prevBtn.type = 'button';
-            prevBtn.className = 'btn btn-secondary';
-            prevBtn.innerHTML = '⬅️ Previous';
-            prevBtn.onclick = () => navigateToQuestion(index - 1);
-            nav.appendChild(prevBtn);
-        } else {
-            nav.appendChild(document.createElement('div'));
-        }
-        
+        nav.style.cssText = `display:flex;justify-content:space-between;align-items:center;margin-top:24px;padding-top:20px;border-top:2px solid #e2e8f0;gap:10px;flex-wrap:wrap;`;
+
+        // Previous button
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.innerHTML = '&#8592; Previous';
+        prevBtn.style.cssText = `padding:12px 20px;border-radius:10px;border:2px solid #e2e8f0;background:white;cursor:pointer;font-weight:600;font-size:0.9em;transition:all 0.2s ease;${index === 0 ? 'visibility:hidden;' : ''}`;
+        prevBtn.onmouseenter = function() { this.style.borderColor='#7c3aed'; this.style.color='#7c3aed'; };
+        prevBtn.onmouseleave = function() { this.style.borderColor='#e2e8f0'; this.style.color='#1e293b'; };
+        prevBtn.onclick = () => navigateToQuestion(index - 1);
+
+        // Counter
         const counter = document.createElement('div');
-        counter.innerHTML = `<strong style="color: #7c3aed; font-size: 1.2em;">${index + 1}</strong> / ${questions.length}`;
-        nav.appendChild(counter);
-        
+        counter.style.cssText = 'font-size:0.95em;color:#64748b;font-weight:600;text-align:center;';
+        counter.innerHTML = `<span style="color:#7c3aed;font-size:1.3em;font-weight:700;">${index + 1}</span> / ${questions.length}`;
+
+        // Save & Next OR Submit
+        const actionBtn = document.createElement('button');
+        actionBtn.type = 'button';
         if (index < questions.length - 1) {
-            const nextBtn = document.createElement('button');
-            nextBtn.type = 'button';
-            nextBtn.className = 'btn btn-primary';
-            nextBtn.innerHTML = 'Next ➡️';
-            nextBtn.onclick = () => navigateToQuestion(index + 1);
-            nav.appendChild(nextBtn);
+            actionBtn.innerHTML = 'Save & Next &#8594;';
+            actionBtn.style.cssText = `padding:12px 20px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:0.9em;color:white;transition:all 0.2s ease;background:linear-gradient(135deg,#7c3aed,#a78bfa);box-shadow:0 4px 12px rgba(124,58,237,0.3);`;
+            actionBtn.onclick = () => { saveQuizProgress(); navigateToQuestion(index + 1); };
         } else {
-            const submitBtn = document.createElement('button');
-            submitBtn.type = 'button';
-            submitBtn.className = 'btn btn-success';
-            submitBtn.innerHTML = '✅ Submit Quiz';
-            submitBtn.onclick = () => submitQuiz(false);
-            nav.appendChild(submitBtn);
+            actionBtn.innerHTML = '&#10003; Submit Quiz';
+            actionBtn.style.cssText = `padding:12px 20px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:0.9em;color:white;transition:all 0.2s ease;background:linear-gradient(135deg,#10b981,#34d399);box-shadow:0 4px 12px rgba(16,185,129,0.3);`;
+            actionBtn.onclick = () => submitQuiz(false);
         }
-        
+
+        nav.appendChild(prevBtn);
+        nav.appendChild(counter);
+        nav.appendChild(actionBtn);
         card.appendChild(nav);
         form.appendChild(card);
     });
-    
+
     currentQuestionIndex = 0;
-    if (typeof generateQuestionPalette === 'function') generateQuestionPalette();
+    generateQuestionPalette();
     const mainSubmit = document.getElementById('submitBtn');
     if (mainSubmit) mainSubmit.style.display = 'none';
 }
 
+// ============================================
+// OPTION STYLES - Single clean version
+// ============================================
 function updateOptionStyles(qIndex) {
     document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r => {
         const lbl = document.querySelector(`label[for="${r.id}"]`);
@@ -2077,42 +2062,120 @@ function updateOptionStyles(qIndex) {
             lbl.style.borderColor = '#7c3aed';
             lbl.style.color = 'white';
             lbl.style.fontWeight = '600';
+            lbl.style.transform = 'scale(1.01)';
             lbl.style.boxShadow = '0 8px 16px rgba(124, 58, 237, 0.3)';
         } else {
             lbl.style.background = 'white';
             lbl.style.borderColor = '#e2e8f0';
             lbl.style.color = '#1e293b';
             lbl.style.fontWeight = '400';
+            lbl.style.transform = 'scale(1)';
             lbl.style.boxShadow = 'none';
         }
     });
 }
-// Helper function to update option styles when selected
-function updateOptionStyles(questionIndex) {
-    const radios = document.querySelectorAll(`input[name="q${questionIndex}"]`);
-    
-    radios.forEach(radio => {
-        const label = document.querySelector(`label[for="${radio.id}"]`);
-        if (!label) return;
-        
-        if (radio.checked) {
-            // Selected style
-            label.style.background = 'linear-gradient(135deg, #7c3aed, #a78bfa)';
-            label.style.borderColor = '#7c3aed';
-            label.style.color = 'white';
-            label.style.fontWeight = '600';
-            label.style.transform = 'scale(1.02)';
-            label.style.boxShadow = '0 8px 16px rgba(124, 58, 237, 0.3)';
+
+// ============================================
+// QUESTION PALETTE FUNCTIONS
+// ============================================
+
+function generateQuestionPalette() {
+    const grid = document.getElementById('paletteGrid');
+    const palette = document.getElementById('questionPalette');
+    if (!grid || !palette) return;
+    grid.innerHTML = '';
+    palette.style.display = 'block';
+
+    questions.forEach((q, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = index + 1;
+        btn.setAttribute('data-index', index);
+        btn.style.cssText = `
+            width:40px; height:40px; border-radius:8px;
+            border:2px solid #ef4444; background:white;
+            color:#ef4444; font-weight:700; font-size:0.9em;
+            cursor:pointer; transition:all 0.2s ease;
+        `;
+        btn.onclick = () => navigateToQuestion(index);
+        grid.appendChild(btn);
+    });
+
+    document.getElementById('paletteTotal').textContent = questions.length;
+    document.getElementById('paletteRemaining').textContent = questions.length;
+    document.getElementById('paletteAnswered').textContent = '0';
+    updatePaletteStates();
+}
+
+function updatePaletteStates() {
+    const btns = document.querySelectorAll('#paletteGrid button');
+    let answered = 0;
+
+    btns.forEach((btn, index) => {
+        const radio = document.querySelector(`input[name="q${index}"]:checked`);
+        const isCurrent = index === currentQuestionIndex;
+        const isAnswered = !!radio;
+
+        if (isAnswered) answered++;
+
+        if (isCurrent) {
+            btn.style.background = '#7c3aed';
+            btn.style.borderColor = '#7c3aed';
+            btn.style.color = 'white';
+            btn.style.transform = 'scale(1.15)';
+        } else if (isAnswered) {
+            btn.style.background = '#10b981';
+            btn.style.borderColor = '#10b981';
+            btn.style.color = 'white';
+            btn.style.transform = 'scale(1)';
         } else {
-            // Unselected style
-            label.style.background = '#ffffff';
-            label.style.borderColor = '#e2e8f0';
-            label.style.color = '#1e293b';
-            label.style.fontWeight = '400';
-            label.style.transform = 'scale(1)';
-            label.style.boxShadow = 'none';
+            btn.style.background = 'white';
+            btn.style.borderColor = '#ef4444';
+            btn.style.color = '#ef4444';
+            btn.style.transform = 'scale(1)';
         }
     });
+
+    document.getElementById('paletteAnswered').textContent = answered;
+    document.getElementById('paletteRemaining').textContent = questions.length - answered;
+}
+
+function navigateToQuestion(index) {
+    if (index < 0 || index >= questions.length) return;
+
+    // Hide all questions
+    document.querySelectorAll('.question-card').forEach(c => c.style.display = 'none');
+
+    // Show target
+    const target = document.getElementById(`question-${index}`);
+    if (target) {
+        target.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    currentQuestionIndex = index;
+    updatePaletteStates();
+}
+
+// ============================================
+// QUIZ PROGRESS SAVE/RESTORE
+// ============================================
+let autoSaveInterval;
+
+function saveQuizProgress() {
+    if (!startTime || questions.length === 0) return;
+    const answers = {};
+    document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+        answers[input.name] = input.value;
+    });
+    localStorage.setItem('quizProgress', JSON.stringify({
+        studentData, questions, startTime: startTime.getTime(),
+        timeRemaining, answers, currentQuestionIndex
+    }));
+}
+
+function stopAutoSave() {
+    if (autoSaveInterval) clearInterval(autoSaveInterval);
 }
         
 function startTimer() {
@@ -2147,12 +2210,9 @@ function startTimer() {
 
     function updateProgress() {
     const answered = document.querySelectorAll('input[type="radio"]:checked').length;
-    
-    // Update both progress displays
     document.getElementById('answeredCount').textContent = answered;
     document.getElementById('floatingAnsweredCount').textContent = answered;
-    
-    // Save progress when answer changes
+    updatePaletteStates();
     saveQuizProgress();
 }
 
