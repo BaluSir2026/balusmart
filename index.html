@@ -93,13 +93,13 @@ Correct: B
  });
  document.addEventListener('selectstart', e => e.preventDefault());
  console.log = console.warn = console.error = function() {};
- setInterval(function() {
+ /*setInterval(function() {
  if (window.outerWidth - window.innerWidth > 160 || 
  window.outerHeight - window.innerHeight > 160) {
  alert('⚠️ Developer tools detected!');
  window.location.href = 'about:blank';
  }
- }, 1000);
+ }, 1000);*/
  function enterFullscreen() {
  if (document.documentElement.requestFullscreen) {
  document.documentElement.requestFullscreen();
