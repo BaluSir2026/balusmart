@@ -2,7 +2,42 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Balu Quiz Platform</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script><style>:root{--primary:#7e22ce;--primary-dark:#6b21a8;--secondary:#a855f7;--accent:#ea580c;--accent-light:#fb923c;--success:#10b981;--success-light:#d1fae5;--danger:#ef4444;--danger-light:#fee2e2;--warning:#f59e0b;--info:#7e22ce;--bg-primary:#f5f0ff;--bg-secondary:#ede9fe;--surface:#ffffff;--surface-hover:#faf5ff;--text:#1e1b2e;--text-light:#64748b;--text-lighter:#94a3b8;--border:#e9d5ff;--border-light:#f3e8ff;--gradient-primary:linear-gradient(135deg,#7e22ce 0%,#a855f7 100%);--gradient-secondary:linear-gradient(135deg,#ea580c 0%,#fb923c 100%);--gradient-accent:linear-gradient(135deg,#ea580c 0%,#f97316 100%);--gradient-success:linear-gradient(135deg,#10b981 0%,#34d399 100%);--gradient-bg:linear-gradient(135deg,#f5f0ff 0%,#ede9fe 40%,#fff7ed 100%);--gradient-hero:linear-gradient(135deg,#7e22ce 0%,#a855f7 50%,#ea580c 100%);--shadow-sm:0 2px 4px rgba(126,34,206,0.06);--shadow-md:0 4px 12px rgba(126,34,206,0.12);--shadow-lg:0 10px 30px rgba(126,34,206,0.15);--shadow-xl:0 20px 60px rgba(126,34,206,0.18);--shadow-glow:0 0 24px rgba(126,34,206,0.35);--shadow-orange:0 0 24px rgba(234,88,12,0.3);--transition-fast:0.2s cubic-bezier(0.4,0,0.2,1);--transition-base:0.3s cubic-bezier(0.4,0,0.2,1);--transition-slow:0.5s cubic-bezier(0.4,0,0.2,1);}*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--gradient-bg);min-height:100vh;color:var(--text);line-height:1.6;overflow-x:hidden;}body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 30%,rgba(126,34,206,0.08) 0%,transparent 50%),radial-gradient(circle at 80% 70%,rgba(234,88,12,0.06) 0%,transparent 50%),radial-gradient(circle at 50% 50%,rgba(168,85,247,0.05) 0%,transparent 60%);pointer-events:none;z-index:0;}.container{max-width:1400px;margin:0 auto;padding:20px;position:relative;z-index:1;}.header{position:relative;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px) saturate(180%);border-radius:24px;padding:24px 32px;margin-bottom:24px;box-shadow:var(--shadow-lg),inset 0 1px 0 rgba(255,255,255,0.8),0 0 0 1px rgba(233,30,140,0.1);border:1px solid rgba(255,255,255,0.3);animation:slideDown 0.5s var(--transition-slow);}@keyframes slideDown{from{opacity:0;transform:translateY(-30px);}to{opacity:1;transform:translateY(0);}}.header-content{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;}.brand{display:flex;align-items:center;gap:16px;}.brand-icon{width:56px;height:56px;background:var(--gradient-primary);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;color:white;box-shadow:var(--shadow-glow);animation:float 3s ease-in-out infinite;}@keyframes float{0%,100%{transform:translateY(0px);}50%{transform:translateY(-8px);}}.brand-text h1{font-family:'Poppins',sans-serif;font-size:1.8em;font-weight:800;background:var(--gradient-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.5px;}.brand-text p{color:var(--text-light);font-size:0.9em;font-weight:500;}.header-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}.mode-selector{display:flex;align-items:center;gap:12px;background:var(--surface-hover);padding:8px 16px;border-radius:12px;border:1px solid var(--border);}.mode-selector label{font-weight:600;font-size:0.9em;color:var(--text-light);}.mode-selector select{padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-weight:600;font-size:0.9em;cursor:pointer;transition:var(--transition-base);background:white;}.mode-selector select:hover{border-color:var(--primary);}.mode-selector select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(233,30,140,0.1);}.btn{padding:12px 24px;border-radius:12px;border:none;font-family:'Inter',sans-serif;font-size:0.9em;font-weight:600;cursor:pointer;transition:var(--transition-base);display:inline-flex;align-items:center;gap:8px;position:relative;overflow:hidden;}.btn::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.3);transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s;}.btn:hover::before{width:300px;height:300px;}.btn-primary{background:var(--gradient-primary);color:white;box-shadow:var(--shadow-md),var(--shadow-glow);}.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg),0 0 30px rgba(233,30,140,0.4);}.btn-primary:active{transform:translateY(0);}.btn-secondary{background:white;color:var(--text);border:2px solid var(--border);box-shadow:var(--shadow-sm);}.btn-secondary:hover{border-color:var(--primary);background:var(--surface-hover);transform:translateY(-2px);}.btn-success{background:var(--gradient-success);color:white;box-shadow:var(--shadow-md);}.btn-success:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg),0 0 20px rgba(16,185,129,0.3);}.btn-danger{background:var(--gradient-accent);color:white;box-shadow:var(--shadow-md);}.btn-danger:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg),0 0 20px rgba(236,72,153,0.3);}.trainer-only{display:inline-flex !important;}.tab-content.trainer-only{display:none !important;}.tab-content.trainer-only.active{display:block !important;}.student-mode .trainer-only{display:none !important;}.student-mode .tab-content.trainer-only.active{display:none !important;}.tab-nav{position:relative;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);padding:8px;border-radius:16px;box-shadow:var(--shadow-md);margin-bottom:24px;display:flex;gap:8px;flex-wrap:wrap;border:1px solid rgba(255,255,255,0.3);animation:slideUp 0.5s var(--transition-slow);}@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}.tab-btn{flex:1;min-width:120px;padding:12px 20px;border:none;background:transparent;border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:0.9em;transition:var(--transition-base);color:var(--text-light);position:relative;z-index:1;}.tab-btn:hover{color:var(--primary);background:rgba(233,30,140,0.05);}.tab-btn.active{background:var(--gradient-primary);color:white;box-shadow:var(--shadow-md),0 0 15px rgba(233,30,140,0.3);}.card{background:rgba(255,255,255,0.98);backdrop-filter:blur(20px);border-radius:24px;padding:32px;box-shadow:var(--shadow-lg);margin-bottom:24px;border:1px solid rgba(255,255,255,0.5);animation:fadeIn 0.5s var(--transition-base);}@keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}.tab-content{display:none;}.tab-content.active{display:block;animation:fadeIn 0.4s var(--transition-base);}h2{font-family:'Poppins',sans-serif;font-size:1.8em;font-weight:700;color:var(--text);margin-bottom:24px;letter-spacing:-0.5px;}.form-group{margin-bottom:24px;}.form-group label{display:block;font-weight:600;margin-bottom:8px;color:var(--text);font-size:0.95em;}.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:0.95em;transition:var(--transition-base);background:white;}.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(233,30,140,0.1);}.form-group textarea{resize:vertical;min-height:120px;}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;}.file-upload-zone{border:3px dashed var(--border);border-radius:20px;padding:60px 40px;text-align:center;background:linear-gradient(135deg,rgba(233,30,140,0.02) 0%,rgba(236,72,153,0.02) 100%);margin:20px 0;transition:var(--transition-base);cursor:pointer;position:relative;}.file-upload-zone::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;border-radius:20px;background:var(--gradient-primary);opacity:0;transition:var(--transition-base);pointer-events:none;}.file-upload-zone:hover::before,.file-upload-zone.dragover::before{opacity:0.05;}.file-upload-zone.dragover{border-color:var(--primary);background:rgba(233,30,140,0.05);transform:scale(1.02);}.file-upload-zone input[type="file"]{display:none;}.upload-icon{font-size:3.5em;margin-bottom:16px;animation:bounce 2s infinite;}@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}.upload-text{font-size:1.1em;font-weight:600;color:var(--text);margin-bottom:8px;}.upload-hint{color:var(--text-light);font-size:0.9em;}.question-card{background:white;border-radius:20px;padding:32px;margin-bottom:24px;box-shadow:var(--shadow-sm),0 0 0 1px var(--border-light);transition:var(--transition-base);border:2px solid transparent;}.question-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--primary);}.question-number{background:var(--gradient-primary);color:white;padding:8px 16px;border-radius:10px;font-weight:700;font-size:0.85em;display:inline-block;margin-bottom:16px;box-shadow:var(--shadow-md);}.question-text{font-size:1.15em;font-weight:600;color:var(--text);margin-bottom:24px;line-height:1.7;}.option-item input[type="radio"]{position:absolute;opacity:0;}.option-label::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:var(--gradient-primary);opacity:0;transition:var(--transition-base);}.option-label:hover{transform:translateX(4px);border-color:var(--primary);background:linear-gradient(135deg,#ffffff 0%,var(--surface-hover) 100%);}.option-item input[type="radio"]:checked+.option-label{background:var(--gradient-primary);color:white;border-color:var(--primary);box-shadow:var(--shadow-md),0 0 20px rgba(233,30,140,0.3);transform:scale(1.02);}.option-marker{width:24px;height:24px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:var(--transition-base);position:relative;z-index:1;background:white;}.option-item input[type="radio"]:checked+.option-label .option-marker{background:white;border-color:white;}.option-item input[type="radio"]:checked+.option-label .option-marker::after{content:'✓';color:var(--primary);font-size:14px;font-weight:bold;}.option-item input[type="radio"]:checked+.option-label span{position:relative;z-index:1;}.timer-section{background:white;padding:20px 28px;border-radius:20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;border:2px solid #e9d5ff;position:sticky;top:10px;z-index:100;box-shadow:0 4px 20px rgba(233,30,140,0.10);}.timer-box{display:flex;align-items:center;gap:10px;background:#faf5ff;padding:10px 20px;border-radius:12px;border:1.5px solid #e9d5ff;}.timer{font-family:'JetBrains Mono',monospace;font-size:1.6em;font-weight:800;color:#7e22ce;letter-spacing:2px;}.progress-bar-wrapper{flex:1;min-width:200px;}.progress-bar-label{display:flex;justify-content:space-between;font-size:0.82em;font-weight:600;color:#64748b;margin-bottom:6px;}.progress-bar-track{width:100%;height:10px;background:#ede9fe;border-radius:99px;overflow:hidden;}.progress-bar-fill{height:100%;background:linear-gradient(90deg,#7e22ce,#ea580c);border-radius:99px;transition:width 0.5s ease;width:0%;}.results-section{text-align:center;padding:48px 0;}.score-display{width:220px;height:220px;margin:40px auto;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--gradient-primary);box-shadow:var(--shadow-xl),0 0 40px rgba(233,30,140,0.4),inset 0 0 60px rgba(255,255,255,0.1);position:relative;animation:scaleIn 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);}@keyframes scaleIn{0%{transform:scale(0) rotate(-180deg);}100%{transform:scale(1) rotate(0deg);}}.score-display::before{content:'';position:absolute;inset:-12px;border-radius:50%;background:var(--gradient-primary);opacity:0.2;z-index:-1;animation:pulse 2s ease-in-out infinite;}@keyframes pulse{0%,100%{transform:scale(1);opacity:0.2;}50%{transform:scale(1.1);opacity:0.3;}}.score-number{font-family:'Poppins',sans-serif;font-size:4.5em;font-weight:800;color:white;line-height:1;}.score-label{font-size:1.2em;color:rgba(255,255,255,0.95);font-weight:600;text-transform:uppercase;letter-spacing:2px;margin-top:8px;}.result-message{font-family:'Poppins',sans-serif;font-size:2.2em;font-weight:800;margin:32px 0 16px;background:var(--gradient-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fadeIn 0.6s 0.3s backwards;}.info-box{background:linear-gradient(135deg,rgba(59,130,246,0.08) 0%,rgba(147,197,253,0.08) 100%);border:2px solid rgba(59,130,246,0.2);border-radius:16px;padding:24px;margin:20px 0;position:relative;overflow:hidden;}.info-box::before{content:'💡';position:absolute;top:20px;right:20px;font-size:2em;opacity:0.2;}.success-box{background:linear-gradient(135deg,rgba(16,185,129,0.08) 0%,rgba(52,211,153,0.08) 100%);border:2px solid rgba(16,185,129,0.2);border-radius:16px;padding:24px;margin:20px 0;position:relative;}.success-box::before{content:'✅';position:absolute;top:20px;right:20px;font-size:2em;opacity:0.2;}.warning-box{background:linear-gradient(135deg,rgba(245,158,11,0.08) 0%,rgba(251,191,36,0.08) 100%);border:2px solid rgba(245,158,11,0.2);border-radius:16px;padding:24px;margin:20px 0;position:relative;}.warning-box::before{content:'⚠️';position:absolute;top:20px;right:20px;font-size:2em;opacity:0.2;}.loading{text-align:center;padding:80px;}.spinner{width:60px;height:60px;margin:0 auto 24px;border:4px solid var(--border-light);border-top:4px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite;}@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:10000;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.3s;}.modal.show{display:flex;}.modal-content{background:white;border-radius:24px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:modalSlideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);}@keyframes modalSlideIn{from{transform:scale(0.8) translateY(-50px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}.modal-header{background:var(--gradient-primary);color:white;padding:32px;border-radius:24px 24px 0 0;position:relative;overflow:hidden;}.modal-header::before{content:'🔐';position:absolute;top:50%;right:20px;font-size:4em;opacity:0.1;transform:translateY(-50%);}.modal-header h2{font-family:'Poppins',sans-serif;font-size:1.6em;margin:0;position:relative;z-index:1;}.modal-body{padding:32px;}.toast{position:fixed;top:24px;right:24px;background:white;padding:20px 28px;border-radius:16px;box-shadow:var(--shadow-xl);border-left:4px solid var(--success);z-index:10001;display:none;min-width:300px;animation:slideInRight 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);}@keyframes slideInRight{from{transform:translateX(400px);opacity:0;}to{transform:translateX(0);opacity:1;}}.toast.show{display:block;}.toast.error{border-left-color:var(--danger);}.toast.warning{border-left-color:var(--warning);}.hidden{display:none !important;}.question-list{display:flex;flex-direction:column;gap:16px;}.question-item{background:white;border:2px solid var(--border-light);border-radius:16px;padding:24px;transition:var(--transition-base);}.question-item:hover{border-color:var(--primary);box-shadow:var(--shadow-md);transform:translateX(4px);}.question-item-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:16px;gap:16px;}.question-num{background:var(--gradient-primary);color:white;padding:6px 14px;border-radius:8px;font-weight:700;font-size:0.85em;box-shadow:var(--shadow-sm);}.icon-btn{background:white;border:2px solid var(--border);border-radius:10px;padding:8px 14px;cursor:pointer;transition:var(--transition-base);font-size:1em;}.icon-btn:hover{border-color:var(--danger);background:var(--danger-light);transform:scale(1.05);}@media (max-width:768px){.container{padding:12px;}.header{position:relative;padding:20px;}.brand-text h1{font-size:1.4em;}.card{padding:20px;}.tab-nav{flex-direction:column;}.tab-btn{width:100%;}.score-display{width:180px;height:180px;}.score-number{font-size:3.5em;}.result-message{font-size:1.6em;}}::-webkit-scrollbar{width:10px;height:10px;}::-webkit-scrollbar-track{background:var(--surface-hover);border-radius:10px;}::-webkit-scrollbar-thumb{background:var(--primary);border-radius:10px;}::-webkit-scrollbar-thumb:hover{background:var(--primary-dark);}.question-text{white-space:pre-wrap !important;font-family:'JetBrains Mono','Courier New',Consolas,Monaco,monospace !important;background:#f8f9fa;padding:16px;border-radius:12px;border:1px solid #e2e8f0;overflow-x:auto;line-height:1.6;font-size:0.95em;}.question-text code{background:#e9ecef;padding:2px 6px;border-radius:4px;}.question-card{background:white;border-radius:24px;padding:40px;box-shadow:0 4px 24px rgba(233,30,140,0.08);border:2px solid #e9d5ff;margin-bottom:16px;animation:fadeIn 0.3s ease;}.question-number{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#e91e8c,#ff6eb4);color:white;font-weight:700;font-size:0.85em;padding:6px 16px;border-radius:99px;margin-bottom:20px;letter-spacing:0.5px;}.question-card label[for^="q"]{display:block !important;width:100% !important;margin-bottom:12px !important;}.options-grid{display:block !important;}.option-item{display:block !important;width:100% !important;margin-bottom:12px !important;}.option-label{display:block !important;width:100% !important;}.banner-img-wrap{width:100%;border-radius:20px;overflow:hidden;margin-bottom:14px;box-shadow:0 8px 32px rgba(126,34,206,0.18),0 0 0 1px rgba(126,34,206,0.1);}.banner-img-wrap img{width:100%;height:auto;display:block;}@keyframes bspin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}@keyframes bglow{from{box-shadow:0 4px 20px rgba(234,88,12,.4);}to{box-shadow:0 4px 30px rgba(234,88,12,.9);}}@keyframes bpulse{0%,100%{transform:scale(1);opacity:.7;}50%{transform:scale(1.25);opacity:1;}}@keyframes btwinkle{0%,100%{opacity:.15;transform:scale(1);}50%{opacity:1;transform:scale(1.6);}}@keyframes popupIn{from{opacity:0;transform:scale(0.6) translateY(40px);}to{opacity:1;transform:scale(1) translateY(0);}}@keyframes countUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Tech Quiz Platform</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"><script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script><style>:root{--primary:#7e22ce;--primary-dark:#6b21a8;--secondary:#a855f7;--accent:#ea580c;--accent-light:#fb923c;--success:#10b981;--success-light:#d1fae5;--danger:#ef4444;--danger-light:#fee2e2;--warning:#f59e0b;--info:#7e22ce;--bg-primary:#f5f0ff;--bg-secondary:#ede9fe;--surface:#ffffff;--surface-hover:#faf5ff;--text:#1e1b2e;--text-light:#64748b;--text-lighter:#94a3b8;--border:#e9d5ff;--border-light:#f3e8ff;--gradient-primary:linear-gradient(135deg,#7e22ce 0%,#a855f7 100%);--gradient-secondary:linear-gradient(135deg,#ea580c 0%,#fb923c 100%);--gradient-accent:linear-gradient(135deg,#ea580c 0%,#f97316 100%);--gradient-success:linear-gradient(135deg,#10b981 0%,#34d399 100%);--gradient-bg:linear-gradient(135deg,#f5f0ff 0%,#ede9fe 40%,#fff7ed 100%);--gradient-hero:linear-gradient(135deg,#7e22ce 0%,#a855f7 50%,#ea580c 100%);--shadow-sm:0 2px 4px rgba(126,34,206,0.06);--shadow-md:0 4px 12px rgba(126,34,206,0.12);--shadow-lg:0 10px 30px rgba(126,34,206,0.15);--shadow-xl:0 20px 60px rgba(126,34,206,0.18);--shadow-glow:0 0 24px rgba(126,34,206,0.35);--shadow-orange:0 0 24px rgba(234,88,12,0.3);--transition-fast:0.2s cubic-bezier(0.4,0,0.2,1);--transition-base:0.3s cubic-bezier(0.4,0,0.2,1);--transition-slow:0.5s cubic-bezier(0.4,0,0.2,1);}*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--gradient-bg);min-height:100vh;color:var(--text);line-height:1.6;overflow-x:hidden;}body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 30%,rgba(126,34,206,0.08) 0%,transparent 50%),radial-gradient(circle at 80% 70%,rgba(234,88,12,0.06) 0%,transparent 50%),radial-gradient(circle at 50% 50%,rgba(168,85,247,0.05) 0%,transparent 60%);pointer-events:none;z-index:0;}.container{max-width:1400px;margin:0 auto;padding:20px;position:relative;z-index:1;}.header{position:relative;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px) saturate(180%);border-radius:24px;padding:24px 32px;margin-bottom:24px;box-shadow:var(--shadow-lg),inset 0 1px 0 rgba(255,255,255,0.8),0 0 0 1px rgba(233,30,140,0.1);border:1px solid rgba(255,255,255,0.3);animation:slideDown 0.5s var(--transition-slow);}@keyframes slideDown{from{opacity:0;transform:translateY(-30px);}to{opacity:1;transform:translateY(0);}}.header-content{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;}.brand{display:flex;align-items:center;gap:16px;}.brand-icon{width:56px;height:56px;background:var(--gradient-primary);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;color:white;box-shadow:var(--shadow-glow);animation:float 3s ease-in-out infinite;}@keyframes float{0%,100%{transform:translateY(0px);}50%{transform:translateY(-8px);}}.brand-text h1{font-family:'Poppins',sans-serif;font-size:1.8em;font-weight:800;background:var(--gradient-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-0.5px;}.brand-text p{color:var(--text-light);font-size:0.9em;font-weight:500;}.header-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}.mode-selector{display:flex;align-items:center;gap:12px;background:var(--surface-hover);padding:8px 16px;border-radius:12px;border:1px solid var(--border);}.mode-selector label{font-weight:600;font-size:0.9em;color:var(--text-light);}.mode-selector select{padding:8px 12px;border:2px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-weight:600;font-size:0.9em;cursor:pointer;transition:var(--transition-base);background:white;}.mode-selector select:hover{border-color:var(--primary);}.mode-selector select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(233,30,140,0.1);}.btn{padding:12px 24px;border-radius:12px;border:none;font-family:'Inter',sans-serif;font-size:0.9em;font-weight:600;cursor:pointer;transition:var(--transition-base);display:inline-flex;align-items:center;gap:8px;position:relative;overflow:hidden;}.btn::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.3);transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s;}.btn:hover::before{width:300px;height:300px;}.btn-primary{background:var(--gradient-primary);color:white;box-shadow:var(--shadow-md),var(--shadow-glow);}.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg),0 0 30px rgba(233,30,140,0.4);}.btn-primary:active{transform:translateY(0);}.btn-secondary{background:white;color:var(--text);border:2px solid var(--border);box-shadow:var(--shadow-sm);}.btn-secondary:hover{border-color:var(--primary);background:var(--surface-hover);transform:translateY(-2px);}.btn-success{background:var(--gradient-success);color:white;box-shadow:var(--shadow-md);}.btn-success:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg),0 0 20px rgba(16,185,129,0.3);}.btn-danger{background:var(--gradient-accent);color:white;box-shadow:var(--shadow-md);}.btn-danger:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg),0 0 20px rgba(236,72,153,0.3);}.trainer-only{display:inline-flex !important;}.tab-content.trainer-only{display:none !important;}.tab-content.trainer-only.active{display:block !important;}.student-mode .trainer-only{display:none !important;}.student-mode .tab-content.trainer-only.active{display:none !important;}.tab-nav{position:relative;background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);padding:8px;border-radius:16px;box-shadow:var(--shadow-md);margin-bottom:24px;display:flex;gap:8px;flex-wrap:wrap;border:1px solid rgba(255,255,255,0.3);animation:slideUp 0.5s var(--transition-slow);}@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}.tab-btn{flex:1;min-width:120px;padding:12px 20px;border:none;background:transparent;border-radius:12px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:0.9em;transition:var(--transition-base);color:var(--text-light);position:relative;z-index:1;}.tab-btn:hover{color:var(--primary);background:rgba(233,30,140,0.05);}.tab-btn.active{background:var(--gradient-primary);color:white;box-shadow:var(--shadow-md),0 0 15px rgba(233,30,140,0.3);}.card{background:rgba(255,255,255,0.98);backdrop-filter:blur(20px);border-radius:24px;padding:32px;box-shadow:var(--shadow-lg);margin-bottom:24px;border:1px solid rgba(255,255,255,0.5);animation:fadeIn 0.5s var(--transition-base);}@keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}.tab-content{display:none;}.tab-content.active{display:block;animation:fadeIn 0.4s var(--transition-base);}h2{font-family:'Poppins',sans-serif;font-size:1.8em;font-weight:700;color:var(--text);margin-bottom:24px;letter-spacing:-0.5px;}.form-group{margin-bottom:24px;}.form-group label{display:block;font-weight:600;margin-bottom:8px;color:var(--text);font-size:0.95em;}.form-group input,.form-group select,.form-group textarea{width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:0.95em;transition:var(--transition-base);background:white;}.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(233,30,140,0.1);}.form-group textarea{resize:vertical;min-height:120px;}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;}.file-upload-zone{border:3px dashed var(--border);border-radius:20px;padding:60px 40px;text-align:center;background:linear-gradient(135deg,rgba(233,30,140,0.02) 0%,rgba(236,72,153,0.02) 100%);margin:20px 0;transition:var(--transition-base);cursor:pointer;position:relative;}.file-upload-zone::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;border-radius:20px;background:var(--gradient-primary);opacity:0;transition:var(--transition-base);pointer-events:none;}.file-upload-zone:hover::before,.file-upload-zone.dragover::before{opacity:0.05;}.file-upload-zone.dragover{border-color:var(--primary);background:rgba(233,30,140,0.05);transform:scale(1.02);}.file-upload-zone input[type="file"]{display:none;}.upload-icon{font-size:3.5em;margin-bottom:16px;animation:bounce 2s infinite;}@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}.upload-text{font-size:1.1em;font-weight:600;color:var(--text);margin-bottom:8px;}.upload-hint{color:var(--text-light);font-size:0.9em;}.question-card{background:white;border-radius:20px;padding:32px;margin-bottom:24px;box-shadow:var(--shadow-sm),0 0 0 1px var(--border-light);transition:var(--transition-base);border:2px solid transparent;}.question-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--primary);}.question-number{background:var(--gradient-primary);color:white;padding:8px 16px;border-radius:10px;font-weight:700;font-size:0.85em;display:inline-block;margin-bottom:16px;box-shadow:var(--shadow-md);}.question-text{font-size:1.15em;font-weight:600;color:var(--text);margin-bottom:24px;line-height:1.7;}.option-item input[type="radio"]{position:absolute;opacity:0;}.option-label::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:var(--gradient-primary);opacity:0;transition:var(--transition-base);}.option-label:hover{transform:translateX(4px);border-color:var(--primary);background:linear-gradient(135deg,#ffffff 0%,var(--surface-hover) 100%);}.option-item input[type="radio"]:checked+.option-label{background:var(--gradient-primary);color:white;border-color:var(--primary);box-shadow:var(--shadow-md),0 0 20px rgba(233,30,140,0.3);transform:scale(1.02);}.option-marker{width:24px;height:24px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:var(--transition-base);position:relative;z-index:1;background:white;}.option-item input[type="radio"]:checked+.option-label .option-marker{background:white;border-color:white;}.option-item input[type="radio"]:checked+.option-label .option-marker::after{content:'✓';color:var(--primary);font-size:14px;font-weight:bold;}.option-item input[type="radio"]:checked+.option-label span{position:relative;z-index:1;}.timer-section{background:white;padding:20px 28px;border-radius:20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;border:2px solid #e9d5ff;position:sticky;top:10px;z-index:100;box-shadow:0 4px 20px rgba(233,30,140,0.10);}.timer-box{display:flex;align-items:center;gap:10px;background:#faf5ff;padding:10px 20px;border-radius:12px;border:1.5px solid #e9d5ff;}.timer{font-family:'JetBrains Mono',monospace;font-size:1.6em;font-weight:800;color:#7e22ce;letter-spacing:2px;}.progress-bar-wrapper{flex:1;min-width:200px;}.progress-bar-label{display:flex;justify-content:space-between;font-size:0.82em;font-weight:600;color:#64748b;margin-bottom:6px;}.progress-bar-track{width:100%;height:10px;background:#ede9fe;border-radius:99px;overflow:hidden;}.progress-bar-fill{height:100%;background:linear-gradient(90deg,#7e22ce,#ea580c);border-radius:99px;transition:width 0.5s ease;width:0%;}.results-section{text-align:center;padding:48px 0;}.score-display{width:220px;height:220px;margin:40px auto;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--gradient-primary);box-shadow:var(--shadow-xl),0 0 40px rgba(233,30,140,0.4),inset 0 0 60px rgba(255,255,255,0.1);position:relative;animation:scaleIn 0.6s cubic-bezier(0.68,-0.55,0.265,1.55);}@keyframes scaleIn{0%{transform:scale(0) rotate(-180deg);}100%{transform:scale(1) rotate(0deg);}}.score-display::before{content:'';position:absolute;inset:-12px;border-radius:50%;background:var(--gradient-primary);opacity:0.2;z-index:-1;animation:pulse 2s ease-in-out infinite;}@keyframes pulse{0%,100%{transform:scale(1);opacity:0.2;}50%{transform:scale(1.1);opacity:0.3;}}.score-number{font-family:'Poppins',sans-serif;font-size:4.5em;font-weight:800;color:white;line-height:1;}.score-label{font-size:1.2em;color:rgba(255,255,255,0.95);font-weight:600;text-transform:uppercase;letter-spacing:2px;margin-top:8px;}.result-message{font-family:'Poppins',sans-serif;font-size:2.2em;font-weight:800;margin:32px 0 16px;background:var(--gradient-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fadeIn 0.6s 0.3s backwards;}.info-box{background:linear-gradient(135deg,rgba(59,130,246,0.08) 0%,rgba(147,197,253,0.08) 100%);border:2px solid rgba(59,130,246,0.2);border-radius:16px;padding:24px;margin:20px 0;position:relative;overflow:hidden;}.info-box::before{content:'💡';position:absolute;top:20px;right:20px;font-size:2em;opacity:0.2;}.success-box{background:linear-gradient(135deg,rgba(16,185,129,0.08) 0%,rgba(52,211,153,0.08) 100%);border:2px solid rgba(16,185,129,0.2);border-radius:16px;padding:24px;margin:20px 0;position:relative;}.success-box::before{content:'✅';position:absolute;top:20px;right:20px;font-size:2em;opacity:0.2;}.warning-box{background:linear-gradient(135deg,rgba(245,158,11,0.08) 0%,rgba(251,191,36,0.08) 100%);border:2px solid rgba(245,158,11,0.2);border-radius:16px;padding:24px;margin:20px 0;position:relative;}.warning-box::before{content:'⚠️';position:absolute;top:20px;right:20px;font-size:2em;opacity:0.2;}.loading{text-align:center;padding:80px;}.spinner{width:60px;height:60px;margin:0 auto 24px;border:4px solid var(--border-light);border-top:4px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite;}@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:10000;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.3s;}.modal.show{display:flex;}.modal-content{background:white;border-radius:24px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-xl);animation:modalSlideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);}@keyframes modalSlideIn{from{transform:scale(0.8) translateY(-50px);opacity:0;}to{transform:scale(1) translateY(0);opacity:1;}}.modal-header{background:var(--gradient-primary);color:white;padding:32px;border-radius:24px 24px 0 0;position:relative;overflow:hidden;}.modal-header::before{content:'🔐';position:absolute;top:50%;right:20px;font-size:4em;opacity:0.1;transform:translateY(-50%);}.modal-header h2{font-family:'Poppins',sans-serif;font-size:1.6em;margin:0;position:relative;z-index:1;}.modal-body{padding:32px;}.toast{position:fixed;top:24px;right:24px;background:white;padding:20px 28px;border-radius:16px;box-shadow:var(--shadow-xl);border-left:4px solid var(--success);z-index:10001;display:none;min-width:300px;animation:slideInRight 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);}@keyframes slideInRight{from{transform:translateX(400px);opacity:0;}to{transform:translateX(0);opacity:1;}}.toast.show{display:block;}.toast.error{border-left-color:var(--danger);}.toast.warning{border-left-color:var(--warning);}.hidden{display:none !important;}.question-list{display:flex;flex-direction:column;gap:16px;}.question-item{background:white;border:2px solid var(--border-light);border-radius:16px;padding:24px;transition:var(--transition-base);}.question-item:hover{border-color:var(--primary);box-shadow:var(--shadow-md);transform:translateX(4px);}.question-item-header{display:flex;justify-content:space-between;align-items:start;margin-bottom:16px;gap:16px;}.question-num{background:var(--gradient-primary);color:white;padding:6px 14px;border-radius:8px;font-weight:700;font-size:0.85em;box-shadow:var(--shadow-sm);}.icon-btn{background:white;border:2px solid var(--border);border-radius:10px;padding:8px 14px;cursor:pointer;transition:var(--transition-base);font-size:1em;}.icon-btn:hover{border-color:var(--danger);background:var(--danger-light);transform:scale(1.05);}@media (max-width:768px){.container{padding:12px;}.header{position:relative;padding:20px;}.brand-text h1{font-size:1.4em;}.card{padding:20px;}.tab-nav{flex-direction:column;}.tab-btn{width:100%;}.score-display{width:180px;height:180px;}.score-number{font-size:3.5em;}.result-message{font-size:1.6em;}}::-webkit-scrollbar{width:10px;height:10px;}::-webkit-scrollbar-track{background:var(--surface-hover);border-radius:10px;}::-webkit-scrollbar-thumb{background:var(--primary);border-radius:10px;}::-webkit-scrollbar-thumb:hover{background:var(--primary-dark);}.question-text{white-space:pre-wrap !important;font-family:'JetBrains Mono','Courier New',Consolas,Monaco,monospace !important;background:#f8f9fa;padding:16px;border-radius:12px;border:1px solid #e2e8f0;overflow-x:auto;line-height:1.6;font-size:0.95em;}.question-text code{background:#e9ecef;padding:2px 6px;border-radius:4px;}.question-card{background:white;border-radius:24px;padding:40px;box-shadow:0 4px 24px rgba(233,30,140,0.08);border:2px solid #e9d5ff;margin-bottom:16px;animation:fadeIn 0.3s ease;}.question-number{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#e91e8c,#ff6eb4);color:white;font-weight:700;font-size:0.85em;padding:6px 16px;border-radius:99px;margin-bottom:20px;letter-spacing:0.5px;}.question-card label[for^="q"]{display:block !important;width:100% !important;margin-bottom:12px !important;}.options-grid{display:block !important;}.option-item{display:block !important;width:100% !important;margin-bottom:12px !important;}.option-label{display:block !important;width:100% !important;}.banner-img-wrap{width:100%;border-radius:20px;overflow:hidden;margin-bottom:14px;box-shadow:0 8px 32px rgba(126,34,206,0.18),0 0 0 1px rgba(126,34,206,0.1);}.banner-img-wrap img{width:100%;height:auto;display:block;}@keyframes bspin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}@keyframes bglow{from{box-shadow:0 4px 20px rgba(234,88,12,.4);}to{box-shadow:0 4px 30px rgba(234,88,12,.9);}}@keyframes bpulse{0%,100%{transform:scale(1);opacity:.7;}50%{transform:scale(1.25);opacity:1;}}@keyframes btwinkle{0%,100%{opacity:.15;transform:scale(1);}50%{opacity:1;transform:scale(1.6);}}@keyframes popupIn{from{opacity:0;transform:scale(0.6) translateY(40px);}to{opacity:1;transform:scale(1) translateY(0);}}@keyframes countUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Forgot Password panel */
+#forgotPanel{display:none;margin-top:4px;}
+#forgotPanel.active{display:block;animation:fadeIn .3s ease;}
+.back-link{display:inline-flex;align-items:center;gap:5px;color:#7e22ce;font-size:.83em;font-weight:700;cursor:pointer;margin-bottom:14px;border:none;background:none;padding:0;}
+.back-link:hover{color:#a855f7;text-decoration:underline;}
+
+/* ═══════════════════════════════════════
+   ANSWER REVIEW & DOWNLOAD
+═══════════════════════════════════════ */
+#answerReviewSection{display:none;max-width:700px;margin:0 auto 32px;}
+.review-header{background:linear-gradient(135deg,#0d001a,#1e0040,#2d0060);color:white;border-radius:20px 20px 0 0;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.review-header h3{font-family:'Poppins',sans-serif;font-size:1.15em;margin:0;}
+.review-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.review-dl-btn{padding:9px 18px;border-radius:99px;border:none;cursor:pointer;font-weight:700;font-size:.82em;display:inline-flex;align-items:center;gap:6px;transition:all .2s;}
+.review-dl-btn:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.3);}
+.review-body{background:white;border-radius:0 0 20px 20px;box-shadow:0 8px 32px rgba(126,34,206,.12);border:1px solid #e9d5ff;border-top:none;padding:24px;}
+.review-summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+.review-stat{flex:1;min-width:80px;border-radius:12px;padding:12px;text-align:center;}
+.review-stat .rs-num{font-family:'Poppins',sans-serif;font-size:1.6em;font-weight:800;line-height:1;}
+.review-stat .rs-lbl{font-size:.73em;font-weight:600;margin-top:3px;}
+.qr-card{border-radius:14px;padding:18px;margin-bottom:14px;border:2px solid;}
+.qr-card.correct{background:#f0fdf4;border-color:#86efac;}
+.qr-card.wrong{background:#fff1f2;border-color:#fca5a5;}
+.qr-card.skipped{background:#fffbeb;border-color:#fde68a;}
+.qr-num{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.82em;margin-bottom:10px;}
+.qr-question{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:14px;border-radius:10px;font-size:.85em;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;margin-bottom:12px;}
+.qr-options{display:grid;gap:7px;}
+.qr-opt{padding:9px 14px;border-radius:9px;font-size:.87em;font-weight:500;border:1.5px solid transparent;}
+.qr-opt.user-correct{background:#d1fae5;border-color:#6ee7b7;color:#065f46;font-weight:700;}
+.qr-opt.user-wrong{background:#fee2e2;border-color:#fca5a5;color:#991b1b;font-weight:700;}
+.qr-opt.correct-ans{background:#dbeafe;border-color:#93c5fd;color:#1e40af;font-weight:700;}
+.qr-opt.normal{background:#f8fafc;border-color:#e2e8f0;color:#374151;}
+.qr-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.75em;font-weight:600;margin-top:10px;}
+.qr-legend span{display:flex;align-items:center;gap:4px;}
 /* ═══════════════════════════════════════
    STUDENT AUTH OVERLAY
 ══════════════════════════════════════════ */
@@ -113,9 +148,36 @@
 
         <button class="auth-submit-btn" id="signInBtn" onclick="doSignIn()">🔑 Sign In</button>
 
+        <!-- Forgot Password link -->
+        <div style="text-align:right;margin-top:-8px;margin-bottom:10px;">
+          <span onclick="showForgotPanel()" style="color:#7e22ce;font-size:.82em;font-weight:600;cursor:pointer;text-decoration:underline;">Forgot Password?</span>
+        </div>
+
         <div class="auth-footer-link">
           Don't have an account? <span onclick="switchAuthTab('signUp')">Sign Up here</span>
         </div>
+      </div>
+
+      <!-- ── FORGOT PASSWORD PANEL ── -->
+      <div class="auth-form" id="forgotPanel">
+        <button class="back-link" onclick="hideForgotPanel()">← Back to Sign In</button>
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="font-size:2em;">🔑</div>
+          <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1.1em;color:#1e293b;">Forgot Password?</div>
+          <div style="font-size:.83em;color:#64748b;margin-top:4px;">Enter your registered email. We'll send a temporary password.</div>
+        </div>
+        <div class="auth-error" id="forgotError"></div>
+        <div class="auth-success" id="forgotSuccess"></div>
+        <div class="auth-field">
+          <label>Registered Email <span class="req">*</span></label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">📧</span>
+            <input type="email" class="auth-input" id="forgotEmail" placeholder="your.email@example.com">
+          </div>
+        </div>
+        <button class="auth-submit-btn" id="forgotBtn" onclick="doForgotPassword()" style="background:linear-gradient(135deg,#ea580c,#f97316);box-shadow:0 6px 20px rgba(234,88,12,.35);">
+          📨 Send Temporary Password
+        </button>
       </div>
 
       <!-- ── SIGN UP FORM ── -->
@@ -312,7 +374,48 @@ Correct: A
                 <button onclick="generateCertificate()" style="padding:14px 40px;border-radius:99px;border:none;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1e293b;font-family:'Poppins',sans-serif;font-weight:800;font-size:1em;cursor:pointer;box-shadow:0 8px 24px rgba(245,158,11,0.4);display:inline-flex;align-items:center;gap:10px;">🏆 Download Certificate</button>
                 <p style="color:#64748b;font-size:0.82em;margin-top:8px;">Certificate of Achievement — PNG format</p>
             </div>
-            <div class="success-box" style="margin: 24px auto; max-width: 600px;"><strong>✅ SUBMISSION CONFIRMED</strong><p style="margin-top: 12px;">Your quiz has been successfully submitted and saved!</p><p style="margin-top: 12px;">📧 Confirmation email sent to: <strong id="confirmEmail"></strong></p><p style="margin-top: 8px; font-size: 0.9em; color: var(--text-light);">Check your inbox for detailed results.</p></div><div style="background: var(--surface-hover); padding: 32px; border-radius: 20px; max-width: 540px; margin: 24px auto; border: 2px solid var(--border-light);"><h3 style="margin-bottom: 24px; text-align: center;">📊 Your Results</h3><div style="display: grid; gap: 14px;"><div style="display: flex; justify-content: space-between; padding: 14px 20px; background: white; border-radius: 12px; box-shadow: var(--shadow-sm);"><span>Score:</span><strong id="finalScore" style="color: var(--primary);"></strong></div><div style="display: flex; justify-content: space-between; padding: 14px 20px; background: white; border-radius: 12px; box-shadow: var(--shadow-sm);"><span>Percentage:</span><strong id="finalPercentage" style="color: var(--primary);"></strong></div><div style="display: flex; justify-content: space-between; padding: 14px 20px; background: white; border-radius: 12px; box-shadow: var(--shadow-sm);"><span>Status:</span><strong id="finalStatus"></strong></div><div style="display: flex; justify-content: space-between; padding: 14px 20px; background: white; border-radius: 12px; box-shadow: var(--shadow-sm);"><span>Time Taken:</span><strong id="finalTime" style="color: var(--text-light);"></strong></div><div style="display: flex; justify-content: space-between; padding: 14px 20px; background: white; border-radius: 12px; box-shadow: var(--shadow-sm);"><span>Submitted:</span><strong id="submittedTime" style="color: var(--text-light); font-size: 0.9em;"></strong></div></div></div><div class="info-box" style="max-width: 600px; margin: 24px auto;"><strong>📝 What's Next?</strong><ul style="margin-left: 20px; margin-top: 12px; line-height: 1.8;"><li>Results saved to database ✅</li><li>Trainer notified of your performance 📊</li><li>Check email for detailed breakdown 📧</li><li>Keep this page for your records 💾</li></ul></div></div></div></div></div>
+            <div class="success-box" style="margin: 24px auto; max-width: 600px;"><strong>✅ SUBMISSION CONFIRMED</strong><p style="margin-top: 12px;">Your quiz has been successfully submitted and saved!</p><p style="margin-top: 12px;">📧 Confirmation email sent to: <strong id="confirmEmail"></strong></p><p style="margin-top: 8px; font-size: 0.9em; color: var(--text-light);">Check your inbox for detailed results.</p></div><div style="background: var(--surface-hover); padding: 32px; border-radius: 20px; max-width: 540px; margin: 24px auto; border: 2px solid var(--border-light);"><h3 style="margin-bottom: 24px; text-align: center;">📊 Your Results</h3><div style="display: grid; gap: 14px;"><div style="display: flex; justify-content: space-between; padding: 14px 20px; background: white; border-radius: 12px; box-shadow: var(--shadow-sm);"><span>Score:</span><strong id="finalScore" style="color: var(--primary);"></strong></div><div style="display: flex; justify-content: space-between; padding: 14px 20px; background: white; border-radius: 12px; box-shadow: var(--shadow-sm);"><span>Percentage:</span><strong id="finalPercentage" style="color: var(--primary);"></strong></div><div style="display: flex; justify-content: space-between; padding: 14px 20px; background: white; border-radius: 12px; box-shadow: var(--shadow-sm);"><span>Status:</span><strong id="finalStatus"></strong></div><div style="display: flex; justify-content: space-between; padding: 14px 20px; background: white; border-radius: 12px; box-shadow: var(--shadow-sm);"><span>Time Taken:</span><strong id="finalTime" style="color: var(--text-light);"></strong></div><div style="display: flex; justify-content: space-between; padding: 14px 20px; background: white; border-radius: 12px; box-shadow: var(--shadow-sm);"><span>Submitted:</span><strong id="submittedTime" style="color: var(--text-light); font-size: 0.9em;"></strong></div></div></div><div class="info-box" style="max-width: 600px; margin: 24px auto;"><strong>📝 What's Next?</strong><ul style="margin-left: 20px; margin-top: 12px; line-height: 1.8;"><li>Results saved to database ✅</li><li>Trainer notified of your performance 📊</li><li>Check email for detailed breakdown 📧</li><li>Keep this page for your records 💾</li></ul></div>
+
+<!-- View Answers + Download buttons -->
+<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:600px;margin:0 auto 8px;">
+  <button onclick="toggleAnswerReview()" id="viewAnswersBtn"
+    style="padding:13px 28px;border-radius:99px;border:none;background:linear-gradient(135deg,#7e22ce,#a855f7);color:white;font-family:'Inter',sans-serif;font-weight:700;font-size:.95em;cursor:pointer;box-shadow:0 6px 20px rgba(126,34,206,.35);display:inline-flex;align-items:center;gap:8px;transition:all .2s;">
+    📖 View My Answers
+  </button>
+  <button onclick="downloadResponseExcel()"
+    style="padding:13px 28px;border-radius:99px;border:none;background:linear-gradient(135deg,#10b981,#34d399);color:white;font-family:'Inter',sans-serif;font-weight:700;font-size:.95em;cursor:pointer;box-shadow:0 6px 20px rgba(16,185,129,.35);display:inline-flex;align-items:center;gap:8px;transition:all .2s;">
+    📊 Download Excel
+  </button>
+  <button onclick="downloadResponsePDF()"
+    style="padding:13px 28px;border-radius:99px;border:none;background:linear-gradient(135deg,#ea580c,#f97316);color:white;font-family:'Inter',sans-serif;font-weight:700;font-size:.95em;cursor:pointer;box-shadow:0 6px 20px rgba(234,88,12,.35);display:inline-flex;align-items:center;gap:8px;transition:all .2s;">
+    📄 Download PDF
+  </button>
+</div>
+
+</div></div></div></div></div>
+
+<!-- ══════════════════════════════════════
+     ANSWER REVIEW SECTION
+══════════════════════════════════════ -->
+<div id="answerReviewSection">
+  <div class="review-header">
+    <h3>📖 My Answer Review</h3>
+    <div class="review-actions">
+      <button class="review-dl-btn" onclick="downloadResponsePDF()" style="background:linear-gradient(135deg,#ea580c,#f97316);color:white;">📄 PDF</button>
+      <button class="review-dl-btn" onclick="downloadResponseExcel()" style="background:linear-gradient(135deg,#10b981,#34d399);color:white;">📊 Excel</button>
+      <button class="review-dl-btn" onclick="toggleAnswerReview()" style="background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3);">✕ Close</button>
+    </div>
+  </div>
+  <div class="review-body">
+    <div class="review-summary" id="reviewSummary"></div>
+    <div class="qr-legend">
+      <span><span style="width:12px;height:12px;background:#d1fae5;border:1.5px solid #6ee7b7;border-radius:3px;display:inline-block;"></span>Your correct answer</span>
+      <span><span style="width:12px;height:12px;background:#fee2e2;border:1.5px solid #fca5a5;border-radius:3px;display:inline-block;"></span>Your wrong answer</span>
+      <span><span style="width:12px;height:12px;background:#dbeafe;border:1.5px solid #93c5fd;border-radius:3px;display:inline-block;"></span>Correct answer</span>
+    </div>
+    <div id="reviewQuestionsList" style="margin-top:18px;"></div>
+  </div>
+</div>
 
             <!-- ── FEEDBACK SECTION ── -->
             <div id="feedbackSection" class="hidden" style="max-width:640px;margin:0 auto 32px;">
@@ -595,6 +698,342 @@ Correct: A
    localStorage.setItem('bsq_student', JSON.stringify(stuData));
  }
 
+
+
+ // ════════════════════════════════════════════════════════
+ // ANSWER REVIEW + DOWNLOAD
+ // ════════════════════════════════════════════════════════
+ let lastDetailedAnswers = [];
+
+ function toggleAnswerReview() {
+   const sec = document.getElementById('answerReviewSection');
+   const btn = document.getElementById('viewAnswersBtn');
+   if (!sec) return;
+   if (sec.style.display === 'block') {
+     sec.style.display = 'none';
+     if (btn) btn.innerHTML = '📖 View My Answers';
+   } else {
+     buildAnswerReview();
+     sec.style.display = 'block';
+     if (btn) btn.innerHTML = '✕ Hide Answers';
+     sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+   }
+ }
+
+ function buildAnswerReview() {
+   const answers = lastDetailedAnswers;
+   if (!answers || answers.length === 0) return;
+   const correct  = answers.filter(a => a.isCorrect).length;
+   const wrong    = answers.filter(a => !a.isCorrect && a.userAnswer).length;
+   const skipped  = answers.filter(a => !a.userAnswer).length;
+   const total    = answers.length;
+   const pct      = Math.round((correct / total) * 100);
+
+   // Summary stats
+   const sumEl = document.getElementById('reviewSummary');
+   sumEl.innerHTML = `
+     <div class="review-stat" style="background:#f0fdf4;border:1.5px solid #86efac;">
+       <div class="rs-num" style="color:#10b981;">${correct}</div>
+       <div class="rs-lbl" style="color:#065f46;">✅ Correct</div>
+     </div>
+     <div class="review-stat" style="background:#fff1f2;border:1.5px solid #fca5a5;">
+       <div class="rs-num" style="color:#ef4444;">${wrong}</div>
+       <div class="rs-lbl" style="color:#991b1b;">❌ Wrong</div>
+     </div>
+     <div class="review-stat" style="background:#fffbeb;border:1.5px solid #fde68a;">
+       <div class="rs-num" style="color:#f59e0b;">${skipped}</div>
+       <div class="rs-lbl" style="color:#92400e;">⏭ Skipped</div>
+     </div>
+     <div class="review-stat" style="background:#f5f0ff;border:1.5px solid #c4b5fd;">
+       <div class="rs-num" style="color:#7e22ce;">${pct}%</div>
+       <div class="rs-lbl" style="color:#5b21b6;">📊 Score</div>
+     </div>`;
+
+   // Questions list
+   const listEl = document.getElementById('reviewQuestionsList');
+   listEl.innerHTML = '';
+   const optLetters = ['A','B','C','D'];
+
+   answers.forEach((a, idx) => {
+     const card = document.createElement('div');
+     const status = !a.userAnswer ? 'skipped' : a.isCorrect ? 'correct' : 'wrong';
+     card.className = `qr-card ${status}`;
+
+     const badge = status === 'correct' ? '✅ Correct' : status === 'wrong' ? '❌ Wrong' : '⏭ Skipped';
+     const badgeColor = status === 'correct' ? '#10b981' : status === 'wrong' ? '#ef4444' : '#f59e0b';
+
+     let optionsHtml = '';
+     (a.options || []).forEach((opt, i) => {
+       const letter = optLetters[i];
+       const isUserAnswer  = a.userAnswer === letter;
+       const isCorrectAns  = a.correctAnswer === letter;
+       let cls = 'normal';
+       let icon = '';
+       if (isUserAnswer && isCorrectAns) { cls = 'user-correct'; icon = ' ✅'; }
+       else if (isUserAnswer && !isCorrectAns) { cls = 'user-wrong'; icon = ' ❌'; }
+       else if (!isUserAnswer && isCorrectAns) { cls = 'correct-ans'; icon = ' ← Correct'; }
+       optionsHtml += `<div class="qr-opt ${cls}">${letter}) ${fixMathSymbols(opt)}${icon}</div>`;
+     });
+
+     card.innerHTML = `
+       <div class="qr-num">
+         <span style="background:linear-gradient(135deg,#7e22ce,#a855f7);color:white;padding:3px 10px;border-radius:99px;">Q${idx+1}</span>
+         <span style="color:${badgeColor};font-size:.9em;">${badge}</span>
+         ${!a.userAnswer ? '<span style="color:#92400e;font-size:.82em;">No answer selected</span>' : ''}
+       </div>
+       <div class="qr-question">${fixMathSymbols(a.question)}</div>
+       <div class="qr-options">${optionsHtml}</div>`;
+     listEl.appendChild(card);
+   });
+ }
+
+ // ── Download as Excel ──
+ function downloadResponseExcel() {
+   const answers = lastDetailedAnswers;
+   if (!answers || answers.length === 0) { showToast('No data to download','warning'); return; }
+   const optLetters = ['A','B','C','D'];
+   const rows = [['#','Question','Option A','Option B','Option C','Option D','Your Answer','Correct Answer','Result']];
+   answers.forEach((a, i) => {
+     rows.push([
+       i+1,
+       a.question || '',
+       (a.options||[])[0]||'', (a.options||[])[1]||'',
+       (a.options||[])[2]||'', (a.options||[])[3]||'',
+       a.userAnswer || 'Skipped',
+       a.correctAnswer || '',
+       !a.userAnswer ? 'Skipped' : a.isCorrect ? 'Correct' : 'Wrong'
+     ]);
+   });
+   // Summary sheet
+   const correct = answers.filter(a=>a.isCorrect).length;
+   const summary = [
+     ['Student Name', studentData.name || ''],
+     ['Email',        studentData.email || ''],
+     ['Student ID',   studentData.studentId || ''],
+     ['Quiz ID',      quizId || ''],
+     ['Score',        correct + ' / ' + answers.length],
+     ['Percentage',   Math.round((correct/answers.length)*100) + '%'],
+     ['Status',       correct/answers.length >= PASSING_SCORE/100 ? 'Passed' : 'Failed'],
+     ['Date',         new Date().toLocaleString()]
+   ];
+   const wb = XLSX.utils.book_new();
+   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), 'Summary');
+   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Answers');
+   XLSX.writeFile(wb, `BALU_Quiz_${studentData.name||'Student'}_${quizId||'response'}.xlsx`);
+   showToast('✅ Excel downloaded!', 'success');
+ }
+
+ // ── Download as PDF ──
+ async function downloadResponsePDF() {
+   const answers = lastDetailedAnswers;
+   if (!answers || answers.length === 0) { showToast('No data to download','warning'); return; }
+   if (typeof window.jspdf === 'undefined' && typeof jspdf === 'undefined') {
+     showToast('PDF library loading, please try again','warning'); return;
+   }
+   showToast('Generating PDF...', 'warning');
+   const { jsPDF } = window.jspdf || jspdf;
+   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+   const W = 210, margin = 15;
+   let y = 0;
+
+   // helper: safe text (removes emoji, keeps ASCII)
+   const safe = t => String(t||'').replace(/[^\x00-\x7F]/g,'').trim();
+
+   // ── Header ──
+   doc.setFillColor(30, 0, 64);
+   doc.rect(0, 0, W, 38, 'F');
+   doc.setTextColor(255,255,255);
+   doc.setFontSize(18); doc.setFont('helvetica','bold');
+   doc.text('BALU SMART QUIZ', W/2, 14, {align:'center'});
+   doc.setFontSize(10); doc.setFont('helvetica','normal');
+   doc.text('Answer Response Report', W/2, 22, {align:'center'});
+   doc.setFontSize(9);
+   doc.text('Aditya Degree & PG College for Women (A), Kakinada', W/2, 30, {align:'center'});
+   y = 46;
+
+   // ── Student info ──
+   doc.setTextColor(30,0,64); doc.setFontSize(11); doc.setFont('helvetica','bold');
+   doc.text('Student Details', margin, y); y += 7;
+   doc.setFillColor(245,240,255);
+   doc.roundedRect(margin, y, W-margin*2, 30, 3, 3, 'F');
+   doc.setTextColor(55,65,81); doc.setFontSize(9); doc.setFont('helvetica','normal');
+   const correct = answers.filter(a=>a.isCorrect).length;
+   const pct = Math.round((correct/answers.length)*100);
+   const details = [
+     ['Name', safe(studentData.name)],
+     ['Email', safe(studentData.email)],
+     ['Student ID', safe(studentData.studentId)],
+     ['Quiz ID', safe(quizId)],
+     ['Score', correct + ' / ' + answers.length + '  (' + pct + '%)'],
+     ['Status', pct >= PASSING_SCORE ? 'PASSED' : 'FAILED'],
+     ['Date', new Date().toLocaleString()]
+   ];
+   let dx = margin+4, dy = y+7;
+   details.forEach((d,i) => {
+     if (i === 4) { dx = margin+4+(W-margin*2)/2; dy = y+7; }
+     doc.setFont('helvetica','bold'); doc.text(d[0]+':', dx, dy);
+     doc.setFont('helvetica','normal'); doc.text(d[1], dx+22, dy);
+     dy += 6;
+   });
+   y += 36;
+
+   // ── Score summary bar ──
+   const wrong   = answers.filter(a=>!a.isCorrect && a.userAnswer).length;
+   const skipped = answers.filter(a=>!a.userAnswer).length;
+   doc.setFillColor(240,253,244); doc.roundedRect(margin, y, 52, 18, 3, 3, 'F');
+   doc.setTextColor(5,150,105); doc.setFontSize(14); doc.setFont('helvetica','bold');
+   doc.text(String(correct), margin+26, y+8, {align:'center'});
+   doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.text('Correct', margin+26, y+14, {align:'center'});
+
+   doc.setFillColor(255,241,242); doc.roundedRect(margin+56, y, 52, 18, 3, 3, 'F');
+   doc.setTextColor(220,38,38); doc.setFontSize(14); doc.setFont('helvetica','bold');
+   doc.text(String(wrong), margin+82, y+8, {align:'center'});
+   doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.text('Wrong', margin+82, y+14, {align:'center'});
+
+   doc.setFillColor(255,251,235); doc.roundedRect(margin+112, y, 52, 18, 3, 3, 'F');
+   doc.setTextColor(217,119,6); doc.setFontSize(14); doc.setFont('helvetica','bold');
+   doc.text(String(skipped), margin+138, y+8, {align:'center'});
+   doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.text('Skipped', margin+138, y+14, {align:'center'});
+   y += 26;
+
+   // ── Questions ──
+   doc.setFontSize(11); doc.setFont('helvetica','bold');
+   doc.setTextColor(30,0,64); doc.text('Question-wise Answer Review', margin, y); y+=6;
+   const optLetters = ['A','B','C','D'];
+
+   answers.forEach((a, idx) => {
+     const status = !a.userAnswer ? 'skipped' : a.isCorrect ? 'correct' : 'wrong';
+     const qText = safe(fixMathSymbols(a.question));
+     const lines = doc.splitTextToSize('Q'+(idx+1)+'. '+qText, W-margin*2-4);
+     const optLines = (a.options||[]).map((o,i) => optLetters[i]+') '+safe(fixMathSymbols(o)));
+     const blockH = lines.length*4.5 + optLines.length*5 + 14;
+
+     if (y + blockH > 270) { doc.addPage(); y = 15; }
+
+     // card background
+     const cardColor = status==='correct' ? [240,253,244] : status==='wrong' ? [255,241,242] : [255,251,235];
+     doc.setFillColor(...cardColor);
+     doc.roundedRect(margin, y, W-margin*2, blockH, 3, 3, 'F');
+
+     // question number badge
+     const badgeColor = status==='correct' ? [16,185,129] : status==='wrong' ? [239,68,68] : [245,158,11];
+     doc.setFillColor(...badgeColor);
+     doc.roundedRect(margin+2, y+2, 22, 6, 2, 2, 'F');
+     doc.setTextColor(255,255,255); doc.setFontSize(7); doc.setFont('helvetica','bold');
+     doc.text('Q'+(idx+1), margin+13, y+6.5, {align:'center'});
+
+     // status label
+     const statusLabel = status==='correct' ? 'Correct' : status==='wrong' ? 'Wrong' : 'Skipped';
+     doc.setTextColor(...badgeColor); doc.setFontSize(7);
+     doc.text(statusLabel, margin+28, y+6.5);
+
+     // question text
+     doc.setTextColor(30,41,59); doc.setFontSize(8); doc.setFont('helvetica','normal');
+     doc.text(lines, margin+4, y+12);
+     let oy = y + lines.length*4.5 + 13;
+
+     // options
+     optLines.forEach((optText, i) => {
+       const letter = optLetters[i];
+       const isUser    = a.userAnswer === letter;
+       const isCorrect = a.correctAnswer === letter;
+       let optBg = null;
+       let textColor = [55,65,81];
+       if (isUser && isCorrect)  { optBg=[209,250,229]; textColor=[6,95,70]; }
+       else if (isUser && !isCorrect) { optBg=[254,226,226]; textColor=[153,27,27]; }
+       else if (!isUser && isCorrect) { optBg=[219,234,254]; textColor=[30,64,175]; }
+       if (optBg) { doc.setFillColor(...optBg); doc.roundedRect(margin+4, oy-3.5, W-margin*2-8, 5.5, 1, 1, 'F'); }
+       doc.setTextColor(...textColor); doc.setFontSize(7.5); doc.setFont('helvetica', optBg?'bold':'normal');
+       const suffix = (isUser&&isCorrect)?' [Your Answer - Correct]' : isUser?' [Your Answer - Wrong]' : isCorrect?' [Correct Answer]':'';
+       doc.text(optText + suffix, margin+6, oy);
+       oy += 5;
+     });
+     y += blockH + 4;
+   });
+
+   // ── Footer on each page ──
+   const totalPages = doc.internal.getNumberOfPages();
+   for (let p = 1; p <= totalPages; p++) {
+     doc.setPage(p);
+     doc.setFillColor(30,0,64); doc.rect(0,287,W,10,'F');
+     doc.setTextColor(255,255,255); doc.setFontSize(7); doc.setFont('helvetica','normal');
+     doc.text('BALU Smart Quiz | '+safe(studentData.name)+' | '+safe(quizId), margin, 293);
+     doc.text('Page '+p+' of '+totalPages, W-margin, 293, {align:'right'});
+   }
+
+   doc.save('BALU_Quiz_'+safe(studentData.name||'Student')+'_'+safe(quizId||'response')+'.pdf');
+   showToast('✅ PDF downloaded!', 'success');
+ }
+ // ════════════════════════════════════════════════════════
+ // END ANSWER REVIEW + DOWNLOAD
+ // ════════════════════════════════════════════════════════
+ // ── Forgot Password ──
+ function showForgotPanel() {
+   document.getElementById('signInForm').classList.remove('active');
+   document.getElementById('forgotPanel').classList.add('active');
+   ['forgotError','forgotSuccess'].forEach(id => {
+     const el = document.getElementById(id);
+     if (el) { el.style.display='none'; el.textContent=''; }
+   });
+ }
+ function hideForgotPanel() {
+   document.getElementById('forgotPanel').classList.remove('active');
+   document.getElementById('signInForm').classList.add('active');
+ }
+ async function doForgotPassword() {
+   const email = (document.getElementById('forgotEmail').value || '').trim();
+   if (!email) {
+     const el = document.getElementById('forgotError');
+     el.textContent = '⚠️ Please enter your email address.';
+     el.style.display = 'block';
+     return;
+   }
+   const btn = document.getElementById('forgotBtn');
+   btn.textContent = '⏳ Sending...'; btn.disabled = true;
+   const errEl = document.getElementById('forgotError');
+   const okEl  = document.getElementById('forgotSuccess');
+   errEl.style.display = 'none'; okEl.style.display = 'none';
+   try {
+     const res = await fetch(webAppUrl, {
+       method: 'POST', redirect: 'follow',
+       headers: { 'Content-Type': 'text/plain' },
+       body: JSON.stringify({ action: 'forgotPassword', email: email })
+     });
+     const data = await res.json();
+     if (data.status === 'success') {
+       // Show temp password on screen
+       const tempPw = data.tempPassword || '';
+       okEl.innerHTML = '✅ ' + data.message +
+         (tempPw ? (
+           '<div style="margin-top:14px;background:#f5f0ff;border:2px dashed #a855f7;border-radius:12px;padding:16px;text-align:center;">' +
+           '<div style="font-size:.8em;color:#64748b;margin-bottom:6px;font-weight:600;">Your Temporary Password:</div>' +
+           '<div style="display:flex;align-items:center;justify-content:center;gap:10px;">' +
+           '<span id="tempPwDisplay" style="font-family:monospace;font-size:1.7em;font-weight:900;color:#7e22ce;letter-spacing:4px;">' + tempPw + '</span>' +
+           '<button onclick="navigator.clipboard.writeText(\'' + tempPw + '\').then(()=>this.textContent=\'✅\').catch(()=>{})" ' +
+           'style="background:linear-gradient(135deg,#7e22ce,#a855f7);color:white;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.8em;font-weight:700;">📋 Copy</button>' +
+           '</div>' +
+           '<div style="font-size:.78em;color:#ea580c;margin-top:8px;font-weight:600;">⚠️ Note this down! Use it to Sign In now.</div>' +
+           '</div>'
+         ) : '');
+       okEl.style.display = 'block';
+       // After 6s, switch back to sign in with email pre-filled
+       setTimeout(() => {
+         document.getElementById('siEmail').value = email;
+         if (tempPw) document.getElementById('siPassword').value = tempPw;
+         hideForgotPanel();
+         authMsg('signInSuccess', '✅ Use your temporary password to Sign In.');
+       }, 6000);
+     } else {
+       errEl.textContent  = '❌ ' + (data.message || 'Failed. Please try again.');
+       errEl.style.display = 'block';
+     }
+   } catch (err) {
+     errEl.textContent  = '❌ Connection error. Please try again.';
+     errEl.style.display = 'block';
+   } finally {
+     btn.textContent = '📨 Send Temporary Password'; btn.disabled = false;
+   }
+ }
  // ── SIGN IN ──
  async function doSignIn() {
    const email    = (document.getElementById('siEmail').value || '').trim();
@@ -1533,6 +1972,7 @@ function startTimer() {
  showToast('⚠️ Could not save: ' + error.message, 'error');
  }
  document.getElementById('quizContent').classList.add('hidden');
+ lastDetailedAnswers = detailedAnswers;
  document.getElementById('resultsSection').classList.remove('hidden');
             document.getElementById('feedbackSection').classList.remove('hidden');
             // Reset feedback form
