@@ -1557,15 +1557,12 @@ Correct: A
  questionBlocks.forEach(block => {
  try {
  const rawLines = block.split('\n');
- const lines = rawLines.map(l => l.trim()); // trimmed only for pattern matching
+ const lines = rawLines.map(l => l.trim());
  let questionText = '';
  let questionStartIndex = 0;
  for (let i = 0; i < rawLines.length; i++) {
  const trimmed = lines[i];
- if (/^[A-D][\.\)]\s*/i.test(trimmed)) {
- questionStartIndex = i;
- break;
- }
+ if (/^[A-D][\.\)]\s*/i.test(trimmed)) { questionStartIndex = i; break; }
  if (i === 0) {
  questionText += rawLines[i].replace(/^Q\d+[\.\)]\s*/i, '') + '\n';
  } else if (rawLines[i].trim()) {
@@ -1577,18 +1574,12 @@ Correct: A
  const options = [];
  let correct = '';
  for (let i = questionStartIndex; i < lines.length; i++) {
- const line    = lines[i];    // trimmed for matching
- const rawLine = rawLines[i]; // raw for indentation
+ const line    = lines[i];
+ const rawLine = rawLines[i];
  const optionMatch = line.match(/^([A-D])[\.\)]\s*(.*)/i);
- if (optionMatch && options.length < 4) {
- options.push(optionMatch[2]);
- continue;
- }
+ if (optionMatch && options.length < 4) { options.push(optionMatch[2]); continue; }
  const correctMatch = line.match(/Correct:\s*([A-D])/i);
- if (correctMatch) {
- correct = correctMatch[1].toUpperCase();
- break;
- }
+ if (correctMatch) { correct = correctMatch[1].toUpperCase(); break; }
  if (options.length > 0 && options.length < 4 && line) {
  options[options.length - 1] += '\n' + rawLine;
  }
@@ -1597,39 +1588,32 @@ Correct: A
  if (questionText && cleanOpts.length === 4 && correct) {
  parsed.push({
  question: questionText,
- optionA: cleanOpts[0],
- optionB: cleanOpts[1],
- optionC: cleanOpts[2],
- optionD: cleanOpts[3],
- correct: correct,
- quizId: quizId
+ optionA: cleanOpts[0], optionB: cleanOpts[1],
+ optionC: cleanOpts[2], optionD: cleanOpts[3],
+ correct: correct, quizId: quizId
  });
  }
- } catch (error) {
- console.error('Error parsing question:', error);
- }
+ } catch (error) { console.error('Error parsing question:', error); }
  });
- if (parsed.length > 0) {
- uploadQuestionsToSheets(parsed);
- } else {
- showToast('❌ No valid questions found. Please check format.', 'error');
- }
+ if (parsed.length > 0) { uploadQuestionsToSheets(parsed); }
+ else { showToast('❌ No valid questions found. Please check format.', 'error'); }
 }
- // Encode leading spaces so Google Sheets won't strip them
  function encodeIndent(text) {
  if (!text) return text;
  return text.split('\n').map(line => {
- const match = line.match(/^( +)/);
- if (!match) return line;
- // Replace each leading space with a non-breaking space ( )
- return '\u00A0'.repeat(match[1].length) + line.slice(match[1].length);
+ let count = 0;
+ while (line.startsWith('    ')) { line = line.slice(4); count++; }
+ let rem = 0;
+ while (line.startsWith(' ')) { line = line.slice(1); rem++; }
+ return '\t'.repeat(count) + ' '.repeat(rem) + line;
  }).join('\n');
  }
- // Decode non-breaking spaces back to regular spaces for display
  function decodeIndent(text) {
  if (!text) return text;
  return text.split('\n').map(line => {
- return line.replace(/^\u00A0+/, m => ' '.repeat(m.length));
+ let count = 0;
+ while (line.startsWith('\t')) { line = line.slice(1); count++; }
+ return ' '.repeat(count * 4) + line;
  }).join('\n');
  }
  async function uploadQuestionsToSheets(questions) {
@@ -1646,10 +1630,10 @@ Correct: A
  body: JSON.stringify({ action: 'uploadQuestions', questions: questions.map(q => ({
  ...q,
  question: encodeIndent(q.question),
- optionA: encodeIndent(q.optionA),
- optionB: encodeIndent(q.optionB),
- optionC: encodeIndent(q.optionC),
- optionD: encodeIndent(q.optionD)
+ optionA:  encodeIndent(q.optionA),
+ optionB:  encodeIndent(q.optionB),
+ optionC:  encodeIndent(q.optionC),
+ optionD:  encodeIndent(q.optionD)
 })) })
  });
  showToast(`✅ Uploaded ${questions.length} questions!`, 'success');
@@ -1676,10 +1660,10 @@ Correct: A
  displayQuestions(data.questions.map(q => ({
  ...q,
  question: decodeIndent(decodeHtmlEntities(q.question || '')),
- optionA: decodeIndent(decodeHtmlEntities(q.optionA || '')),
- optionB: decodeIndent(decodeHtmlEntities(q.optionB || '')),
- optionC: decodeIndent(decodeHtmlEntities(q.optionC || '')),
- optionD: decodeIndent(decodeHtmlEntities(q.optionD || ''))
+ optionA:  decodeIndent(decodeHtmlEntities(q.optionA || '')),
+ optionB:  decodeIndent(decodeHtmlEntities(q.optionB || '')),
+ optionC:  decodeIndent(decodeHtmlEntities(q.optionC || '')),
+ optionD:  decodeIndent(decodeHtmlEntities(q.optionD || ''))
 })));
  showToast(`Loaded ${data.questions.length} questions for ${targetQuizId}`, 'success');
  } else {
@@ -1752,25 +1736,27 @@ Correct: A
  qText.textContent = fixMathSymbols(q.question);
  item.appendChild(qText);
  const opts = (q.options && q.options.length === 4 && q.options.some(o=>o))
- ? q.options
- : [q.optionA||'', q.optionB||'', q.optionC||'', q.optionD||''];
+ ? q.options : [q.optionA||'', q.optionB||'', q.optionC||'', q.optionD||''];
  opts.forEach((opt, idx) => {
- const optDiv = document.createElement('div');
  const letter = String.fromCharCode(65 + idx);
  const isCorrect = letter === q.correct;
+ const isMultiLine = opt.includes('\n');
+ const optDiv = document.createElement('div');
+ const bg = isCorrect ? 'background:rgba(16,185,129,0.1);color:#10b981;' : 'background:#f9fafb;';
+ optDiv.style.cssText = `padding:10px 14px;margin-bottom:8px;border-radius:8px;${bg}`;
+ if (isMultiLine) {
+ const badge = document.createElement('span');
+ badge.textContent = `${letter}) ${isCorrect ? '✓' : ''}`;
+ badge.style.cssText = `font-weight:700;font-size:0.88em;`;
+ const pre = document.createElement('pre');
+ pre.textContent = fixMathSymbols(opt);
+ pre.style.cssText = `margin:6px 0 0 0;font-family:'JetBrains Mono',monospace;font-size:0.85em;background:rgba(0,0,0,0.04);border-radius:6px;padding:8px 12px;white-space:pre;overflow-x:auto;tab-size:4;`;
+ optDiv.appendChild(badge);
+ optDiv.appendChild(pre);
+ } else {
  optDiv.textContent = `${letter}) ${fixMathSymbols(opt)} ${isCorrect ? '✓' : ''}`;
- optDiv.style.cssText = `
- padding: 12px 16px;
- margin-bottom: 8px;
- border-radius: 8px;
- white-space: pre-wrap;
- word-break: break-word;
- font-family: 'JetBrains Mono', monospace;
- font-size: 0.88em;
- ${isCorrect ?
- 'background: rgba(16, 185, 129, 0.1); color: #10b981; font-weight: 700;' :
- 'background: #f9fafb;'}
- `;
+ optDiv.style.cssText += `font-family:'JetBrains Mono',monospace;font-size:0.88em;white-space:pre-wrap;word-break:break-word;`;
+ }
  item.appendChild(optDiv);
  });
 
@@ -1877,8 +1863,23 @@ function generateQuestions() {
  const label = document.createElement('label');
  label.htmlFor = `q${index}_${i}`;
  label.textContent = `${String.fromCharCode(65 + i)}) ${fixMathSymbols(opt)}`;
- const isCodeOpt = opt.includes('\n');
-    label.style.cssText = `font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;display:block;width:100%;padding:14px 20px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:1em;box-sizing:border-box;white-space:pre-wrap;word-wrap:break-word;word-break:break-word;${isCodeOpt ? "font-family:'JetBrains Mono','Courier New',monospace;font-size:0.9em;background:#f8fafc;" : ''}`;
+ const isMultiLine = opt.includes('\n');
+    // For multi-line options, show as a code block below the letter badge
+    if (isMultiLine) {
+      // Wrapper with letter badge + code block
+      label.style.cssText = `font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;display:block;width:100%;padding:12px 16px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:1em;box-sizing:border-box;`;
+      label.textContent = ''; // clear — we build custom layout below
+      const badge = document.createElement('span');
+      badge.textContent = String.fromCharCode(65 + i) + ') ';
+      badge.style.cssText = `font-weight:700;font-size:0.95em;color:inherit;`;
+      const pre = document.createElement('pre');
+      pre.textContent = fixMathSymbols(opt);
+      pre.style.cssText = `margin:6px 0 0 0;font-family:'JetBrains Mono','Courier New',monospace;font-size:0.88em;background:#f8fafc;border-radius:8px;padding:10px 14px;white-space:pre;overflow-x:auto;tab-size:4;`;
+      label.appendChild(badge);
+      label.appendChild(pre);
+    } else {
+      label.style.cssText = `font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;display:block;width:100%;padding:14px 20px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:1em;box-sizing:border-box;white-space:pre-wrap;word-wrap:break-word;`;
+    }
  label.onmouseenter = function() { if (!radio.checked) { this.style.borderColor='#e91e8c'; this.style.background='#fff0f6'; } };
  label.onmouseleave = function() { if (!radio.checked) { this.style.borderColor='#e2e8f0'; this.style.background='white'; } };
  wrapper.appendChild(radio);
