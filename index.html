@@ -31,7 +31,7 @@
 .qr-num{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.82em;margin-bottom:10px;}
 .qr-question{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:14px;border-radius:10px;font-size:.85em;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;margin-bottom:12px;}
 .qr-options{display:grid;gap:7px;}
-.qr-opt{padding:9px 14px;border-radius:9px;font-size:.87em;font-weight:500;border:1.5px solid transparent;}
+.qr-opt{padding:9px 14px;border-radius:9px;font-size:.87em;font-weight:500;border:1.5px solid transparent;white-space:pre-wrap;word-wrap:break-word;}
 .qr-opt.user-correct{background:#d1fae5;border-color:#6ee7b7;color:#065f46;font-weight:700;}
 .qr-opt.user-wrong{background:#fee2e2;border-color:#fca5a5;color:#991b1b;font-weight:700;}
 .qr-opt.correct-ans{background:#dbeafe;border-color:#93c5fd;color:#1e40af;font-weight:700;}
@@ -332,14 +332,35 @@
                         ✅ Import Questions
                     </button><button class="btn btn-secondary" onclick="testQuestionUpload()">
                         🧪 Test Upload
-                    </button></div></div><div class="info-box" style="margin-top: 32px;"><strong>📖 Question Format</strong><div style="margin-top: 16px; padding: 20px; background: rgba(0,0,0,0.03); border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85em;">
-Q1. Which Programming Language used for Data Analytics?<br>
-A) Python<br>
-B) C<br>
-C) C++<br>
-D) HTML<br>
-Correct: A
-                </div></div></div><div class="card tab-content trainer-only" id="quizmanagerTab"><h2>🎛️ Quiz Manager</h2><div style="background:#eff6ff;border:2px solid #bfdbfe;border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:0.9em;color:#1e40af;">Only <strong>Active</strong> quizzes are visible to students. Toggle below to activate or deactivate.</div><div style="margin-bottom:16px;text-align:right;"><button class="btn btn-primary" onclick="loadQuizManager()" style="padding:8px 20px;font-size:0.85em;">🔄 Refresh</button></div><div id="quizManagerList"><div class="loading"><div class="spinner"></div><div>Loading...</div></div></div></div><div class="card tab-content trainer-only" id="manageTab"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 20px;"><h2 style="margin: 0;">📋 Question Bank</h2><div style="display: flex; gap: 12px; flex-wrap:wrap; align-items:center;"><div style="display:flex;align-items:center;gap:8px;background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:12px;padding:6px 14px;"><label style="font-weight:700;font-size:0.85em;color:#7e22ce;white-space:nowrap;">📝 Quiz:</label><select id="manageQuizSelector" onchange="loadQuestionsFromSheets()" style="border:none;background:transparent;font-family:inherit;font-weight:600;font-size:0.88em;color:#1e293b;cursor:pointer;outline:none;min-width:140px;"><option value="">-- All / Default --</option></select><button onclick="populateManageQuizSelector()" title="Refresh quiz list" style="background:none;border:none;cursor:pointer;font-size:1em;padding:0 4px;color:#7e22ce;">🔄</button></div><button class="btn btn-success" onclick="loadQuestionsFromSheets()">
+                    </button></div></div><div class="info-box" style="margin-top: 32px;"><strong>📖 Question Format</strong>
+<p style="margin-top:10px;font-size:0.9em;color:#64748b;">Supports both <strong>single-line</strong> and <strong>multi-line</strong> options. Options end when the next A)/B)/C)/D) or <code>Correct:</code> line starts.</p>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;flex-wrap:wrap;">
+  <div>
+    <div style="font-size:0.78em;font-weight:700;color:#7e22ce;margin-bottom:6px;">✅ Single-line options</div>
+    <div style="padding:16px;background:rgba(0,0,0,0.03);border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:0.82em;line-height:1.8;white-space:pre-wrap;">Q1. Which language is used for Data Analytics?
+A) Python
+B) C
+C) C++
+D) HTML
+Correct: A</div>
+  </div>
+  <div>
+    <div style="font-size:0.78em;font-weight:700;color:#ea580c;margin-bottom:6px;">✅ Multi-line options</div>
+    <div style="padding:16px;background:rgba(0,0,0,0.03);border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:0.82em;line-height:1.8;white-space:pre-wrap;">Q2. What will be the output?
+for i in range(3):
+    print(i)
+A) 0
+   1
+   2
+B) 1
+   2
+   3
+C) 0 1 2
+D) Error
+Correct: A</div>
+  </div>
+</div>
+</div></div><div class="card tab-content trainer-only" id="quizmanagerTab"><h2>🎛️ Quiz Manager</h2><div style="background:#eff6ff;border:2px solid #bfdbfe;border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:0.9em;color:#1e40af;">Only <strong>Active</strong> quizzes are visible to students. Toggle below to activate or deactivate.</div><div style="margin-bottom:16px;text-align:right;"><button class="btn btn-primary" onclick="loadQuizManager()" style="padding:8px 20px;font-size:0.85em;">🔄 Refresh</button></div><div id="quizManagerList"><div class="loading"><div class="spinner"></div><div>Loading...</div></div></div></div><div class="card tab-content trainer-only" id="manageTab"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 20px;"><h2 style="margin: 0;">📋 Question Bank</h2><div style="display: flex; gap: 12px; flex-wrap:wrap; align-items:center;"><div style="display:flex;align-items:center;gap:8px;background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:12px;padding:6px 14px;"><label style="font-weight:700;font-size:0.85em;color:#7e22ce;white-space:nowrap;">📝 Quiz:</label><select id="manageQuizSelector" onchange="loadQuestionsFromSheets()" style="border:none;background:transparent;font-family:inherit;font-weight:600;font-size:0.88em;color:#1e293b;cursor:pointer;outline:none;min-width:140px;"><option value="">-- All / Default --</option></select><button onclick="populateManageQuizSelector()" title="Refresh quiz list" style="background:none;border:none;cursor:pointer;font-size:1em;padding:0 4px;color:#7e22ce;">🔄</button></div><button class="btn btn-success" onclick="loadQuestionsFromSheets()">
                         🔄 Reload from Sheets
                     </button><button class="btn btn-danger" onclick="clearLocalQuestions()">
                         🗑️ Clear Cache
@@ -823,7 +844,13 @@ Correct: A
        if (isUserAnswer && isCorrectAns) { cls = 'user-correct'; icon = ' ✅'; }
        else if (isUserAnswer && !isCorrectAns) { cls = 'user-wrong'; icon = ' ❌'; }
        else if (!isUserAnswer && isCorrectAns) { cls = 'correct-ans'; icon = ' ← Correct'; }
-       optionsHtml += `<div class="qr-opt ${cls}">${letter}) ${fixMathSymbols(opt)}${icon}</div>`;
+       const optText2 = fixMathSymbols(opt);
+      const prefix2 = letter + ') ';
+      const indent2 = '\u00a0'.repeat(prefix2.length);
+      const preserveSp2 = s => s.replace(/ /g, '\u00a0');
+      const lines2 = optText2.split('\n');
+      const formatted2 = prefix2 + lines2.map((l, idx) => idx === 0 ? preserveSp2(l) : preserveSp2(indent2 + l)).join('\n');
+      optionsHtml += `<div class="qr-opt ${cls}" style="font-family:'JetBrains Mono','Courier New',monospace;">${formatted2}${icon}</div>`;
      });
 
      card.innerHTML = `
@@ -1514,6 +1541,13 @@ Correct: A
  function decodeHtmlEntities(text) {
  if (!text) return text;
  return String(text)
+ .replace(/&#10;/g, '\n')
+ .replace(/&#13;/g, '\r')
+ .replace(/\\n/g, '\n')
+ .replace(/\\r\\n/g, '\n')
+ .replace(/\\r/g, '\n')
+ .replace(/&nbsp;/g, ' ')
+ .replace(/&#32;/g, ' ')
  .replace(/&lt;/g, '<')
  .replace(/&gt;/g, '>')
  .replace(/&amp;/g, '&')
@@ -1556,37 +1590,57 @@ Correct: A
  const questionBlocks = text.split(/(?=Q\d+[\.\)]\s*)/i).filter(b => b.trim());
  questionBlocks.forEach(block => {
  try {
- const lines = block.split('\n').map(l => l.trim());
+ // Split into raw lines (preserve spacing) and trimmed lines (for detection only)
+ const rawLines = block.split('\n');
+ const trimmedLines = rawLines.map(l => l.trim());
  let questionText = '';
  let questionStartIndex = 0;
- for (let i = 0; i < lines.length; i++) {
- const line = lines[i];
- if (/^[A-D][\.\)]\s*/i.test(line)) {
+ // Collect question text (lines before first A) option)
+ for (let i = 0; i < trimmedLines.length; i++) {
+ const tline = trimmedLines[i];
+ if (/^[A-D][\.)]/i.test(tline)) {
  questionStartIndex = i;
  break;
  }
  if (i === 0) {
- questionText += line.replace(/^Q\d+[\.\)]\s*/i, '') + '\n';
- } else if (line) {
- questionText += line + '\n';
+ questionText += tline.replace(/^Q\d+[\.\)]\s*/i, '') + '\n';
+ } else if (tline) {
+ questionText += tline + '\n';
  }
  }
  questionText = questionText.trim();
  if (!questionText) return;
+ // Parse options — preserve raw content (spaces intact)
  const options = [];
  let correct = '';
- for (let i = questionStartIndex; i < lines.length; i++) {
- const line = lines[i];
- const optionMatch = line.match(/^([A-D])[\.\)]\s*(.+)/i);
- if (optionMatch && options.length < 4) {
- options.push(optionMatch[2].trim());
- continue;
- }
- const correctMatch = line.match(/Correct:\s*([A-D])/i);
+ let currentOptionLines = null;
+ for (let i = questionStartIndex; i < trimmedLines.length; i++) {
+ const tline = trimmedLines[i];  // use trimmed for detection
+ const rline = rawLines[i];       // use raw for content
+ const optionMatch = tline.match(/^([A-D])[\.)]/i);
+ const correctMatch = tline.match(/^Correct:\s*([A-D])/i);
  if (correctMatch) {
+ if (currentOptionLines !== null) {
+ options.push(currentOptionLines.join('\n').trimEnd());
+ currentOptionLines = null;
+ }
  correct = correctMatch[1].toUpperCase();
  break;
+ } else if (optionMatch && options.length < 4) {
+ if (currentOptionLines !== null) {
+ options.push(currentOptionLines.join('\n').trimEnd());
  }
+ // Strip only the A)/B) prefix — preserve rest of line exactly
+ const firstLineContent = rline.replace(/^\s*[A-D][\.)\s]*/i, '');
+ currentOptionLines = [firstLineContent];
+ } else if (currentOptionLines !== null) {
+ // Continuation — use raw line, strip only leading indent that exceeds option indent
+ currentOptionLines.push(rline.trimEnd());
+ }
+ }
+ // Flush last option
+ if (currentOptionLines !== null && options.length < 4) {
+ options.push(currentOptionLines.join('\n').trimEnd());
  }
  if (questionText && options.length === 4 && correct) {
  parsed.push({
@@ -1833,8 +1887,17 @@ function generateQuestions() {
  radio.onchange = function() { updateProgress(); updateOptionStyles(index); };
  const label = document.createElement('label');
  label.htmlFor = `q${index}_${i}`;
- label.textContent = `${String.fromCharCode(65 + i)}) ${fixMathSymbols(opt)}`;
- label.style.cssText = `font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;display:block;width:100%;padding:14px 20px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:1em;box-sizing:border-box;white-space:normal;word-wrap:break-word;`;
+ label.style.cssText = `font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;display:block;width:100%;padding:10px 16px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:0.95em;box-sizing:border-box;font-family:'JetBrains Mono','Courier New',monospace;white-space:pre-wrap;word-wrap:break-word;line-height:1.7;`;
+ const letter = String.fromCharCode(65 + i);
+ const optText = fixMathSymbols(opt);
+ // Prefix first line with "A) " and indent subsequent lines to align
+ const lines = optText.split('\n');
+ const prefix = letter + ') ';
+ const indent = '\u00a0'.repeat(prefix.length); // non-breaking spaces for indent
+ // Convert spaces to non-breaking spaces to prevent collapse (Google Sheets strips multiple spaces)
+ const preserveSpaces = s => s.replace(/ /g, '\u00a0');
+ const formatted = prefix + lines.map((l, idx) => idx === 0 ? preserveSpaces(l) : preserveSpaces(indent + l)).join('\n');
+ label.textContent = formatted;
  label.onmouseenter = function() { if (!radio.checked) { this.style.borderColor='#e91e8c'; this.style.background='#fff0f6'; } };
  label.onmouseleave = function() { if (!radio.checked) { this.style.borderColor='#e2e8f0'; this.style.background='white'; } };
  wrapper.appendChild(radio);
