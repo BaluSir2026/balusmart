@@ -1556,8 +1556,7 @@ Correct: A
  const questionBlocks = text.split(/(?=Q\d+[\.\)]\s*)/i).filter(b => b.trim());
  questionBlocks.forEach(block => {
  try {
- const rawLines = block.split('\n');
- const lines = rawLines.map(l => l.trim());
+ const lines = block.split('\n').map(l => l.trim());
  let questionText = '';
  let questionStartIndex = 0;
  for (let i = 0; i < lines.length; i++) {
@@ -1578,9 +1577,9 @@ Correct: A
  let correct = '';
  for (let i = questionStartIndex; i < lines.length; i++) {
  const line = lines[i];
- const optionMatch = line.match(/^([A-D])[\.\)]\s*(.*)/i);
+ const optionMatch = line.match(/^([A-D])[\.\)]\s*(.+)/i);
  if (optionMatch && options.length < 4) {
- options.push(optionMatch[2]);
+ options.push(optionMatch[2].trim());
  continue;
  }
  const correctMatch = line.match(/Correct:\s*([A-D])/i);
@@ -1588,18 +1587,14 @@ Correct: A
  correct = correctMatch[1].toUpperCase();
  break;
  }
- if (options.length > 0 && options.length < 4 && line) {
- options[options.length - 1] += '\n' + line;
  }
- }
- const cleanOpts = options.map(o => o.trim());
- if (questionText && cleanOpts.length === 4 && correct) {
+ if (questionText && options.length === 4 && correct) {
  parsed.push({
  question: questionText,
- optionA: cleanOpts[0],
- optionB: cleanOpts[1],
- optionC: cleanOpts[2],
- optionD: cleanOpts[3],
+ optionA: options[0],
+ optionB: options[1],
+ optionC: options[2],
+ optionD: options[3],
  correct: correct,
  quizId: quizId
  });
@@ -1719,21 +1714,25 @@ Correct: A
  `;
  qText.textContent = fixMathSymbols(q.question);
  item.appendChild(qText);
- q.options.forEach((opt, idx) => {
- const optDiv = document.createElement('div');
- const letter = String.fromCharCode(65 + idx);
- const isCorrect = letter === q.correct;
- optDiv.textContent = `${letter}) ${opt} ${isCorrect ? '✓' : ''}`;
- optDiv.style.cssText = `
- padding: 12px 16px;
- margin-bottom: 8px;
- border-radius: 8px;
- ${isCorrect ? 
- 'background: rgba(16, 185, 129, 0.1); color: #10b981; font-weight: 600;' : 
- 'background: #f9fafb;'}
- `;
- item.appendChild(optDiv);
- });
+    const opts = (q.options && q.options.length === 4) ? q.options : [q.optionA||'',q.optionB||'',q.optionC||'',q.optionD||''];
+    opts.forEach((opt, idx) => {
+    const optDiv = document.createElement('div');
+    const letter = String.fromCharCode(65 + idx);
+    const isCorrect = letter === q.correct;
+    const pre = document.createElement('pre');
+    pre.textContent = `${letter}) ${fixMathSymbols(opt)} ${isCorrect ? '✓' : ''}`;
+    pre.style.cssText = 'margin:0;font-family:\'JetBrains Mono\',monospace;font-size:0.88em;white-space:pre-wrap;word-wrap:break-word;';
+    optDiv.style.cssText = `
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    ${isCorrect ? 
+    'background: rgba(16, 185, 129, 0.1); color: #10b981; font-weight: 600;' : 
+    'background: #f9fafb;'}
+    `;
+    optDiv.appendChild(pre);
+    item.appendChild(optDiv);
+    });
 
       // Edit & Delete buttons
       const actionRow = document.createElement('div');
@@ -1778,18 +1777,15 @@ Correct: A
  if (!response.ok) throw new Error('Network response was not ok');
  const data = await response.json();
  if (data.status === 'success' && data.questions && data.questions.length > 0) {
- questions = data.questions.map(q => {
- const oA = decodeHtmlEntities(q.optionA || q.options?.[0] || '');
- const oB = decodeHtmlEntities(q.optionB || q.options?.[1] || '');
- const oC = decodeHtmlEntities(q.optionC || q.options?.[2] || '');
- const oD = decodeHtmlEntities(q.optionD || q.options?.[3] || '');
- return {
+ questions = data.questions.map(q => ({
  ...q,
  question: decodeHtmlEntities(q.question || ''),
- options: [oA, oB, oC, oD],
- optionA: oA, optionB: oB, optionC: oC, optionD: oD
- };
-});
+ options: (q.options || []).map(o => decodeHtmlEntities(o || '')),
+ optionA: decodeHtmlEntities(q.optionA || ''),
+ optionB: decodeHtmlEntities(q.optionB || ''),
+ optionC: decodeHtmlEntities(q.optionC || ''),
+ optionD: decodeHtmlEntities(q.optionD || '')
+}));
  document.getElementById('loadingQuestions').classList.add('hidden');
  document.getElementById('totalCount').textContent = questions.length;
  generateQuestions();
@@ -1838,8 +1834,7 @@ function generateQuestions() {
  const label = document.createElement('label');
  label.htmlFor = `q${index}_${i}`;
  label.textContent = `${String.fromCharCode(65 + i)}) ${fixMathSymbols(opt)}`;
- const isCodeOpt = opt.includes('\n') || /^[A-Z]{2,}$/.test(opt.trim());
-    label.style.cssText = `font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;display:block;width:100%;padding:14px 20px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:1em;box-sizing:border-box;white-space:pre-wrap;word-wrap:break-word;word-break:break-word;${isCodeOpt ? "font-family:'JetBrains Mono','Courier New',monospace;font-size:0.9em;background:#f8fafc;" : ''}`;
+ label.style.cssText = `font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;display:block;width:100%;padding:14px 20px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:1em;box-sizing:border-box;white-space:normal;word-wrap:break-word;`;
  label.onmouseenter = function() { if (!radio.checked) { this.style.borderColor='#e91e8c'; this.style.background='#fff0f6'; } };
  label.onmouseleave = function() { if (!radio.checked) { this.style.borderColor='#e2e8f0'; this.style.background='white'; } };
  wrapper.appendChild(radio);
