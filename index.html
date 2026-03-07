@@ -1556,7 +1556,6 @@ Correct: A
  const questionBlocks = text.split(/(?=Q\d+[\.\)]\s*)/i).filter(b => b.trim());
  questionBlocks.forEach(block => {
  try {
- // ── Use RAW lines (no trim) so we can detect indented continuation lines ──
  const rawLines = block.split('\n');
  const lines = rawLines.map(l => l.trim());
  let questionText = '';
@@ -1578,31 +1577,23 @@ Correct: A
  const options = [];
  let correct = '';
  for (let i = questionStartIndex; i < lines.length; i++) {
- const line    = lines[i];
- const rawLine = rawLines[i] || '';
- // New option line: starts with A) B) C) D)
+ const line = lines[i];
+ // Match both A) and A. formats
  const optionMatch = line.match(/^([A-D])[\.\)]\s*(.*)/i);
  if (optionMatch && options.length < 4) {
- options.push(optionMatch[2]);  // start collecting (may be empty if value is on next line)
+ options.push(optionMatch[2]);
  continue;
  }
- // Correct answer line
  const correctMatch = line.match(/Correct:\s*([A-D])/i);
  if (correctMatch) {
  correct = correctMatch[1].toUpperCase();
  break;
  }
- // ── Continuation line: belongs to the last option ──
- // A line is a continuation if:
- //   - We already have at least one option
- //   - It's NOT a new A/B/C/D option
- //   - It's NOT a Correct: line
- //   - It has content (trimmed)
- if (options.length > 0 && line && !correctMatch) {
+ // Continuation line — append to last option with newline
+ if (options.length > 0 && options.length < 4 && line) {
  options[options.length - 1] += '\n' + line;
  }
  }
- // Clean up options
  const cleanOpts = options.map(o => o.trim());
  if (questionText && cleanOpts.length === 4 && correct) {
  parsed.push({
