@@ -31,7 +31,7 @@
 .qr-num{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.82em;margin-bottom:10px;}
 .qr-question{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:14px;border-radius:10px;font-size:.85em;line-height:1.6;white-space:pre-wrap;word-wrap:break-word;margin-bottom:12px;}
 .qr-options{display:grid;gap:7px;}
-.qr-opt{padding:9px 14px;border-radius:9px;font-size:.87em;font-weight:500;border:1.5px solid transparent;white-space:pre-wrap;word-wrap:break-word;}
+.qr-opt{padding:9px 14px;border-radius:9px;font-size:.87em;font-weight:500;border:1.5px solid transparent;}
 .qr-opt.user-correct{background:#d1fae5;border-color:#6ee7b7;color:#065f46;font-weight:700;}
 .qr-opt.user-wrong{background:#fee2e2;border-color:#fca5a5;color:#991b1b;font-weight:700;}
 .qr-opt.correct-ans{background:#dbeafe;border-color:#93c5fd;color:#1e40af;font-weight:700;}
@@ -332,35 +332,14 @@
                         ✅ Import Questions
                     </button><button class="btn btn-secondary" onclick="testQuestionUpload()">
                         🧪 Test Upload
-                    </button></div></div><div class="info-box" style="margin-top: 32px;"><strong>📖 Question Format</strong>
-<p style="margin-top:10px;font-size:0.9em;color:#64748b;">Supports both <strong>single-line</strong> and <strong>multi-line</strong> options. Options end when the next A)/B)/C)/D) or <code>Correct:</code> line starts.</p>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;flex-wrap:wrap;">
-  <div>
-    <div style="font-size:0.78em;font-weight:700;color:#7e22ce;margin-bottom:6px;">✅ Single-line options</div>
-    <div style="padding:16px;background:rgba(0,0,0,0.03);border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:0.82em;line-height:1.8;white-space:pre-wrap;">Q1. Which language is used for Data Analytics?
-A) Python
-B) C
-C) C++
-D) HTML
-Correct: A</div>
-  </div>
-  <div>
-    <div style="font-size:0.78em;font-weight:700;color:#ea580c;margin-bottom:6px;">✅ Multi-line options</div>
-    <div style="padding:16px;background:rgba(0,0,0,0.03);border-radius:12px;font-family:'JetBrains Mono',monospace;font-size:0.82em;line-height:1.8;white-space:pre-wrap;">Q2. What will be the output?
-for i in range(3):
-    print(i)
-A) 0
-   1
-   2
-B) 1
-   2
-   3
-C) 0 1 2
-D) Error
-Correct: A</div>
-  </div>
-</div>
-</div></div><div class="card tab-content trainer-only" id="quizmanagerTab"><h2>🎛️ Quiz Manager</h2><div style="background:#eff6ff;border:2px solid #bfdbfe;border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:0.9em;color:#1e40af;">Only <strong>Active</strong> quizzes are visible to students. Toggle below to activate or deactivate.</div><div style="margin-bottom:16px;text-align:right;"><button class="btn btn-primary" onclick="loadQuizManager()" style="padding:8px 20px;font-size:0.85em;">🔄 Refresh</button></div><div id="quizManagerList"><div class="loading"><div class="spinner"></div><div>Loading...</div></div></div></div><div class="card tab-content trainer-only" id="manageTab"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 20px;"><h2 style="margin: 0;">📋 Question Bank</h2><div style="display: flex; gap: 12px; flex-wrap:wrap; align-items:center;"><div style="display:flex;align-items:center;gap:8px;background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:12px;padding:6px 14px;"><label style="font-weight:700;font-size:0.85em;color:#7e22ce;white-space:nowrap;">📝 Quiz:</label><select id="manageQuizSelector" onchange="loadQuestionsFromSheets()" style="border:none;background:transparent;font-family:inherit;font-weight:600;font-size:0.88em;color:#1e293b;cursor:pointer;outline:none;min-width:140px;"><option value="">-- All / Default --</option></select><button onclick="populateManageQuizSelector()" title="Refresh quiz list" style="background:none;border:none;cursor:pointer;font-size:1em;padding:0 4px;color:#7e22ce;">🔄</button></div><button class="btn btn-success" onclick="loadQuestionsFromSheets()">
+                    </button></div></div><div class="info-box" style="margin-top: 32px;"><strong>📖 Question Format</strong><div style="margin-top: 16px; padding: 20px; background: rgba(0,0,0,0.03); border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85em;">
+Q1. Which Programming Language used for Data Analytics?<br>
+A) Python<br>
+B) C<br>
+C) C++<br>
+D) HTML<br>
+Correct: A
+                </div></div></div><div class="card tab-content trainer-only" id="quizmanagerTab"><h2>🎛️ Quiz Manager</h2><div style="background:#eff6ff;border:2px solid #bfdbfe;border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:0.9em;color:#1e40af;">Only <strong>Active</strong> quizzes are visible to students. Toggle below to activate or deactivate.</div><div style="margin-bottom:16px;text-align:right;"><button class="btn btn-primary" onclick="loadQuizManager()" style="padding:8px 20px;font-size:0.85em;">🔄 Refresh</button></div><div id="quizManagerList"><div class="loading"><div class="spinner"></div><div>Loading...</div></div></div></div><div class="card tab-content trainer-only" id="manageTab"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 20px;"><h2 style="margin: 0;">📋 Question Bank</h2><div style="display: flex; gap: 12px; flex-wrap:wrap; align-items:center;"><div style="display:flex;align-items:center;gap:8px;background:#faf5ff;border:1.5px solid #e9d5ff;border-radius:12px;padding:6px 14px;"><label style="font-weight:700;font-size:0.85em;color:#7e22ce;white-space:nowrap;">📝 Quiz:</label><select id="manageQuizSelector" onchange="loadQuestionsFromSheets()" style="border:none;background:transparent;font-family:inherit;font-weight:600;font-size:0.88em;color:#1e293b;cursor:pointer;outline:none;min-width:140px;"><option value="">-- All / Default --</option></select><button onclick="populateManageQuizSelector()" title="Refresh quiz list" style="background:none;border:none;cursor:pointer;font-size:1em;padding:0 4px;color:#7e22ce;">🔄</button></div><button class="btn btn-success" onclick="loadQuestionsFromSheets()">
                         🔄 Reload from Sheets
                     </button><button class="btn btn-danger" onclick="clearLocalQuestions()">
                         🗑️ Clear Cache
@@ -844,13 +823,7 @@ Correct: A</div>
        if (isUserAnswer && isCorrectAns) { cls = 'user-correct'; icon = ' ✅'; }
        else if (isUserAnswer && !isCorrectAns) { cls = 'user-wrong'; icon = ' ❌'; }
        else if (!isUserAnswer && isCorrectAns) { cls = 'correct-ans'; icon = ' ← Correct'; }
-       const optText2 = fixMathSymbols(opt);
-      const prefix2 = letter + ') ';
-      const indent2 = '\u00a0'.repeat(prefix2.length);
-      const preserveSp2 = s => s.replace(/ /g, '\u00a0');
-      const lines2 = optText2.split('\n');
-      const formatted2 = prefix2 + lines2.map((l, idx) => idx === 0 ? preserveSp2(l) : preserveSp2(indent2 + l)).join('\n');
-      optionsHtml += `<div class="qr-opt ${cls}" style="font-family:'JetBrains Mono','Courier New',monospace;">${formatted2}${icon}</div>`;
+       optionsHtml += `<div class="qr-opt ${cls}">${letter}) ${fixMathSymbols(opt)}${icon}</div>`;
      });
 
      card.innerHTML = `
@@ -1541,13 +1514,6 @@ Correct: A</div>
  function decodeHtmlEntities(text) {
  if (!text) return text;
  return String(text)
- .replace(/&#10;/g, '\n')
- .replace(/&#13;/g, '\r')
- .replace(/\\n/g, '\n')
- .replace(/\\r\\n/g, '\n')
- .replace(/\\r/g, '\n')
- .replace(/&nbsp;/g, ' ')
- .replace(/&#32;/g, ' ')
  .replace(/&lt;/g, '<')
  .replace(/&gt;/g, '>')
  .replace(/&amp;/g, '&')
@@ -1590,65 +1556,51 @@ Correct: A</div>
  const questionBlocks = text.split(/(?=Q\d+[\.\)]\s*)/i).filter(b => b.trim());
  questionBlocks.forEach(block => {
  try {
- // Split into raw lines (preserve spacing) and trimmed lines (for detection only)
  const rawLines = block.split('\n');
- const trimmedLines = rawLines.map(l => l.trim());
+ const lines = rawLines.map(l => l.trim()); // trimmed only for pattern matching
  let questionText = '';
  let questionStartIndex = 0;
- // Collect question text (lines before first A) option)
- for (let i = 0; i < trimmedLines.length; i++) {
- const tline = trimmedLines[i];
- if (/^[A-D][\.)]/i.test(tline)) {
+ for (let i = 0; i < rawLines.length; i++) {
+ const trimmed = lines[i];
+ if (/^[A-D][\.\)]\s*/i.test(trimmed)) {
  questionStartIndex = i;
  break;
  }
  if (i === 0) {
- questionText += tline.replace(/^Q\d+[\.\)]\s*/i, '') + '\n';
- } else if (tline) {
- questionText += tline + '\n';
+ questionText += rawLines[i].replace(/^Q\d+[\.\)]\s*/i, '') + '\n';
+ } else if (rawLines[i].trim()) {
+ questionText += rawLines[i] + '\n';
  }
  }
- questionText = questionText.trim();
+ questionText = questionText.trimEnd();
  if (!questionText) return;
- // Parse options — preserve raw content (spaces intact)
  const options = [];
  let correct = '';
- let currentOptionLines = null;
- for (let i = questionStartIndex; i < trimmedLines.length; i++) {
- const tline = trimmedLines[i];  // use trimmed for detection
- const rline = rawLines[i];       // use raw for content
- const optionMatch = tline.match(/^([A-D])[\.)]/i);
- const correctMatch = tline.match(/^Correct:\s*([A-D])/i);
- if (correctMatch) {
- if (currentOptionLines !== null) {
- options.push(currentOptionLines.join('\n').trimEnd());
- currentOptionLines = null;
+ for (let i = questionStartIndex; i < lines.length; i++) {
+ const line    = lines[i];    // trimmed for matching
+ const rawLine = rawLines[i]; // raw for indentation
+ const optionMatch = line.match(/^([A-D])[\.\)]\s*(.*)/i);
+ if (optionMatch && options.length < 4) {
+ options.push(optionMatch[2]);
+ continue;
  }
+ const correctMatch = line.match(/Correct:\s*([A-D])/i);
+ if (correctMatch) {
  correct = correctMatch[1].toUpperCase();
  break;
- } else if (optionMatch && options.length < 4) {
- if (currentOptionLines !== null) {
- options.push(currentOptionLines.join('\n').trimEnd());
  }
- // Strip only the A)/B) prefix — preserve rest of line exactly
- const firstLineContent = rline.replace(/^\s*[A-D][\.)\s]*/i, '');
- currentOptionLines = [firstLineContent];
- } else if (currentOptionLines !== null) {
- // Continuation — use raw line, strip only leading indent that exceeds option indent
- currentOptionLines.push(rline.trimEnd());
+ if (options.length > 0 && options.length < 4 && line) {
+ options[options.length - 1] += '\n' + rawLine;
  }
  }
- // Flush last option
- if (currentOptionLines !== null && options.length < 4) {
- options.push(currentOptionLines.join('\n').trimEnd());
- }
- if (questionText && options.length === 4 && correct) {
+ const cleanOpts = options.map(o => o.trim());
+ if (questionText && cleanOpts.length === 4 && correct) {
  parsed.push({
  question: questionText,
- optionA: options[0],
- optionB: options[1],
- optionC: options[2],
- optionD: options[3],
+ optionA: cleanOpts[0],
+ optionB: cleanOpts[1],
+ optionC: cleanOpts[2],
+ optionD: cleanOpts[3],
  correct: correct,
  quizId: quizId
  });
@@ -1663,6 +1615,23 @@ Correct: A</div>
  showToast('❌ No valid questions found. Please check format.', 'error');
  }
 }
+ // Encode leading spaces so Google Sheets won't strip them
+ function encodeIndent(text) {
+ if (!text) return text;
+ return text.split('\n').map(line => {
+ const match = line.match(/^( +)/);
+ if (!match) return line;
+ // Replace each leading space with a non-breaking space ( )
+ return '\u00A0'.repeat(match[1].length) + line.slice(match[1].length);
+ }).join('\n');
+ }
+ // Decode non-breaking spaces back to regular spaces for display
+ function decodeIndent(text) {
+ if (!text) return text;
+ return text.split('\n').map(line => {
+ return line.replace(/^\u00A0+/, m => ' '.repeat(m.length));
+ }).join('\n');
+ }
  async function uploadQuestionsToSheets(questions) {
  if (!webAppUrl) {
  showToast('Please configure first', 'error');
@@ -1674,7 +1643,14 @@ Correct: A</div>
  method: 'POST',
  redirect: 'follow',
  headers: { 'Content-Type': 'text/plain' },
- body: JSON.stringify({ action: 'uploadQuestions', questions })
+ body: JSON.stringify({ action: 'uploadQuestions', questions: questions.map(q => ({
+ ...q,
+ question: encodeIndent(q.question),
+ optionA: encodeIndent(q.optionA),
+ optionB: encodeIndent(q.optionB),
+ optionC: encodeIndent(q.optionC),
+ optionD: encodeIndent(q.optionD)
+})) })
  });
  showToast(`✅ Uploaded ${questions.length} questions!`, 'success');
  setTimeout(() => {
@@ -1697,7 +1673,14 @@ Correct: A</div>
  const response = await fetch(`${webAppUrl}?action=getQuestions&quizId=${encodeURIComponent(targetQuizId)}`);
  const data = await response.json();
  if (data.status === 'success' && data.questions.length > 0) {
- displayQuestions(data.questions);
+ displayQuestions(data.questions.map(q => ({
+ ...q,
+ question: decodeIndent(decodeHtmlEntities(q.question || '')),
+ optionA: decodeIndent(decodeHtmlEntities(q.optionA || '')),
+ optionB: decodeIndent(decodeHtmlEntities(q.optionB || '')),
+ optionC: decodeIndent(decodeHtmlEntities(q.optionC || '')),
+ optionD: decodeIndent(decodeHtmlEntities(q.optionD || ''))
+})));
  showToast(`Loaded ${data.questions.length} questions for ${targetQuizId}`, 'success');
  } else {
  showToast('No questions found for ' + targetQuizId, 'warning');
@@ -1768,25 +1751,28 @@ Correct: A</div>
  `;
  qText.textContent = fixMathSymbols(q.question);
  item.appendChild(qText);
-    const opts = (q.options && q.options.length === 4) ? q.options : [q.optionA||'',q.optionB||'',q.optionC||'',q.optionD||''];
-    opts.forEach((opt, idx) => {
-    const optDiv = document.createElement('div');
-    const letter = String.fromCharCode(65 + idx);
-    const isCorrect = letter === q.correct;
-    const pre = document.createElement('pre');
-    pre.textContent = `${letter}) ${fixMathSymbols(opt)} ${isCorrect ? '✓' : ''}`;
-    pre.style.cssText = 'margin:0;font-family:\'JetBrains Mono\',monospace;font-size:0.88em;white-space:pre-wrap;word-wrap:break-word;';
-    optDiv.style.cssText = `
-    padding: 12px 16px;
-    margin-bottom: 8px;
-    border-radius: 8px;
-    ${isCorrect ? 
-    'background: rgba(16, 185, 129, 0.1); color: #10b981; font-weight: 600;' : 
-    'background: #f9fafb;'}
-    `;
-    optDiv.appendChild(pre);
-    item.appendChild(optDiv);
-    });
+ const opts = (q.options && q.options.length === 4 && q.options.some(o=>o))
+ ? q.options
+ : [q.optionA||'', q.optionB||'', q.optionC||'', q.optionD||''];
+ opts.forEach((opt, idx) => {
+ const optDiv = document.createElement('div');
+ const letter = String.fromCharCode(65 + idx);
+ const isCorrect = letter === q.correct;
+ optDiv.textContent = `${letter}) ${fixMathSymbols(opt)} ${isCorrect ? '✓' : ''}`;
+ optDiv.style.cssText = `
+ padding: 12px 16px;
+ margin-bottom: 8px;
+ border-radius: 8px;
+ white-space: pre-wrap;
+ word-break: break-word;
+ font-family: 'JetBrains Mono', monospace;
+ font-size: 0.88em;
+ ${isCorrect ?
+ 'background: rgba(16, 185, 129, 0.1); color: #10b981; font-weight: 700;' :
+ 'background: #f9fafb;'}
+ `;
+ item.appendChild(optDiv);
+ });
 
       // Edit & Delete buttons
       const actionRow = document.createElement('div');
@@ -1831,15 +1817,18 @@ Correct: A</div>
  if (!response.ok) throw new Error('Network response was not ok');
  const data = await response.json();
  if (data.status === 'success' && data.questions && data.questions.length > 0) {
- questions = data.questions.map(q => ({
+ questions = data.questions.map(q => {
+ const oA = decodeIndent(decodeHtmlEntities(q.optionA || q.options?.[0] || ''));
+ const oB = decodeIndent(decodeHtmlEntities(q.optionB || q.options?.[1] || ''));
+ const oC = decodeIndent(decodeHtmlEntities(q.optionC || q.options?.[2] || ''));
+ const oD = decodeIndent(decodeHtmlEntities(q.optionD || q.options?.[3] || ''));
+ return {
  ...q,
- question: decodeHtmlEntities(q.question || ''),
- options: (q.options || []).map(o => decodeHtmlEntities(o || '')),
- optionA: decodeHtmlEntities(q.optionA || ''),
- optionB: decodeHtmlEntities(q.optionB || ''),
- optionC: decodeHtmlEntities(q.optionC || ''),
- optionD: decodeHtmlEntities(q.optionD || '')
-}));
+ question: decodeIndent(decodeHtmlEntities(q.question || '')),
+ options: [oA, oB, oC, oD],
+ optionA: oA, optionB: oB, optionC: oC, optionD: oD
+ };
+});
  document.getElementById('loadingQuestions').classList.add('hidden');
  document.getElementById('totalCount').textContent = questions.length;
  generateQuestions();
@@ -1887,17 +1876,9 @@ function generateQuestions() {
  radio.onchange = function() { updateProgress(); updateOptionStyles(index); };
  const label = document.createElement('label');
  label.htmlFor = `q${index}_${i}`;
- label.style.cssText = `font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;display:block;width:100%;padding:10px 16px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:0.95em;box-sizing:border-box;font-family:'JetBrains Mono','Courier New',monospace;white-space:pre-wrap;word-wrap:break-word;line-height:1.7;`;
- const letter = String.fromCharCode(65 + i);
- const optText = fixMathSymbols(opt);
- // Prefix first line with "A) " and indent subsequent lines to align
- const lines = optText.split('\n');
- const prefix = letter + ') ';
- const indent = '\u00a0'.repeat(prefix.length); // non-breaking spaces for indent
- // Convert spaces to non-breaking spaces to prevent collapse (Google Sheets strips multiple spaces)
- const preserveSpaces = s => s.replace(/ /g, '\u00a0');
- const formatted = prefix + lines.map((l, idx) => idx === 0 ? preserveSpaces(l) : preserveSpaces(indent + l)).join('\n');
- label.textContent = formatted;
+ label.textContent = `${String.fromCharCode(65 + i)}) ${fixMathSymbols(opt)}`;
+ const isCodeOpt = opt.includes('\n');
+    label.style.cssText = `font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;display:block;width:100%;padding:14px 20px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:1em;box-sizing:border-box;white-space:pre-wrap;word-wrap:break-word;word-break:break-word;${isCodeOpt ? "font-family:'JetBrains Mono','Courier New',monospace;font-size:0.9em;background:#f8fafc;" : ''}`;
  label.onmouseenter = function() { if (!radio.checked) { this.style.borderColor='#e91e8c'; this.style.background='#fff0f6'; } };
  label.onmouseleave = function() { if (!radio.checked) { this.style.borderColor='#e2e8f0'; this.style.background='white'; } };
  wrapper.appendChild(radio);
