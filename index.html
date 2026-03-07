@@ -1578,7 +1578,6 @@ Correct: A
  let correct = '';
  for (let i = questionStartIndex; i < lines.length; i++) {
  const line = lines[i];
- // Match both A) and A. formats
  const optionMatch = line.match(/^([A-D])[\.\)]\s*(.*)/i);
  if (optionMatch && options.length < 4) {
  options.push(optionMatch[2]);
@@ -1589,7 +1588,6 @@ Correct: A
  correct = correctMatch[1].toUpperCase();
  break;
  }
- // Continuation line — append to last option with newline
  if (options.length > 0 && options.length < 4 && line) {
  options[options.length - 1] += '\n' + line;
  }
@@ -1780,15 +1778,18 @@ Correct: A
  if (!response.ok) throw new Error('Network response was not ok');
  const data = await response.json();
  if (data.status === 'success' && data.questions && data.questions.length > 0) {
- questions = data.questions.map(q => ({
+ questions = data.questions.map(q => {
+ const oA = decodeHtmlEntities(q.optionA || q.options?.[0] || '');
+ const oB = decodeHtmlEntities(q.optionB || q.options?.[1] || '');
+ const oC = decodeHtmlEntities(q.optionC || q.options?.[2] || '');
+ const oD = decodeHtmlEntities(q.optionD || q.options?.[3] || '');
+ return {
  ...q,
  question: decodeHtmlEntities(q.question || ''),
- options: (q.options || []).map(o => decodeHtmlEntities(o || '')),
- optionA: decodeHtmlEntities(q.optionA || ''),
- optionB: decodeHtmlEntities(q.optionB || ''),
- optionC: decodeHtmlEntities(q.optionC || ''),
- optionD: decodeHtmlEntities(q.optionD || '')
-}));
+ options: [oA, oB, oC, oD],
+ optionA: oA, optionB: oB, optionC: oC, optionD: oD
+ };
+});
  document.getElementById('loadingQuestions').classList.add('hidden');
  document.getElementById('totalCount').textContent = questions.length;
  generateQuestions();
@@ -1837,7 +1838,8 @@ function generateQuestions() {
  const label = document.createElement('label');
  label.htmlFor = `q${index}_${i}`;
  label.textContent = `${String.fromCharCode(65 + i)}) ${fixMathSymbols(opt)}`;
- label.style.cssText = `font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;display:block;width:100%;padding:14px 20px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:1em;box-sizing:border-box;white-space:normal;word-wrap:break-word;`;
+ const isCodeOpt = opt.includes('\n') || /^[A-Z]{2,}$/.test(opt.trim());
+    label.style.cssText = `font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;display:block;width:100%;padding:14px 20px;background:white;border:2px solid #e2e8f0;border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:1em;box-sizing:border-box;white-space:pre-wrap;word-wrap:break-word;word-break:break-word;${isCodeOpt ? "font-family:'JetBrains Mono','Courier New',monospace;font-size:0.9em;background:#f8fafc;" : ''}`;
  label.onmouseenter = function() { if (!radio.checked) { this.style.borderColor='#e91e8c'; this.style.background='#fff0f6'; } };
  label.onmouseleave = function() { if (!radio.checked) { this.style.borderColor='#e2e8f0'; this.style.background='white'; } };
  wrapper.appendChild(radio);
