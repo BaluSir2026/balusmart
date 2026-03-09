@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Balu Smart Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --primary:#7e22ce;--primary-dark:#6b21a8;--secondary:#a855f7;
+  --accent:#ea580c;--accent-light:#fb923c;
+  --success:#10b981;--success-light:#d1fae5;
+  --danger:#ef4444;--danger-light:#fee2e2;
+  --warning:#f59e0b;--warning-light:#fef3c7;
+  --bg:#f5f0ff;--surface:#fff;--surface-hover:#faf5ff;
+  --text:#1e1b2e;--text-light:#64748b;--text-lighter:#94a3b8;
+  --border:#e9d5ff;--border-light:#f3e8ff;
+  --grad-primary:linear-gradient(135deg,#7e22ce,#a855f7);
+  --grad-accent:linear-gradient(135deg,#ea580c,#fb923c);
+  --grad-success:linear-gradient(135deg,#10b981,#34d399);
+  --grad-bg:linear-gradient(135deg,#f5f0ff 0%,#ede9fe 40%,#fff7ed 100%);
+  --shadow-sm:0 2px 4px rgba(126,34,206,.06);
+  --shadow-md:0 4px 12px rgba(126,34,206,.12);
+  --shadow-lg:0 10px 30px rgba(126,34,206,.15);
+  --shadow-xl:0 20px 60px rgba(126,34,206,.18);
+  --glow:0 0 24px rgba(126,34,206,.35);
+  --ease:0.3s cubic-bezier(.4,0,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--grad-bg);min-height:100vh;color:var(--text);line-height:1.6;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(circle at 20% 30%,rgba(126,34,206,.08),transparent 50%),radial-gradient(circle at 80% 70%,rgba(234,88,12,.06),transparent 50%);pointer-events:none;z-index:0;}
+.container{max-width:1300px;margin:0 auto;padding:20px;position:relative;z-index:1;}
+.hidden{display:none!important;}
+
+/* ── HEADER ── */
+.header{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:20px;padding:20px 28px;margin-bottom:20px;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,.3);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-icon{width:48px;height:48px;background:var(--grad-primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;color:white;box-shadow:var(--glow);animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.brand-name{font-family:'Poppins',sans-serif;font-size:1.6em;font-weight:800;background:var(--grad-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.brand-sub{color:var(--text-light);font-size:.82em;font-weight:500;}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#userBadge{display:none;align-items:center;gap:8px;background:rgba(126,34,206,.08);border:1.5px solid var(--border);border-radius:99px;padding:8px 16px;font-size:.84em;font-weight:600;color:var(--primary);}
+#roleBadge{display:none;font-size:.75em;padding:3px 10px;border-radius:99px;font-weight:700;}
+.role-trainer{background:linear-gradient(135deg,#ea580c,#fb923c);color:white;}
+.role-student{background:var(--grad-primary);color:white;}
+
+/* ── LIVE BADGE ── */
+.live-dot{display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;margin-right:5px;animation:pulse-dot 1.5s infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+/* ── BUTTONS ── */
+.btn{padding:10px 20px;border-radius:10px;border:none;font-family:'Inter',sans-serif;font-size:.88em;font-weight:600;cursor:pointer;transition:var(--ease);display:inline-flex;align-items:center;gap:7px;position:relative;overflow:hidden;}
+.btn:hover{transform:translateY(-2px);}
+.btn:active{transform:translateY(0);}
+.btn-primary{background:var(--grad-primary);color:white;box-shadow:var(--shadow-md),var(--glow);}
+.btn-primary:hover{box-shadow:var(--shadow-lg),0 0 28px rgba(126,34,206,.4);}
+.btn-secondary{background:white;color:var(--text);border:2px solid var(--border);}
+.btn-secondary:hover{border-color:var(--primary);background:var(--surface-hover);}
+.btn-success{background:var(--grad-success);color:white;box-shadow:var(--shadow-md);}
+.btn-danger{background:var(--grad-accent);color:white;box-shadow:var(--shadow-md);}
+.btn-sm{padding:6px 14px;font-size:.8em;border-radius:8px;}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none!important;}
+
+/* ── TABS ── */
+.tab-nav{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:14px;padding:6px;margin-bottom:20px;display:flex;gap:6px;flex-wrap:wrap;box-shadow:var(--shadow-md);}
+.tab-btn{flex:1;min-width:110px;padding:10px 16px;border:none;background:transparent;border-radius:10px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:.86em;color:var(--text-light);transition:var(--ease);}
+.tab-btn:hover{color:var(--primary);background:rgba(126,34,206,.05);}
+.tab-btn.active{background:var(--grad-primary);color:white;box-shadow:var(--shadow-md);}
+.tab-content{display:none;}
+.tab-content.active{display:block;animation:fadeIn .3s var(--ease);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CARDS ── */
+.card{background:rgba(255,255,255,.98);border-radius:20px;padding:28px;box-shadow:var(--shadow-lg);margin-bottom:20px;}
+.card-sm{background:rgba(255,255,255,.98);border-radius:16px;padding:20px;box-shadow:var(--shadow-md);border:1px solid var(--border-light);}
+.section-title{font-family:'Poppins',sans-serif;font-size:1.3em;font-weight:700;color:var(--text);margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+
+/* ── FORM ── */
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:16px;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-weight:600;font-size:.88em;color:var(--text);margin-bottom:6px;}
+.input{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:.92em;transition:var(--ease);background:white;}
+.input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(126,34,206,.1);}
+select.input{cursor:pointer;}
+textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',monospace;font-size:.85em;}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:.75em;font-weight:700;}
+.badge-easy{background:#d1fae5;color:#065f46;}
+.badge-medium{background:#fef3c7;color:#92400e;}
+.badge-hard{background:#fee2e2;color:#991b1b;}
+.badge-primary{background:rgba(126,34,206,.1);color:var(--primary);}
+.badge-success{background:var(--success-light);color:#065f46;}
+
+/* ── QUIZ CARDS ── */
+.quiz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
+.quiz-card{background:white;border-radius:18px;padding:22px;box-shadow:var(--shadow-md);border:2px solid var(--border-light);transition:var(--ease);position:relative;overflow:hidden;}
+.quiz-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--card-accent,var(--grad-primary));}
+.quiz-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--primary);}
+.lang-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface-hover);border:1.5px solid var(--border);border-radius:99px;padding:4px 12px;font-size:.8em;font-weight:700;margin-bottom:10px;}
+.quiz-card-title{font-family:'Poppins',sans-serif;font-size:1.05em;font-weight:700;color:var(--text);margin-bottom:6px;}
+.quiz-card-meta{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;font-size:.8em;color:var(--text-light);}
+.quiz-card-meta span{display:flex;align-items:center;gap:4px;}
+.quiz-card-score{text-align:center;padding:12px;background:var(--success-light);border-radius:10px;margin-bottom:12px;}
+.score-num{font-family:'Poppins',sans-serif;font-size:1.6em;font-weight:800;color:var(--success);}
+
+/* ── QUIZ TAKING ── */
+.timer-bar{background:white;padding:16px 24px;border-radius:16px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;border:2px solid var(--border);position:sticky;top:10px;z-index:100;box-shadow:var(--shadow-md);}
+.timer-display{font-family:'JetBrains Mono',monospace;font-size:1.5em;font-weight:800;color:var(--primary);letter-spacing:2px;}
+.timer-display.urgent{color:var(--danger);animation:blink .8s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.progress-wrap{flex:1;min-width:180px;}
+.progress-label{display:flex;justify-content:space-between;font-size:.78em;font-weight:600;color:var(--text-light);margin-bottom:5px;}
+.progress-track{height:8px;background:#ede9fe;border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:99px;transition:width .4s ease;}
+.q-card{background:white;border-radius:18px;padding:28px;margin-bottom:18px;box-shadow:var(--shadow-sm);border:2px solid var(--border-light);}
+.q-number{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#e91e8c,#ff6eb4);color:white;font-weight:700;font-size:.82em;padding:5px 14px;border-radius:99px;margin-bottom:16px;}
+.q-text{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:16px;border-radius:12px;font-size:.87em;line-height:1.7;white-space:pre;overflow-x:auto;tab-size:4;display:block;max-width:100%;margin-bottom:18px;}
+.options-list{display:flex;flex-direction:column;gap:10px;}
+.option-item{position:relative;}
+.option-item input[type=radio]{position:absolute;opacity:0;}
+.option-label{display:flex;align-items:center;gap:12px;padding:13px 18px;background:white;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:var(--ease);font-size:.93em;}
+.option-label:hover{border-color:var(--primary);background:var(--surface-hover);}
+.option-item input:checked+.option-label{background:var(--grad-primary);color:white;border-color:var(--primary);box-shadow:var(--shadow-md);}
+.option-marker{width:28px;height:28px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;font-size:.82em;background:white;color:var(--text);}
+.option-item input:checked+.option-label .option-marker{background:white;border-color:white;color:var(--primary);}
+
+/* ── PALETTE ── */
+.palette{background:white;border-radius:16px;padding:18px;margin-bottom:16px;border:2px solid var(--border-light);box-shadow:var(--shadow-sm);}
+.palette-title{font-size:.82em;font-weight:700;color:var(--text-light);margin-bottom:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.palette-grid{display:flex;flex-wrap:wrap;gap:7px;}
+.palette-btn{width:34px;height:34px;border:2px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-weight:700;font-size:.8em;transition:var(--ease);color:var(--text);}
+.palette-btn.answered{background:var(--success);border-color:var(--success);color:white;}
+.palette-btn.current{background:var(--primary);border-color:var(--primary);color:white;}
+.pal-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+
+/* ── RESULTS ── */
+.result-screen{text-align:center;padding:32px 0;}
+.score-circle{width:180px;height:180px;margin:0 auto 24px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--shadow-xl);animation:popIn .6s cubic-bezier(.68,-.55,.265,1.55);}
+@keyframes popIn{from{transform:scale(0) rotate(-180deg)}to{transform:scale(1) rotate(0)}}
+.score-circle.pass{background:var(--grad-success);}
+.score-circle.fail{background:linear-gradient(135deg,#ef4444,#f87171);}
+.score-big{font-family:'Poppins',sans-serif;font-size:3.5em;font-weight:800;color:white;line-height:1;}
+.score-lbl{font-size:.9em;color:rgba(255,255,255,.9);font-weight:600;text-transform:uppercase;letter-spacing:1px;}
+.result-msg{font-family:'Poppins',sans-serif;font-size:1.8em;font-weight:800;background:var(--grad-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;}
+.result-stats{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin:20px 0;}
+.stat-box{background:white;border:2px solid var(--border-light);border-radius:14px;padding:16px 24px;text-align:center;box-shadow:var(--shadow-sm);}
+.stat-num{font-family:'Poppins',sans-serif;font-size:1.6em;font-weight:800;color:var(--primary);}
+.stat-lbl{font-size:.78em;color:var(--text-light);font-weight:600;}
+.review-item{background:white;border-radius:14px;padding:18px;margin-bottom:12px;box-shadow:var(--shadow-sm);border-left:4px solid var(--border);}
+.review-item.correct{border-left-color:var(--success);}
+.review-item.wrong{border-left-color:var(--danger);}
+.review-q{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.83em;white-space:pre;overflow-x:auto;tab-size:4;display:block;margin-bottom:10px;}
+.review-opt{padding:7px 12px;border-radius:8px;background:#f8f9fa;font-size:.88em;margin-bottom:4px;}
+.review-opt.correct-ans{background:rgba(16,185,129,.1);color:#065f46;font-weight:600;}
+.review-opt.your-wrong{background:rgba(239,68,68,.1);color:#991b1b;font-weight:600;}
+
+/* ── TRAINER LISTS ── */
+.list-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.list-item{background:white;border:2px solid var(--border-light);border-radius:14px;padding:16px;transition:var(--ease);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.list-item:hover{border-color:var(--primary);box-shadow:var(--shadow-md);}
+.list-item-icon{font-size:1.4em;flex-shrink:0;}
+.list-item-name{font-weight:600;font-size:.92em;}
+.list-item-sub{font-size:.78em;color:var(--text-light);}
+
+/* ── STEPS ── */
+.steps{display:flex;margin-bottom:24px;border-radius:12px;overflow:hidden;border:2px solid var(--border);}
+.step{flex:1;padding:12px 8px;text-align:center;background:var(--surface-hover);font-size:.78em;font-weight:700;color:var(--text-light);border-right:2px solid var(--border);transition:var(--ease);}
+.step:last-child{border-right:none;}
+.step.active{background:var(--grad-primary);color:white;}
+.step.done{background:var(--success-light);color:var(--success);}
+
+/* ── RESULTS TABLE ── */
+.results-table{width:100%;border-collapse:collapse;font-size:.87em;}
+.results-table th{background:var(--grad-primary);color:white;padding:12px 14px;text-align:left;font-weight:600;}
+.results-table th:first-child{border-radius:10px 0 0 0;}
+.results-table th:last-child{border-radius:0 10px 0 0;}
+.results-table td{padding:11px 14px;border-bottom:1px solid var(--border-light);vertical-align:middle;}
+.results-table tr:hover td{background:var(--surface-hover);}
+.pct-bar{height:6px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin-top:4px;}
+.pct-fill{height:100%;border-radius:99px;}
+
+/* ── STUDENT CHECKS ── */
+.student-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-height:280px;overflow-y:auto;border:2px solid var(--border);border-radius:12px;padding:14px;}
+.student-check{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;border:1.5px solid var(--border-light);background:white;cursor:pointer;transition:var(--ease);}
+.student-check:hover{border-color:var(--primary);}
+.student-check.selected{border-color:var(--primary);background:rgba(126,34,206,.05);}
+.student-check input{width:16px;height:16px;cursor:pointer;accent-color:var(--primary);}
+
+/* ── DASHBOARD STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px;}
+.stat-card{background:white;border-radius:16px;padding:20px;box-shadow:var(--shadow-md);text-align:center;}
+.stat-card-icon{font-size:2em;margin-bottom:8px;}
+.stat-card-num{font-family:'Poppins',sans-serif;font-size:2em;font-weight:800;background:var(--grad-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-card-label{font-size:.78em;font-weight:600;color:var(--text-light);}
+
+/* ── AUTH ── */
+#authOverlay{position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0d001a,#1e0040,#2d0060,#3d1000);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;}
+#authCard{background:white;border-radius:24px;width:100%;max-width:440px;box-shadow:0 24px 80px rgba(0,0,0,.6);overflow:hidden;animation:popIn .5s cubic-bezier(.68,-.55,.265,1.55);}
+.auth-header{background:linear-gradient(135deg,#0d001a,#1e0040,#2d0060);padding:24px 28px;}
+.auth-brand{display:flex;align-items:center;gap:12px;justify-content:center;}
+.auth-brand-name{font-family:'Poppins',sans-serif;font-size:1.8em;font-weight:900;background:linear-gradient(135deg,#fff,#e9d5ff 40%,#fb923c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.auth-brand-badge{background:linear-gradient(135deg,#ea580c,#f97316);color:white;font-family:'Poppins',sans-serif;font-weight:800;font-size:.82em;padding:4px 14px;border-radius:99px;}
+.auth-subtitle{color:rgba(255,255,255,.6);font-size:.82em;text-align:center;margin-top:8px;}
+.auth-tabs{display:flex;border-bottom:2px solid var(--border);background:#faf5ff;}
+.auth-tab-btn{flex:1;padding:13px;border:none;background:transparent;font-family:'Inter',sans-serif;font-weight:700;font-size:.88em;cursor:pointer;color:var(--text-light);border-bottom:3px solid transparent;margin-bottom:-2px;transition:var(--ease);}
+.auth-tab-btn.active{color:var(--primary);border-bottom-color:var(--primary);background:white;}
+.auth-body{padding:26px;}
+.auth-form{display:none;}
+.auth-form.active{display:block;}
+.auth-field{margin-bottom:14px;}
+.auth-field label{display:block;font-weight:600;font-size:.85em;color:var(--text);margin-bottom:5px;}
+.auth-input{width:100%;padding:11px 14px 11px 38px;border:2px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:.91em;transition:var(--ease);background:white;box-sizing:border-box;}
+.auth-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(126,34,206,.1);}
+.auth-input-wrap{position:relative;}
+.auth-input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:.95em;pointer-events:none;}
+.auth-pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1em;color:var(--text-lighter);}
+.auth-submit-btn{width:100%;padding:12px;border-radius:10px;border:none;background:var(--grad-primary);color:white;font-family:'Inter',sans-serif;font-weight:700;font-size:.95em;cursor:pointer;transition:var(--ease);box-shadow:0 6px 20px rgba(126,34,206,.35);margin-top:4px;}
+.auth-submit-btn:hover{transform:translateY(-2px);}
+.auth-submit-btn:disabled{opacity:.65;cursor:not-allowed;transform:none;}
+.auth-error{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;border-radius:8px;padding:8px 12px;font-size:.83em;font-weight:600;margin-bottom:12px;display:none;}
+.auth-success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;border-radius:8px;padding:8px 12px;font-size:.83em;font-weight:600;margin-bottom:12px;display:none;}
+.auth-footer-link{text-align:center;margin-top:14px;font-size:.83em;color:var(--text-light);}
+.auth-footer-link span{color:var(--primary);font-weight:700;cursor:pointer;text-decoration:underline;}
+
+/* ── TOAST ── */
+#toast{position:fixed;top:22px;right:22px;background:white;padding:16px 22px;border-radius:14px;box-shadow:var(--shadow-xl);border-left:4px solid var(--success);z-index:100001;display:none;min-width:260px;animation:slideIn .4s cubic-bezier(.68,-.55,.265,1.55);}
+@keyframes slideIn{from{transform:translateX(400px);opacity:0}to{transform:translateX(0);opacity:1}}
+#toast.show{display:block;}
+#toast.error{border-left-color:var(--danger);}
+#toast.warning{border-left-color:var(--warning);}
+
+/* ── INFO BOXES ── */
+.info-box{background:rgba(59,130,246,.06);border:2px solid rgba(59,130,246,.2);border-radius:14px;padding:18px;margin:14px 0;}
+.success-box{background:rgba(16,185,129,.06);border:2px solid rgba(16,185,129,.2);border-radius:14px;padding:18px;margin:14px 0;}
+.warning-box{background:rgba(245,158,11,.06);border:2px solid rgba(245,158,11,.2);border-radius:14px;padding:18px;margin:14px 0;}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:60px 20px;color:var(--text-light);}
+.spinner{width:48px;height:48px;margin:0 auto 16px;border:4px solid var(--border-light);border-top:4px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-light);}
+.empty-icon{font-size:3em;margin-bottom:12px;}
+.upload-zone{border:3px dashed var(--border);border-radius:16px;padding:40px;text-align:center;background:rgba(126,34,206,.02);cursor:pointer;transition:var(--ease);margin-bottom:16px;}
+.upload-zone:hover{border-color:var(--primary);background:rgba(126,34,206,.04);}
+.upload-zone input{display:none;}
+
+@media(max-width:768px){
+  .container{padding:12px;}
+  .header{padding:16px 18px;}
+  .brand-name{font-size:1.3em;}
+  .card{padding:18px;}
+  .tab-nav{flex-direction:column;}
+  .tab-btn{width:100%;}
+  .quiz-grid{grid-template-columns:1fr;}
+  .steps{flex-direction:column;}
+  .step{border-right:none;border-bottom:2px solid var(--border);}
+}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-track{background:var(--surface-hover);border-radius:8px;}
+::-webkit-scrollbar-thumb{background:var(--primary);border-radius:8px;}
+</style>
+</head>
+<body>
+
+<!-- ═══ AUTH OVERLAY ═══════════════════════════════════════════════ -->
+<div id="authOverlay">
+  <div id="authCard">
+    <div class="auth-header">
+      <div class="auth-brand">
+        <span class="auth-brand-name">BALU</span>
+        <span class="auth-brand-badge">SMART QUIZ</span>
+      </div>
+      <div class="auth-subtitle">Powered by Firebase · Language → Topic → Quiz</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab-btn active" id="siTab" onclick="switchAuthTab('si')">🔑 Sign In</button>
+      <button class="auth-tab-btn" id="suTab" onclick="switchAuthTab('su')">📝 Sign Up</button>
+    </div>
+    <div class="auth-body">
+      <!-- Sign In -->
+      <div class="auth-form active" id="siForm">
+        <div class="auth-error" id="siError"></div>
+        <div class="auth-success" id="siSuccess"></div>
+        <div class="auth-field">
+          <label>Email *</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">📧</span>
+            <input class="auth-input" id="siEmail" type="email" placeholder="your@email.com" autocomplete="email">
+          </div>
+        </div>
+        <div class="auth-field">
+          <label>Password *</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">🔒</span>
+            <input class="auth-input" id="siPass" type="password" placeholder="Enter password" autocomplete="current-password">
+            <button class="auth-pw-toggle" onclick="togglePw('siPass',this)" type="button">👁️</button>
+          </div>
+        </div>
+        <button class="auth-submit-btn" id="siBtn" onclick="doSignIn()">🔑 Sign In</button>
+        <div class="auth-footer-link">No account? <span onclick="switchAuthTab('su')">Sign Up here</span></div>
+      </div>
+      <!-- Sign Up -->
+      <div class="auth-form" id="suForm">
+        <div class="auth-error" id="suError"></div>
+        <div class="auth-success" id="suSuccess"></div>
+        <div class="auth-field">
+          <label>I am registering as</label>
+          <div style="display:flex;gap:10px;">
+            <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;" id="roleStudentLabel">
+              <input type="radio" name="suRole" value="student" checked onchange="onRoleChange()" style="accent-color:var(--primary)"> 👨‍🎓 Student
+            </label>
+            <label style="flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;border:2px solid var(--border);border-radius:10px;cursor:pointer;" id="roleTrainerLabel">
+              <input type="radio" name="suRole" value="trainer" onchange="onRoleChange()" style="accent-color:var(--accent)"> 🎓 Trainer
+            </label>
+          </div>
+        </div>
+        <div class="auth-field">
+          <label>Full Name *</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">👤</span>
+            <input class="auth-input" id="suName" type="text" placeholder="Your full name">
+          </div>
+        </div>
+        <div class="auth-field">
+          <label>Email *</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">📧</span>
+            <input class="auth-input" id="suEmail" type="email" placeholder="your@email.com">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="auth-field">
+            <label>Mobile *</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">📱</span>
+              <input class="auth-input" id="suMobile" type="tel" placeholder="10 digits">
+            </div>
+          </div>
+          <div class="auth-field" id="studentIdWrap">
+            <label>Student ID *</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">🆔</span>
+              <input class="auth-input" id="suStudentId" type="text" placeholder="e.g. BSQ001">
+            </div>
+          </div>
+        </div>
+        <div class="auth-field hidden" id="trainerCodeField">
+          <label>Trainer Access Code *</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">🔑</span>
+            <input class="auth-input" id="suTrainerCode" type="password" placeholder="Enter trainer access code">
+          </div>
+          <div style="font-size:.75em;color:var(--text-light);margin-top:4px">Get this code from your administrator.</div>
+        </div>
+        <div class="auth-field">
+          <label>Password * <span style="font-size:.8em;color:var(--text-light)">(min 6 characters)</span></label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">🔒</span>
+            <input class="auth-input" id="suPass" type="password" placeholder="Create password">
+            <button class="auth-pw-toggle" onclick="togglePw('suPass',this)" type="button">👁️</button>
+          </div>
+        </div>
+        <div class="auth-field">
+          <label>Confirm Password *</label>
+          <div class="auth-input-wrap">
+            <span class="auth-input-icon">🔒</span>
+            <input class="auth-input" id="suConfirm" type="password" placeholder="Repeat password">
+          </div>
+        </div>
+        <button class="auth-submit-btn" id="suBtn" onclick="doSignUp()">📝 Create Account</button>
+        <div class="auth-footer-link">Already have account? <span onclick="switchAuthTab('si')">Sign In here</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ════════════════════════════════════════════════════ -->
+<div id="mainApp" class="hidden">
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">🧠</div>
+      <div>
+        <div class="brand-name">BALU Smart Quiz</div>
+        <div class="brand-sub"><span class="live-dot"></span>Firebase · Language → Topic → Quiz</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span id="roleBadge"></span>
+      <span id="userBadge"></span>
+      <button class="btn btn-secondary btn-sm" onclick="doLogout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <!-- ══ TRAINER VIEW ══ -->
+  <div id="trainerView" class="hidden">
+    <div class="tab-nav" id="trainerTabNav">
+      <button class="tab-btn active" onclick="trainerTab('dashboard',this)">📊 Dashboard</button>
+      <button class="tab-btn" onclick="trainerTab('languages',this)">🌐 Languages</button>
+      <button class="tab-btn" onclick="trainerTab('topics',this)">📚 Topics</button>
+      <button class="tab-btn" onclick="trainerTab('questions',this)">❓ Questions</button>
+      <button class="tab-btn" onclick="trainerTab('assign',this)">📤 Assign</button>
+      <button class="tab-btn" onclick="trainerTab('results',this)">📈 Results</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-card-icon">🌐</div><div class="stat-card-num" id="dLangs">—</div><div class="stat-card-label">Languages</div></div>
+        <div class="stat-card"><div class="stat-card-icon">📚</div><div class="stat-card-num" id="dTopics">—</div><div class="stat-card-label">Topics</div></div>
+        <div class="stat-card"><div class="stat-card-icon">🎯</div><div class="stat-card-num" id="dQuizzes">—</div><div class="stat-card-label">Quizzes</div></div>
+        <div class="stat-card"><div class="stat-card-icon">👨‍🎓</div><div class="stat-card-num" id="dStudents">—</div><div class="stat-card-label">Students</div></div>
+        <div class="stat-card"><div class="stat-card-icon">📤</div><div class="stat-card-num" id="dAssigned">—</div><div class="stat-card-label">Assigned</div></div>
+        <div class="stat-card"><div class="stat-card-icon">✅</div><div class="stat-card-num" id="dAttempts">—</div><div class="stat-card-label">Attempts</div></div>
+      </div>
+      <div class="card">
+        <div class="section-title">🚀 Quick Setup Guide</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;">
+          <div class="card-sm" style="border-left:4px solid var(--primary);cursor:pointer" onclick="trainerTab('languages',null)"><strong>Step 1 🌐</strong><br><span style="font-size:.84em;color:var(--text-light)">Add languages (C, Java, DBMS…)</span></div>
+          <div class="card-sm" style="border-left:4px solid var(--secondary);cursor:pointer" onclick="trainerTab('topics',null)"><strong>Step 2 📚</strong><br><span style="font-size:.84em;color:var(--text-light)">Add topics per language</span></div>
+          <div class="card-sm" style="border-left:4px solid var(--accent);cursor:pointer" onclick="trainerTab('questions',null)"><strong>Step 3 ❓</strong><br><span style="font-size:.84em;color:var(--text-light)">Upload questions for a quiz</span></div>
+          <div class="card-sm" style="border-left:4px solid var(--success);cursor:pointer" onclick="trainerTab('assign',null)"><strong>Step 4 📤</strong><br><span style="font-size:.84em;color:var(--text-light)">Assign quiz to students</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Languages -->
+    <div class="tab-content" id="tab-languages">
+      <div class="card">
+        <div class="section-title">🌐 Manage Languages</div>
+        <div class="form-row" style="align-items:end;">
+          <div class="form-group" style="margin:0;flex:2">
+            <label>Language Name *</label>
+            <input class="input" id="langName" placeholder="e.g. C Programming, Java, DBMS">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Icon</label>
+            <input class="input" id="langIcon" placeholder="💻" maxlength="4" style="width:70px">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Color</label>
+            <input class="input" id="langColor" type="color" value="#7e22ce" style="width:56px;padding:4px;height:42px">
+          </div>
+          <button class="btn btn-primary" onclick="addLanguage()">➕ Add</button>
+        </div>
+      </div>
+      <div id="langList"><div class="loading"><div class="spinner"></div>Loading…</div></div>
+    </div>
+
+    <!-- Topics -->
+    <div class="tab-content" id="tab-topics">
+      <div class="card">
+        <div class="section-title">📚 Manage Topics</div>
+        <div class="form-row" style="align-items:end;">
+          <div class="form-group" style="margin:0">
+            <label>Language *</label>
+            <select class="input" id="topicLangSel" onchange="loadTopicsList()"><option value="">— Select —</option></select>
+          </div>
+          <div class="form-group" style="margin:0;flex:2">
+            <label>Topic Name *</label>
+            <input class="input" id="topicName" placeholder="e.g. Pointers, OOP, SQL Queries, Normalization…">
+          </div>
+          <button class="btn btn-primary" onclick="addTopic()">➕ Add</button>
+        </div>
+      </div>
+      <div id="topicList"><div class="empty-state"><div class="empty-icon">📚</div>Select a language to see topics</div></div>
+    </div>
+
+    <!-- Questions -->
+    <div class="tab-content" id="tab-questions">
+      <div class="card">
+        <div class="section-title">❓ Upload Questions</div>
+        <div class="steps">
+          <div class="step active" id="qstep1">1️⃣ Language</div>
+          <div class="step" id="qstep2">2️⃣ Topic</div>
+          <div class="step" id="qstep3">3️⃣ Difficulty</div>
+          <div class="step" id="qstep4">4️⃣ Upload</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>1. Language *</label>
+            <select class="input" id="qLangSel" onchange="onQLangChange()"><option value="">— Select —</option></select>
+          </div>
+          <div class="form-group">
+            <label>2. Topic *</label>
+            <select class="input" id="qTopicSel" onchange="onQTopicChange()" disabled><option value="">— Select Language —</option></select>
+          </div>
+          <div class="form-group">
+            <label>3. Difficulty *</label>
+            <select class="input" id="qDiffSel" onchange="onQDiffChange()" disabled>
+              <option value="">— Select Topic —</option>
+              <option value="Easy">🟢 Easy</option>
+              <option value="Medium">🟡 Medium</option>
+              <option value="Hard">🔴 Hard</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>⏱ Time (minutes)</label>
+            <input class="input" id="qTimeSel" type="number" value="30" min="5" max="180" disabled>
+          </div>
+        </div>
+        <div id="qzStatusBox"></div>
+        <div id="qUploadArea" class="hidden">
+          <hr style="border:none;border-top:2px solid var(--border);margin:16px 0">
+          <div class="section-title" style="font-size:1em">4️⃣ Paste or Upload Questions</div>
+          <div class="info-box" style="font-size:.82em">
+            <strong>Format:</strong><br>
+            <code style="font-family:'JetBrains Mono',monospace">Q1. Question text here<br>&nbsp;&nbsp;&nbsp;&nbsp;code line if needed<br>A) Option 1<br>B) Option 2<br>C) Option 3<br>D) Option 4<br>Correct: A</code>
+          </div>
+          <textarea class="input" id="qPasteArea" placeholder="Paste questions here…" rows="10"></textarea>
+          <div style="display:flex;gap:12px;align-items:center;margin:12px 0;flex-wrap:wrap;">
+            <label class="btn btn-secondary" style="cursor:pointer">📁 Upload TXT/Excel<input type="file" id="qFileInput" accept=".txt,.xlsx,.xls" style="display:none" onchange="handleQFile(this)"></label>
+            <button class="btn btn-primary" onclick="parseAndUpload()">⬆️ Parse &amp; Upload</button>
+            <span id="parseStatus" style="font-size:.84em;color:var(--text-light)"></span>
+          </div>
+        </div>
+      </div>
+      <div id="qBankSection" class="hidden">
+        <div class="card">
+          <div id="qBankTitle" class="section-title"></div>
+          <div id="qBankList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assign -->
+    <div class="tab-content" id="tab-assign">
+      <div class="card">
+        <div class="section-title">📤 Assign Quiz to Students</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Language *</label>
+            <select class="input" id="aLangSel" onchange="loadAsnTopics()"><option value="">— Select —</option></select>
+          </div>
+          <div class="form-group">
+            <label>Topic *</label>
+            <select class="input" id="aTopicSel" onchange="loadAsnQuizzes()"><option value="">— Select Language —</option></select>
+          </div>
+          <div class="form-group">
+            <label>Quiz (Difficulty) *</label>
+            <select class="input" id="aQuizSel"><option value="">— Select Topic —</option></select>
+          </div>
+          <div class="form-group">
+            <label>Due Date</label>
+            <input class="input" id="aDueSel" type="date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Select Students *</label>
+          <div style="display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+            <button class="btn btn-sm btn-secondary" onclick="selectAll(true)">☑️ All</button>
+            <button class="btn btn-sm btn-secondary" onclick="selectAll(false)">⬜ Clear</button>
+            <span id="selCount" style="font-size:.84em;color:var(--text-light);align-self:center"></span>
+          </div>
+          <div class="student-list" id="studentListEl"><div class="loading" style="padding:20px"><div class="spinner"></div></div></div>
+        </div>
+        <button class="btn btn-primary" onclick="doAssign()">📤 Assign Quiz</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="tab-content" id="tab-results">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+          <div class="section-title" style="margin:0">📈 Student Results <span class="live-dot" style="margin-left:6px"></span><span style="font-size:.7em;color:var(--success);font-weight:600">Live</span></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <select class="input" id="resLangFilter" onchange="loadResTopics()" style="width:auto;padding:8px 12px;font-size:.85em"><option value="">All Languages</option></select>
+            <select class="input" id="resTopicFilter" onchange="loadResQuizFilter()" style="width:auto;padding:8px 12px;font-size:.85em"><option value="">All Topics</option></select>
+            <select class="input" id="resQuizFilter" style="width:auto;padding:8px 12px;font-size:.85em"><option value="">All Quizzes</option></select>
+            <button class="btn btn-primary btn-sm" onclick="loadResults()">🔍 Load</button>
+          </div>
+        </div>
+        <div id="resultsTableWrap"><div class="empty-state"><div class="empty-icon">📈</div>Select filters and click Load</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STUDENT VIEW ══ -->
+  <div id="studentView" class="hidden">
+    <div id="myQuizzesScreen">
+      <div class="tab-nav" style="margin-bottom:16px;">
+        <button class="tab-btn active" id="stuTab1" onclick="stuTab('quizzes',this)">📋 My Quizzes</button>
+        <button class="tab-btn" id="stuTab2" onclick="stuTab('history',this)">📊 My History</button>
+      </div>
+      <div id="stuTabQuizzes">
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div class="section-title" style="margin:0">📋 My Assigned Quizzes</div>
+            <button class="btn btn-secondary btn-sm" onclick="loadMyQuizzes()">🔄 Refresh</button>
+          </div>
+        </div>
+        <div id="quizCardsGrid" class="quiz-grid"><div class="loading"><div class="spinner"></div>Loading…</div></div>
+      </div>
+      <div id="stuTabHistory" class="hidden">
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div class="section-title" style="margin:0">📊 My Attempt History</div>
+            <button class="btn btn-secondary btn-sm" onclick="loadAttemptHistory()">🔄 Refresh</button>
+          </div>
+        </div>
+        <div id="attemptHistoryGrid" class="quiz-grid"><div class="loading"><div class="spinner"></div>Loading…</div></div>
+      </div>
+    </div>
+    <div id="quizTakingScreen" class="hidden">
+      <div class="timer-bar">
+        <div>
+          <div style="font-size:.74em;font-weight:600;color:var(--text-light);margin-bottom:2px" id="quizScreenTitle"></div>
+          <div class="timer-display" id="timerDisplay">00:00</div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label">
+            <span>📊 Progress</span>
+            <span><strong id="answeredCount" style="color:var(--accent)">0</strong> / <strong id="totalCount">0</strong></span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="confirmSubmit()">✅ Submit Quiz</button>
+      </div>
+      <div class="palette" id="paletteBox">
+        <div class="palette-title">
+          <span>📍 Question Navigator</span>
+          <span style="display:flex;gap:12px;font-size:.9em;">
+            <span><span class="pal-dot" style="background:var(--success)"></span> <span id="palAnswered">0</span> done</span>
+            <span><span class="pal-dot" style="background:var(--border)"></span> <span id="palRemaining">0</span> left</span>
+          </span>
+        </div>
+        <div class="palette-grid" id="paletteGrid"></div>
+      </div>
+      <div id="questionsContainer"></div>
+      <div style="display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-top:8px;">
+        <button class="btn btn-secondary" id="prevBtn" onclick="navQ(-1)" disabled>← Prev</button>
+        <span id="qPosition" style="font-size:.85em;color:var(--text-light);font-weight:600"></span>
+        <button class="btn btn-primary" id="nextBtn" onclick="navQ(1)">Next →</button>
+      </div>
+    </div>
+    <div id="quizResultScreen" class="hidden">
+      <div class="card result-screen">
+        <div id="scoreCircleWrap"></div>
+        <div id="resultMsg" class="result-msg"></div>
+        <div id="resultSub" style="color:var(--text-light);font-size:.9em;margin-bottom:16px;"></div>
+        <div class="result-stats" id="resultStats"></div>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px;">
+          <button class="btn btn-secondary" onclick="toggleReview()">📖 Review Answers</button>
+          <button class="btn btn-primary" onclick="backToQuizzes()">← Back to My Quizzes</button>
+        </div>
+        <div class="hidden" id="reviewSection">
+          <hr style="border:none;border-top:2px solid var(--border);margin:24px 0">
+          <div class="section-title">📖 Answer Review</div>
+          <div id="reviewList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div id="toast"><span id="toastMsg"></span></div>
+
+<!-- ═══ FIREBASE CONFIG & APP SCRIPT ════════════════════════════════ -->
+<script>
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  STEP 1 — Replace with your Firebase project config         ║
+// ║  Firebase Console → Project Settings → Your Apps → Config   ║
+// ╚══════════════════════════════════════════════════════════════╝
+// Import the functions you need from the SDKs you need
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAYBEaXnlkAigTRO13Li-HGHVBOv0MTflc",
+  authDomain: "balu-smart-quiz.firebaseapp.com",
+  projectId: "balu-smart-quiz",
+  storageBucket: "balu-smart-quiz.firebasestorage.app",
+  messagingSenderId: "695902467126",
+  appId: "1:695902467126:web:827e86036621462ce05497",
+  measurementId: "G-D860KZ1R0H"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  STEP 2 — Change this to your secret trainer access code    ║
+// ╚══════════════════════════════════════════════════════════════╝
+const TRAINER_CODE = 'BALU@TRAINER2025';
+
+// ── FIREBASE INIT ──────────────────────────────────────────────
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ── STATE ──────────────────────────────────────────────────────
+let currentUser     = null;
+let currentUserRole = null;
+let cachedLanguages = [];
+let cachedStudents  = [];
+let currentQuizId   = null;
+let quizQuestions   = [];
+let currentQIndex   = 0;
+let timerInterval   = null;
+let timeLeft        = 0;
+let quizStartedAt   = null;
+let lastResult      = null;
+let resultsListener = null; // Firestore real-time listener
+
+// ════════════════════════════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════════════════════════════
+auth.onAuthStateChanged(async fbUser => {
+  if (fbUser) {
+    try {
+      const snap = await db.collection('users').doc(fbUser.uid).get();
+      if (snap.exists) {
+        currentUser = { uid: fbUser.uid, email: fbUser.email, ...snap.data() };
+        currentUserRole = currentUser.role || 'student';
+        showMainApp();
+      } else {
+        await auth.signOut();
+      }
+    } catch(e) {
+      console.error('Auth state error:', e);
+    }
+  } else {
+    currentUser = null;
+    currentUserRole = null;
+  }
+});
+
+function switchAuthTab(tab) {
+  ['si','su'].forEach(t => {
+    document.getElementById(t+'Form').classList.toggle('active', t===tab);
+    document.getElementById(t+'Tab').classList.toggle('active', t===tab);
+  });
+  ['siError','siSuccess','suError','suSuccess'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.style.display='none'; el.textContent=''; }
+  });
+}
+
+function authMsg(id, msg, isErr) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = msg;
+  el.className = isErr ? 'auth-error' : 'auth-success';
+  el.style.display = 'block';
+}
+
+function togglePw(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type==='password' ? 'text' : 'password';
+  btn.textContent = inp.type==='password' ? '👁️' : '🔒';
+}
+
+function onRoleChange() {
+  const role = document.querySelector('input[name="suRole"]:checked')?.value||'student';
+  document.getElementById('trainerCodeField').classList.toggle('hidden', role!=='trainer');
+  document.getElementById('studentIdWrap').classList.toggle('hidden', role==='trainer');
+  document.getElementById('roleTrainerLabel').style.borderColor = role==='trainer'?'var(--accent)':'var(--border)';
+  document.getElementById('roleStudentLabel').style.borderColor = role==='student'?'var(--primary)':'var(--border)';
+}
+
+async function doSignIn() {
+  const email = (document.getElementById('siEmail').value||'').trim();
+  const pass  = document.getElementById('siPass').value||'';
+  if (!email||!pass) { authMsg('siError','⚠️ Fill all fields.',true); return; }
+  const btn = document.getElementById('siBtn');
+  btn.textContent='🔐 Signing in…'; btn.disabled=true;
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    authMsg('siSuccess','✅ Signed in!');
+  } catch(e) {
+    authMsg('siError','❌ '+(e.code==='auth/user-not-found'?'Email not found.':e.code==='auth/wrong-password'?'Wrong password.':'Sign in failed.'),true);
+    btn.textContent='🔑 Sign In'; btn.disabled=false;
+  }
+}
+
+async function doSignUp() {
+  const role    = document.querySelector('input[name="suRole"]:checked')?.value||'student';
+  const name    = (document.getElementById('suName').value||'').trim();
+  const email   = (document.getElementById('suEmail').value||'').trim();
+  const mobile  = (document.getElementById('suMobile').value||'').trim();
+  const sid     = role==='student' ? (document.getElementById('suStudentId').value||'').trim() : '';
+  const pass    = document.getElementById('suPass').value||'';
+  const confirm = document.getElementById('suConfirm').value||'';
+  if (!name||!email||!mobile||!pass||!confirm) { authMsg('suError','⚠️ All fields required.',true); return; }
+  if (role==='student'&&!sid) { authMsg('suError','⚠️ Enter your Student ID.',true); return; }
+  if (!/^\d{10}$/.test(mobile)) { authMsg('suError','⚠️ Mobile must be 10 digits.',true); return; }
+  if (pass.length<6) { authMsg('suError','⚠️ Password minimum 6 characters.',true); return; }
+  if (pass!==confirm) { authMsg('suError','⚠️ Passwords do not match.',true); return; }
+  if (role==='trainer') {
+    const code = (document.getElementById('suTrainerCode').value||'').trim();
+    if (!code) { authMsg('suError','⚠️ Enter the trainer access code.',true); return; }
+    if (code!==TRAINER_CODE) { authMsg('suError','❌ Invalid trainer access code.',true); return; }
+  }
+  const btn = document.getElementById('suBtn');
+  btn.textContent='📝 Creating…'; btn.disabled=true;
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    await db.collection('users').doc(cred.user.uid).set({
+      name, email: email.toLowerCase(), mobile, studentId: sid,
+      role, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    authMsg('suSuccess','✅ Account created! Signing you in…');
+  } catch(e) {
+    authMsg('suError','❌ '+(e.code==='auth/email-already-in-use'?'Email already registered.':'Sign up failed: '+e.message),true);
+    btn.textContent='📝 Create Account'; btn.disabled=false;
+  }
+}
+
+async function doLogout() {
+  if (!confirm('Logout?')) return;
+  if (resultsListener) { resultsListener(); resultsListener=null; }
+  await auth.signOut();
+  location.reload();
+}
+
+function showMainApp() {
+  document.getElementById('authOverlay').style.display = 'none';
+  document.getElementById('mainApp').classList.remove('hidden');
+  // User badge
+  const ub = document.getElementById('userBadge');
+  ub.style.display = 'flex';
+  ub.textContent = '👤 ' + (currentUser.name||currentUser.email);
+  // Role badge
+  const rb = document.getElementById('roleBadge');
+  rb.style.display = 'inline-flex';
+  if (currentUserRole==='trainer') {
+    rb.textContent='🎓 Trainer'; rb.className='role-trainer';
+    document.getElementById('trainerView').classList.remove('hidden');
+    loadDashboard();
+    populateAllLangDropdowns();
+  } else {
+    rb.textContent='👨‍🎓 Student'; rb.className='role-student';
+    document.getElementById('studentView').classList.remove('hidden');
+    loadMyQuizzes();
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  TRAINER — NAVIGATION
+// ════════════════════════════════════════════════════════════════
+function trainerTab(name, btn) {
+  document.querySelectorAll('#trainerTabNav .tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#trainerView .tab-content').forEach(c=>c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    const btns = document.querySelectorAll('#trainerTabNav .tab-btn');
+    const names = ['dashboard','languages','topics','questions','assign','results'];
+    const idx = names.indexOf(name);
+    if (idx>=0) btns[idx]?.classList.add('active');
+  }
+  document.getElementById('tab-'+name).classList.add('active');
+  if (name==='dashboard')  loadDashboard();
+  if (name==='languages')  loadLanguages();
+  if (name==='topics')     populateLangDropdown('topicLangSel');
+  if (name==='questions')  populateLangDropdown('qLangSel');
+  if (name==='assign')     { populateLangDropdown('aLangSel'); loadStudentsList(); }
+  if (name==='results')    { populateLangDropdown('resLangFilter'); }
+}
+
+// ════════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════════════════════
+async function loadDashboard() {
+  const [langs, topics, quizzes, students, assignments, attempts] = await Promise.all([
+    db.collection('languages').get(),
+    db.collection('topics').get(),
+    db.collection('quizzes').get(),
+    db.collection('users').where('role','==','student').get(),
+    db.collection('assignments').get(),
+    db.collection('attempts').get()
+  ]);
+  document.getElementById('dLangs').textContent    = langs.size;
+  document.getElementById('dTopics').textContent   = topics.size;
+  document.getElementById('dQuizzes').textContent  = quizzes.size;
+  document.getElementById('dStudents').textContent = students.size;
+  document.getElementById('dAssigned').textContent = assignments.size;
+  document.getElementById('dAttempts').textContent = attempts.size;
+  cachedLanguages = langs.docs.map(d=>({langId:d.id,...d.data()}));
+}
+
+// ════════════════════════════════════════════════════════════════
+//  LANGUAGES
+// ════════════════════════════════════════════════════════════════
+async function loadLanguages() {
+  const snap = await db.collection('languages').orderBy('name').get();
+  cachedLanguages = snap.docs.map(d=>({langId:d.id,...d.data()}));
+  const el = document.getElementById('langList');
+  if (!cachedLanguages.length) {
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">🌐</div>No languages yet. Add one above.</div>'; return;
+  }
+  el.innerHTML='<div class="list-grid">'+cachedLanguages.map(l=>`
+    <div class="list-item">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0">
+        <span class="list-item-icon">${l.icon||'💻'}</span>
+        <div><div class="list-item-name">${escHtml(l.name)}</div><div class="list-item-sub" style="color:${l.color||'var(--primary)'}">${l.langId}</div></div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteLang('${l.langId}','${escHtml(l.name)}')">🗑️</button>
+    </div>`).join('')+'</div>';
+}
+
+async function addLanguage() {
+  const name  = document.getElementById('langName').value.trim();
+  const icon  = document.getElementById('langIcon').value.trim()||'💻';
+  const color = document.getElementById('langColor').value;
+  if (!name) { toast('Enter language name','warning'); return; }
+  await db.collection('languages').add({name, icon, color, createdAt: firebase.firestore.FieldValue.serverTimestamp()});
+  toast('✅ Language added');
+  document.getElementById('langName').value='';
+  loadLanguages(); populateAllLangDropdowns();
+}
+
+async function deleteLang(id, name) {
+  if (!confirm(`Delete "${name}"?`)) return;
+  await db.collection('languages').doc(id).delete();
+  toast('🗑️ Deleted'); loadLanguages(); populateAllLangDropdowns();
+}
+
+async function populateAllLangDropdowns() {
+  const snap = await db.collection('languages').orderBy('name').get();
+  cachedLanguages = snap.docs.map(d=>({langId:d.id,...d.data()}));
+  ['topicLangSel','qLangSel','aLangSel','resLangFilter'].forEach(id=>populateLangDropdown(id));
+}
+
+function populateLangDropdown(selectId) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+  const cur = sel.value;
+  const isFilter = selectId.includes('Filter');
+  sel.innerHTML = `<option value="">${isFilter?'All Languages':'— Select Language —'}</option>`
+    + cachedLanguages.map(l=>`<option value="${l.langId}" data-name="${escHtml(l.name)}" data-icon="${l.icon||'💻'}" data-color="${l.color||'#7e22ce'}">${l.icon||'💻'} ${escHtml(l.name)}</option>`).join('');
+  if (cur) sel.value = cur;
+}
+
+// ════════════════════════════════════════════════════════════════
+//  TOPICS
+// ════════════════════════════════════════════════════════════════
+async function loadTopicsList() {
+  const langId = document.getElementById('topicLangSel').value;
+  const el = document.getElementById('topicList');
+  if (!langId) { el.innerHTML='<div class="empty-state"><div class="empty-icon">📚</div>Select a language</div>'; return; }
+  const snap = await db.collection('topics').where('langId','==',langId).orderBy('name').get();
+  const topics = snap.docs.map(d=>({topicId:d.id,...d.data()}));
+  const langName = document.getElementById('topicLangSel').selectedOptions[0]?.dataset.name||'';
+  if (!topics.length) {
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📚</div>No topics for ${escHtml(langName)} yet.</div>`; return;
+  }
+  el.innerHTML='<div class="list-grid">'+topics.map(t=>`
+    <div class="list-item">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="list-item-icon">📖</span>
+        <div><div class="list-item-name">${escHtml(t.name)}</div><div class="list-item-sub">${escHtml(langName)}</div></div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteTopic('${t.topicId}','${escHtml(t.name)}')">🗑️</button>
+    </div>`).join('')+'</div>';
+}
+
+async function addTopic() {
+  const langId = document.getElementById('topicLangSel').value;
+  const name   = document.getElementById('topicName').value.trim();
+  if (!langId) { toast('Select a language first','warning'); return; }
+  if (!name)   { toast('Enter topic name','warning'); return; }
+  await db.collection('topics').add({langId, name, createdAt: firebase.firestore.FieldValue.serverTimestamp()});
+  toast('✅ Topic added');
+  document.getElementById('topicName').value='';
+  loadTopicsList();
+}
+
+async function deleteTopic(id, name) {
+  if (!confirm(`Delete topic "${name}"?`)) return;
+  await db.collection('topics').doc(id).delete();
+  toast('🗑️ Topic deleted'); loadTopicsList();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  QUESTIONS UPLOAD
+// ════════════════════════════════════════════════════════════════
+async function onQLangChange() {
+  const langId = document.getElementById('qLangSel').value;
+  const tSel   = document.getElementById('qTopicSel');
+  tSel.innerHTML='<option value="">— Select Topic —</option>';
+  tSel.disabled = !langId;
+  document.getElementById('qDiffSel').disabled=true;
+  document.getElementById('qTimeSel').disabled=true;
+  document.getElementById('qUploadArea').classList.add('hidden');
+  document.getElementById('qBankSection').classList.add('hidden');
+  setQStep(langId?2:1);
+  if (!langId) return;
+  const snap = await db.collection('topics').where('langId','==',langId).orderBy('name').get();
+  snap.docs.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent='📖 '+d.data().name; tSel.appendChild(o); });
+}
+
+function onQTopicChange() {
+  const ok = !!document.getElementById('qTopicSel').value;
+  document.getElementById('qDiffSel').disabled=!ok;
+  document.getElementById('qUploadArea').classList.add('hidden');
+  document.getElementById('qBankSection').classList.add('hidden');
+  setQStep(ok?3:2);
+  if(ok) document.getElementById('qDiffSel').value='';
+}
+
+async function onQDiffChange() {
+  const langId  = document.getElementById('qLangSel').value;
+  const topicId = document.getElementById('qTopicSel').value;
+  const diff    = document.getElementById('qDiffSel').value;
+  if (!diff) return;
+  document.getElementById('qTimeSel').disabled=false;
+  setQStep(4);
+  document.getElementById('qUploadArea').classList.remove('hidden');
+  // Check existing quiz
+  const snap = await db.collection('quizzes')
+    .where('langId','==',langId).where('topicId','==',topicId).where('difficulty','==',diff).get();
+  const statusEl = document.getElementById('qzStatusBox');
+  if (!snap.empty) {
+    currentQuizId = snap.docs[0].id;
+    document.getElementById('qTimeSel').value = snap.docs[0].data().timeMinutes||30;
+    const qCount = (await db.collection('questions').where('quizId','==',currentQuizId).get()).size;
+    statusEl.innerHTML=`<div class="success-box" style="margin:0 0 14px">✅ Quiz exists — <strong>${qCount}</strong> questions. Uploading will add more.</div>`;
+    loadQBank(currentQuizId);
+  } else {
+    currentQuizId = null;
+    statusEl.innerHTML=`<div class="info-box" style="margin:0 0 14px">ℹ️ No quiz yet for this combination. Will be created on upload.</div>`;
+    document.getElementById('qBankSection').classList.add('hidden');
+  }
+}
+
+function setQStep(n) {
+  for(let i=1;i<=4;i++){
+    const el=document.getElementById('qstep'+i);
+    if(!el) continue;
+    el.className='step'+(i<n?' done':i===n?' active':'');
+  }
+}
+
+async function loadQBank(quizId) {
+  const snap = await db.collection('questions').where('quizId','==',quizId).get();
+  const qs   = snap.docs.map(d=>({qId:d.id,...d.data()}));
+  const el   = document.getElementById('qBankSection');
+  document.getElementById('qBankTitle').textContent = `📋 Current Questions (${qs.length})`;
+  const listEl = document.getElementById('qBankList');
+  if (!qs.length) { listEl.innerHTML='<div class="empty-state" style="padding:20px"><div class="empty-icon">❓</div>No questions yet</div>'; }
+  else {
+    listEl.innerHTML = qs.map((q,i)=>`
+      <div style="background:#f8f9fa;border-radius:10px;padding:14px;margin-bottom:10px;border:1.5px solid var(--border-light)">
+        <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:8px">
+          <span class="badge badge-primary">Q${i+1}</span>
+          <button class="btn btn-danger btn-sm" onclick="deleteQ('${q.qId}')">🗑️</button>
+        </div>
+        <pre style="font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.82em;white-space:pre;overflow-x:auto;tab-size:4;margin-bottom:10px">${escHtml(decodeIndent(q.question||''))}</pre>
+        <div style="font-size:.84em;display:flex;flex-direction:column;gap:4px;">
+          ${['A','B','C','D'].map(l=>`<div style="padding:5px 10px;border-radius:6px;${q.correct===l?'background:rgba(16,185,129,.1);color:#065f46;font-weight:700':'background:#f1f5f9'}">${l}) ${escHtml(decodeIndent(q['option'+l]||''))}</div>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+  el.classList.remove('hidden');
+}
+
+async function deleteQ(qId) {
+  if (!confirm('Delete this question?')) return;
+  await db.collection('questions').doc(qId).delete();
+  toast('🗑️ Question deleted');
+  loadQBank(currentQuizId);
+  onQDiffChange();
+}
+
+async function parseAndUpload() {
+  const langId  = document.getElementById('qLangSel').value;
+  const topicId = document.getElementById('qTopicSel').value;
+  const diff    = document.getElementById('qDiffSel').value;
+  const minutes = parseInt(document.getElementById('qTimeSel').value)||30;
+  const text    = document.getElementById('qPasteArea').value.trim();
+  if (!langId||!topicId||!diff) { toast('Select language, topic and difficulty first','warning'); return; }
+  if (!text) { toast('Paste or upload questions first','warning'); return; }
+  const parsed = parseQuestions(text);
+  if (!parsed.length) { toast('❌ No valid questions found. Check format.','error'); return; }
+  document.getElementById('parseStatus').textContent = `Parsed ${parsed.length} questions, uploading…`;
+  // Get or create quiz
+  let quizId = currentQuizId;
+  if (!quizId) {
+    const langOpt  = document.getElementById('qLangSel').selectedOptions[0];
+    const topicOpt = document.getElementById('qTopicSel').selectedOptions[0];
+    const title    = `${langOpt?.dataset.name||''} - ${topicOpt?.textContent.replace('📖 ','').trim()||''} (${diff})`;
+    const ref = await db.collection('quizzes').add({
+      langId, topicId, difficulty:diff, timeMinutes:minutes, title,
+      isActive:true, createdBy:currentUser.email||'',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    quizId = ref.id;
+    currentQuizId = quizId;
+  }
+  // Batch upload questions
+  const batch = db.batch();
+  parsed.forEach(q=>{
+    const ref = db.collection('questions').doc();
+    batch.set(ref, {
+      quizId,
+      question: encodeIndent(q.question),
+      optionA:  encodeIndent(q.optionA),
+      optionB:  encodeIndent(q.optionB),
+      optionC:  encodeIndent(q.optionC),
+      optionD:  encodeIndent(q.optionD),
+      correct:  q.correct
+    });
+  });
+  await batch.commit();
+  toast(`✅ ${parsed.length} questions uploaded!`);
+  document.getElementById('qPasteArea').value='';
+  document.getElementById('parseStatus').textContent='';
+  loadQBank(quizId);
+  onQDiffChange();
+}
+
+function handleQFile(input) {
+  const file=input.files[0]; if(!file) return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='txt') {
+    const r=new FileReader(); r.onload=e=>{document.getElementById('qPasteArea').value=e.target.result;toast('📄 File loaded');}; r.readAsText(file);
+  } else {
+    const r=new FileReader(); r.onload=e=>{
+      try{const wb=XLSX.read(e.target.result,{type:'binary'});document.getElementById('qPasteArea').value=XLSX.utils.sheet_to_txt(wb.Sheets[wb.SheetNames[0]]);toast('📊 Excel loaded');}catch(e){toast('❌ Could not read Excel','error');}
+    }; r.readAsBinaryString(file);
+  }
+  input.value='';
+}
+
+// ════════════════════════════════════════════════════════════════
+//  ASSIGN
+// ════════════════════════════════════════════════════════════════
+async function loadAsnTopics() {
+  const langId = document.getElementById('aLangSel').value;
+  const tSel   = document.getElementById('aTopicSel');
+  tSel.innerHTML='<option value="">— Select Topic —</option>';
+  document.getElementById('aQuizSel').innerHTML='<option value="">— Select Topic first —</option>';
+  if (!langId) return;
+  const snap=await db.collection('topics').where('langId','==',langId).orderBy('name').get();
+  snap.docs.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent='📖 '+d.data().name; tSel.appendChild(o); });
+}
+
+async function loadAsnQuizzes() {
+  const topicId=document.getElementById('aTopicSel').value;
+  const langId =document.getElementById('aLangSel').value;
+  const qSel   =document.getElementById('aQuizSel');
+  qSel.innerHTML='<option value="">— Select Quiz —</option>';
+  if (!topicId) return;
+  const [qSnap,qsSnap]=await Promise.all([
+    db.collection('quizzes').where('topicId','==',topicId).where('langId','==',langId).get(),
+    db.collection('questions').get()
+  ]);
+  const qCounts={};
+  qsSnap.docs.forEach(d=>{ const qid=d.data().quizId; qCounts[qid]=(qCounts[qid]||0)+1; });
+  qSnap.docs.forEach(d=>{
+    const q=d.data(); const o=document.createElement('option'); o.value=d.id;
+    o.textContent=`${diffIcon(q.difficulty)} ${q.difficulty} — ${qCounts[d.id]||0} questions — ⏱ ${q.timeMinutes||30}min`;
+    qSel.appendChild(o);
+  });
+}
+
+async function loadStudentsList() {
+  const snap=await db.collection('users').where('role','==','student').orderBy('name').get();
+  cachedStudents=snap.docs.map(d=>({uid:d.id,...d.data()}));
+  const el=document.getElementById('studentListEl');
+  if (!cachedStudents.length){ el.innerHTML='<div class="empty-state" style="padding:20px"><div class="empty-icon">👨‍🎓</div>No students registered yet</div>'; return; }
+  el.innerHTML=cachedStudents.map(s=>`
+    <label class="student-check" onclick="updateSelCount()">
+      <input type="checkbox" value="${s.uid}">
+      <div>
+        <div style="font-weight:600;font-size:.88em">${escHtml(s.name)}</div>
+        <div style="font-size:.75em;color:var(--text-light)">${s.studentId||s.email}</div>
+      </div>
+    </label>`).join('');
+  updateSelCount();
+}
+
+function selectAll(v) {
+  document.querySelectorAll('#studentListEl input[type=checkbox]').forEach(c=>{
+    c.checked=v; c.closest('.student-check').classList.toggle('selected',v);
+  });
+  updateSelCount();
+}
+
+function updateSelCount() {
+  const n=document.querySelectorAll('#studentListEl input:checked').length;
+  document.getElementById('selCount').textContent=n?`${n} selected`:'';
+  document.querySelectorAll('#studentListEl input').forEach(c=>c.closest('.student-check').classList.toggle('selected',c.checked));
+}
+
+async function doAssign() {
+  const quizId  = document.getElementById('aQuizSel').value;
+  const dueDate = document.getElementById('aDueSel').value;
+  const sIds    = [...document.querySelectorAll('#studentListEl input:checked')].map(c=>c.value);
+  if (!quizId)    { toast('Select a quiz first','warning'); return; }
+  if (!sIds.length){ toast('Select at least one student','warning'); return; }
+  // Check existing assignments to avoid duplicates
+  const existing=await db.collection('assignments').where('quizId','==',quizId).get();
+  const assignedIds=new Set(existing.docs.map(d=>d.data().studentId));
+  const batch=db.batch();
+  let count=0;
+  sIds.forEach(sid=>{
+    if (assignedIds.has(sid)) return;
+    const ref=db.collection('assignments').doc();
+    batch.set(ref,{ quizId, studentId:sid, assignedBy:currentUser.email||'', dueDate,
+      status:'pending', assignedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    count++;
+  });
+  if (!count) { toast('⚠️ All selected students already assigned','warning'); return; }
+  await batch.commit();
+  toast(`✅ Quiz assigned to ${count} student(s)`);
+  selectAll(false);
+}
+
+// ════════════════════════════════════════════════════════════════
+//  RESULTS (Live with Firestore listener)
+// ════════════════════════════════════════════════════════════════
+async function loadResTopics() {
+  const langId=document.getElementById('resLangFilter').value;
+  const tSel=document.getElementById('resTopicFilter');
+  tSel.innerHTML='<option value="">All Topics</option>';
+  document.getElementById('resQuizFilter').innerHTML='<option value="">All Quizzes</option>';
+  if (!langId) return;
+  const snap=await db.collection('topics').where('langId','==',langId).orderBy('name').get();
+  snap.docs.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent=d.data().name; tSel.appendChild(o); });
+}
+
+async function loadResQuizFilter() {
+  const topicId=document.getElementById('resTopicFilter').value;
+  const langId =document.getElementById('resLangFilter').value;
+  const qSel   =document.getElementById('resQuizFilter');
+  qSel.innerHTML='<option value="">All Quizzes</option>';
+  if (!topicId&&!langId) return;
+  let q=db.collection('quizzes');
+  if (topicId) q=q.where('topicId','==',topicId);
+  else if (langId) q=q.where('langId','==',langId);
+  const snap=await q.get();
+  snap.docs.forEach(d=>{ const o=document.createElement('option'); o.value=d.id;
+    const data=d.data(); o.textContent=`${data.difficulty||'?'} — ${document.getElementById('resTopicFilter').selectedOptions[0]?.textContent||''}`;
+    qSel.appendChild(o); });
+}
+
+async function loadResults() {
+  const quizId=document.getElementById('resQuizFilter').value;
+  const wrap=document.getElementById('resultsTableWrap');
+  wrap.innerHTML='<div class="loading"><div class="spinner"></div>Loading results…</div>';
+  // Cancel previous listener
+  if (resultsListener) { resultsListener(); resultsListener=null; }
+  let query=db.collection('attempts').orderBy('completedAt','desc');
+  if (quizId) query=db.collection('attempts').where('quizId','==',quizId).orderBy('completedAt','desc');
+  // Real-time listener
+  resultsListener = query.onSnapshot(async snap=>{
+    const attempts=snap.docs.map(d=>({attId:d.id,...d.data()}));
+    if (!attempts.length){ wrap.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>No results yet.</div>'; return; }
+    // Enrich
+    const [usersSnap,quizzesSnap,topicsSnap,langsSnap]=await Promise.all([
+      db.collection('users').get(),
+      db.collection('quizzes').get(),
+      db.collection('topics').get(),
+      db.collection('languages').get()
+    ]);
+    const users={},quizzes={},topics={},langs={};
+    usersSnap.docs.forEach(d=>users[d.id]={...d.data()});
+    quizzesSnap.docs.forEach(d=>quizzes[d.id]={...d.data()});
+    topicsSnap.docs.forEach(d=>topics[d.id]={...d.data()});
+    langsSnap.docs.forEach(d=>langs[d.id]={...d.data()});
+    wrap.innerHTML=`
+      <div style="overflow-x:auto">
+        <table class="results-table">
+          <thead><tr><th>#</th><th>Student</th><th>Language / Topic</th><th>Difficulty</th><th>Score</th><th>Percentage</th><th>Date</th></tr></thead>
+          <tbody>${attempts.map((a,i)=>{
+            const u=users[a.studentId]||{};
+            const q=quizzes[a.quizId]||{};
+            const t=topics[q.topicId]||{};
+            const l=langs[q.langId]||{};
+            const pct=Number(a.percentage)||0;
+            const pass=pct>=60;
+            return `<tr>
+              <td style="color:var(--text-light)">${i+1}</td>
+              <td><strong>${escHtml(u.name||'')}</strong><br><span style="font-size:.77em;color:var(--text-light)">${escHtml(u.studentId||u.email||'')}</span></td>
+              <td><strong>${escHtml(l.name||'')}</strong><br><span style="font-size:.77em;color:var(--text-light)">${escHtml(t.name||'')}</span></td>
+              <td><span class="badge badge-${(q.difficulty||'easy').toLowerCase()}">${diffIcon(q.difficulty)} ${q.difficulty||'—'}</span></td>
+              <td style="font-weight:700">${a.score}/${a.total}</td>
+              <td>
+                <strong style="color:${pass?'var(--success)':'var(--danger)'}">${pct}%</strong>
+                <div class="pct-bar"><div class="pct-fill" style="width:${pct}%;background:${pass?'linear-gradient(90deg,#10b981,#34d399)':'linear-gradient(90deg,#ef4444,#f87171)'}"></div></div>
+              </td>
+              <td style="font-size:.79em;color:var(--text-light)">${fmtDate(a.completedAt?.toDate?.()||a.completedAt)}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>`;
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+//  STUDENT — QUIZZES
+// ════════════════════════════════════════════════════════════════
+function stuTab(tab, btn) {
+  document.getElementById('stuTabQuizzes').classList.toggle('hidden', tab!=='quizzes');
+  document.getElementById('stuTabHistory').classList.toggle('hidden', tab!=='history');
+  document.getElementById('stuTab1').classList.toggle('active', tab==='quizzes');
+  document.getElementById('stuTab2').classList.toggle('active', tab==='history');
+  if (tab==='history') loadAttemptHistory();
+}
+
+async function loadMyQuizzes() {
+  const el=document.getElementById('quizCardsGrid');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>Loading your quizzes…</div>';
+  const [asnSnap,attSnap]=await Promise.all([
+    db.collection('assignments').where('studentId','==',currentUser.uid).get(),
+    db.collection('attempts').where('studentId','==',currentUser.uid).get()
+  ]);
+  const assignments=asnSnap.docs.map(d=>({asnId:d.id,...d.data()}));
+  const attempts=new Map(attSnap.docs.map(d=>[d.data().quizId,{...d.data()}]));
+  if (!assignments.length){
+    el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📭</div>No quizzes assigned yet.<br><span style="font-size:.85em">Your trainer will assign quizzes soon!</span></div>'; return;
+  }
+  // Enrich with quiz/topic/lang data
+  const quizIds=[...new Set(assignments.map(a=>a.quizId))];
+  const [quizzesSnap,topicsSnap,langsSnap]=await Promise.all([
+    db.collection('quizzes').get(),
+    db.collection('topics').get(),
+    db.collection('languages').get()
+  ]);
+  const quizzes={},topics={},langs={};
+  quizzesSnap.docs.forEach(d=>quizzes[d.id]={...d.data()});
+  topicsSnap.docs.forEach(d=>topics[d.id]={...d.data()});
+  langsSnap.docs.forEach(d=>langs[d.id]={...d.data()});
+  // Count questions per quiz
+  const qCountSnap=await db.collection('questions').get();
+  const qCounts={};
+  qCountSnap.docs.forEach(d=>{ const qid=d.data().quizId; qCounts[qid]=(qCounts[qid]||0)+1; });
+  el.innerHTML=assignments.map(a=>{
+    const q=quizzes[a.quizId]||{};
+    const t=topics[q.topicId]||{};
+    const l=langs[q.langId]||{};
+    const att=attempts.get(a.quizId);
+    const done=!!att;
+    const color=l.color||'#7e22ce';
+    return `<div class="quiz-card ${done?'completed':''}" style="--card-accent:linear-gradient(90deg,${color},${color}99)">
+      <div class="lang-chip"><span>${l.icon||'💻'}</span><span>${escHtml(l.name||'')}</span></div>
+      <div class="quiz-card-title">${escHtml(t.name||q.title||'Quiz')}</div>
+      <div style="margin-bottom:8px"><span class="badge badge-${(q.difficulty||'easy').toLowerCase()}">${diffIcon(q.difficulty)} ${q.difficulty||'—'}</span></div>
+      <div class="quiz-card-meta">
+        <span>⏱ ${q.timeMinutes||30} min</span>
+        <span>📝 ${qCounts[a.quizId]||'?'} Qs</span>
+        ${a.dueDate?`<span style="color:var(--accent);font-weight:600;font-size:.78em">📅 Due ${a.dueDate}</span>`:''}
+      </div>
+      ${done?`
+        <div class="quiz-card-score" style="background:${att.percentage>=60?'var(--success-light)':'var(--danger-light)'}">
+          <div class="score-num" style="color:${att.percentage>=60?'var(--success)':'var(--danger)'}">${att.percentage}%</div>
+          <div style="font-size:.78em;font-weight:600;color:${att.percentage>=60?'var(--success)':'var(--danger)'}">${att.score}/${att.total} correct</div>
+        </div>
+        <button class="btn btn-secondary" style="width:100%;justify-content:center" disabled>✅ Completed</button>
+      `:`
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:auto" onclick="startQuiz('${a.quizId}','${escHtml(l.name+' › '+t.name+' ('+q.difficulty+')')}',${q.timeMinutes||30})">
+          🚀 Start Quiz →
+        </button>
+      `}
+    </div>`;
+  }).join('');
+}
+
+async function loadAttemptHistory() {
+  const el=document.getElementById('attemptHistoryGrid');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>Loading…</div>';
+  const snap=await db.collection('attempts').where('studentId','==',currentUser.uid).orderBy('completedAt','desc').get();
+  const attempts=snap.docs.map(d=>({attId:d.id,...d.data()}));
+  if (!attempts.length){
+    el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📊</div>No attempts yet.<br><span style="font-size:.85em">Complete a quiz to see history here!</span></div>'; return;
+  }
+  const [quizzesSnap,topicsSnap,langsSnap]=await Promise.all([
+    db.collection('quizzes').get(), db.collection('topics').get(), db.collection('languages').get()
+  ]);
+  const quizzes={},topics={},langs={};
+  quizzesSnap.docs.forEach(d=>quizzes[d.id]={...d.data()});
+  topicsSnap.docs.forEach(d=>topics[d.id]={...d.data()});
+  langsSnap.docs.forEach(d=>langs[d.id]={...d.data()});
+  el.innerHTML=attempts.map(a=>{
+    const q=quizzes[a.quizId]||{};
+    const t=topics[q.topicId]||{};
+    const l=langs[q.langId]||{};
+    const pct=Number(a.percentage)||0;
+    const pass=pct>=60;
+    return `<div class="quiz-card" style="--card-accent:linear-gradient(90deg,${pass?'#10b981,#34d399':'#ef4444,#f87171'})">
+      <div class="lang-chip"><span>${l.icon||'💻'}</span><span>${escHtml(l.name||'Quiz')}</span></div>
+      <div class="quiz-card-title">${escHtml(t.name||q.title||'Quiz')}</div>
+      <div style="margin-bottom:8px"><span class="badge badge-${(q.difficulty||'easy').toLowerCase()}">${diffIcon(q.difficulty)} ${q.difficulty||'—'}</span></div>
+      <div class="quiz-card-score" style="background:${pass?'var(--success-light)':'var(--danger-light)'}">
+        <div class="score-num" style="color:${pass?'var(--success)':'var(--danger)'}">${pct}%</div>
+        <div style="font-size:.78em;font-weight:600;color:${pass?'var(--success)':'var(--danger)'}">${a.score}/${a.total} correct</div>
+        <div style="font-size:.72em;color:var(--text-light);margin-top:2px">${fmtDate(a.completedAt?.toDate?.()||a.completedAt)}</div>
+      </div>
+      <div style="text-align:center;margin-top:8px"><span class="badge ${pass?'badge-success':'badge-primary'}">${pass?'✅ Passed':'❌ Failed'}</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  QUIZ TAKING
+// ════════════════════════════════════════════════════════════════
+async function startQuiz(quizId, title, timeMinutes) {
+  document.getElementById('myQuizzesScreen').classList.add('hidden');
+  document.getElementById('quizResultScreen').classList.add('hidden');
+  document.getElementById('quizTakingScreen').classList.remove('hidden');
+  document.getElementById('quizScreenTitle').textContent = title;
+  document.getElementById('questionsContainer').innerHTML='<div class="loading"><div class="spinner"></div>Loading questions…</div>';
+  const snap=await db.collection('questions').where('quizId','==',quizId).get();
+  quizQuestions=snap.docs.map(d=>{
+    const data=d.data();
+    return { qId:d.id, question:decodeIndent(data.question||''),
+      optionA:decodeIndent(data.optionA||''), optionB:decodeIndent(data.optionB||''),
+      optionC:decodeIndent(data.optionC||''), optionD:decodeIndent(data.optionD||''),
+      correct:data.correct };
+  });
+  if (!quizQuestions.length){ toast('❌ No questions in this quiz yet','error'); backToQuizzes(); return; }
+  currentQuizId=quizId; currentQIndex=0;
+  quizStartedAt=new Date().toISOString();
+  timeLeft=timeMinutes*60;
+  renderQuestions(); buildPalette();
+  const restored=restoreAutoSave(quizId);
+  if (!restored) showQ(0);
+  startTimer();
+}
+
+function renderQuestions() {
+  document.getElementById('questionsContainer').innerHTML=quizQuestions.map((q,i)=>`
+    <div class="q-card" id="qcard_${i}" style="display:none">
+      <div class="q-number">Question ${i+1} of ${quizQuestions.length}</div>
+      <pre class="q-text">${escHtml(q.question)}</pre>
+      <div class="options-list">
+        ${['A','B','C','D'].map(l=>{
+          const opt=q['option'+l]; const multi=opt.includes('\n');
+          return `<div class="option-item">
+            <input type="radio" name="q_${i}" id="opt_${i}_${l}" value="${l}" onchange="onAnswer()">
+            <label class="option-label" for="opt_${i}_${l}">
+              <span class="option-marker">${l}</span>
+              ${multi
+                ?`<pre style="margin:0;font-family:'JetBrains Mono',monospace;font-size:.83em;background:#f8fafc;border-radius:6px;padding:8px;white-space:pre;overflow-x:auto;tab-size:4;flex:1">${escHtml(opt)}</pre>`
+                :`<span style="font-family:'JetBrains Mono',monospace;font-size:.9em">${escHtml(opt)}</span>`
+              }
+            </label>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function buildPalette() {
+  document.getElementById('paletteGrid').innerHTML=quizQuestions.map((_,i)=>`<button class="palette-btn" id="pb_${i}" onclick="showQ(${i})">${i+1}</button>`).join('');
+  document.getElementById('totalCount').textContent=quizQuestions.length;
+  document.getElementById('palRemaining').textContent=quizQuestions.length;
+  updateProgress();
+}
+
+function showQ(index) {
+  if (index<0||index>=quizQuestions.length) return;
+  document.querySelectorAll('.q-card').forEach(c=>c.style.display='none');
+  const card=document.getElementById('qcard_'+index);
+  card.style.display='block';
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+  currentQIndex=index;
+  document.querySelectorAll('.palette-btn').forEach((b,i)=>{
+    const ans=document.querySelector(`input[name="q_${i}"]:checked`);
+    b.className='palette-btn'+(ans?' answered':'')+(i===index?' current':'');
+  });
+  document.getElementById('qPosition').textContent=`${index+1} / ${quizQuestions.length}`;
+  document.getElementById('prevBtn').disabled=index===0;
+  const isLast=index===quizQuestions.length-1;
+  document.getElementById('nextBtn').textContent=isLast?'✅ Submit':'Next →';
+  document.getElementById('nextBtn').onclick=isLast?confirmSubmit:()=>navQ(1);
+}
+
+function navQ(dir){ showQ(currentQIndex+dir); }
+
+function onAnswer(){ updateProgress(); showQ(currentQIndex); }
+
+function updateProgress() {
+  const answered=quizQuestions.filter((_,i)=>document.querySelector(`input[name="q_${i}"]:checked`)).length;
+  const total=quizQuestions.length;
+  document.getElementById('answeredCount').textContent=answered;
+  document.getElementById('palAnswered').textContent=answered;
+  document.getElementById('palRemaining').textContent=total-answered;
+  document.getElementById('progressFill').style.width=(answered/total*100)+'%';
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval=setInterval(()=>{
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft<=0){ clearInterval(timerInterval); toast('⏰ Time up! Submitting…','warning'); setTimeout(submitQuiz,1500); }
+    if (timeLeft===60) toast('⚠️ 1 minute remaining!','warning');
+    if (timeLeft%60===0&&timeLeft>0) autoSaveProgress();
+  },1000);
+}
+
+function updateTimerDisplay() {
+  const m=Math.floor(timeLeft/60).toString().padStart(2,'0');
+  const s=(timeLeft%60).toString().padStart(2,'0');
+  const el=document.getElementById('timerDisplay');
+  el.textContent=m+':'+s;
+  el.className='timer-display'+(timeLeft<=60?' urgent':'');
+}
+
+function autoSaveProgress() {
+  if (!currentQuizId||!currentUser) return;
+  const answers={};
+  quizQuestions.forEach((q,i)=>{ const c=document.querySelector(`input[name="q_${i}"]:checked`); if(c) answers[q.qId]=c.value; });
+  localStorage.setItem('bsq_save_'+currentUser.uid, JSON.stringify({quizId:currentQuizId,timeLeft,answers,savedAt:new Date().toISOString()}));
+}
+
+function restoreAutoSave(quizId) {
+  if (!currentUser) return false;
+  const raw=localStorage.getItem('bsq_save_'+currentUser.uid);
+  if (!raw) return false;
+  try {
+    const save=JSON.parse(raw);
+    if (save.quizId!==quizId) return false;
+    if (!confirm('💾 Auto-saved progress found! Restore your previous answers?')) return false;
+    setTimeout(()=>{
+      Object.entries(save.answers||{}).forEach(([qId,ans])=>{
+        const idx=quizQuestions.findIndex(q=>q.qId===qId);
+        if (idx>=0){ const r=document.querySelector(`input[name="q_${idx}"][value="${ans}"]`); if(r) r.checked=true; }
+      });
+      if (save.timeLeft>0) timeLeft=save.timeLeft;
+      updateProgress(); showQ(0); toast('✅ Progress restored!');
+    },300);
+    return true;
+  } catch(e){ return false; }
+}
+
+function clearAutoSave(){ if(currentUser) localStorage.removeItem('bsq_save_'+currentUser.uid); }
+
+function confirmSubmit() {
+  const unanswered=quizQuestions.filter((_,i)=>!document.querySelector(`input[name="q_${i}"]:checked`)).length;
+  if (unanswered>0&&!confirm(`${unanswered} question(s) unanswered. Submit anyway?`)) return;
+  submitQuiz();
+}
+
+async function submitQuiz() {
+  clearInterval(timerInterval);
+  clearAutoSave();
+  const answers={};
+  quizQuestions.forEach((q,i)=>{ const c=document.querySelector(`input[name="q_${i}"]:checked`); if(c) answers[q.qId]=c.value; });
+  // Calculate score client-side
+  let score=0;
+  quizQuestions.forEach(q=>{ if(answers[q.qId]===q.correct) score++; });
+  const total=quizQuestions.length;
+  const percentage=total>0?Math.round(score/total*100):0;
+  // Save attempt to Firestore
+  await db.collection('attempts').add({
+    studentId:currentUser.uid, quizId:currentQuizId,
+    score, total, percentage, answers:JSON.stringify(answers),
+    startedAt:quizStartedAt, completedAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+  // Update assignment status
+  const asnSnap=await db.collection('assignments')
+    .where('quizId','==',currentQuizId).where('studentId','==',currentUser.uid).get();
+  if (!asnSnap.empty) await asnSnap.docs[0].ref.update({status:'completed'});
+  lastResult={score,total,percentage,questions:quizQuestions,answers};
+  showResults(lastResult);
+}
+
+function showResults(data) {
+  document.getElementById('quizTakingScreen').classList.add('hidden');
+  document.getElementById('quizResultScreen').classList.remove('hidden');
+  const pass=data.percentage>=60;
+  document.getElementById('scoreCircleWrap').innerHTML=`
+    <div class="score-circle ${pass?'pass':'fail'}">
+      <div class="score-big">${data.percentage}%</div>
+      <div class="score-lbl">${pass?'PASSED':'FAILED'}</div>
+    </div>`;
+  document.getElementById('resultMsg').textContent=pass?'🎉 Excellent Work!':'📚 Keep Practicing!';
+  document.getElementById('resultSub').textContent=`You scored ${data.score} out of ${data.total} questions`;
+  document.getElementById('resultStats').innerHTML=`
+    <div class="stat-box"><div class="stat-num" style="color:var(--success)">${data.score}</div><div class="stat-lbl">Correct</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--danger)">${data.total-data.score}</div><div class="stat-lbl">Wrong</div></div>
+    <div class="stat-box"><div class="stat-num">${data.total}</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:${pass?'var(--success)':'var(--danger)'}">${data.percentage}%</div><div class="stat-lbl">Score</div></div>`;
+}
+
+function toggleReview() {
+  const sec=document.getElementById('reviewSection');
+  if (!sec.classList.contains('hidden')){ sec.classList.add('hidden'); return; }
+  sec.classList.remove('hidden');
+  if (!lastResult) return;
+  document.getElementById('reviewList').innerHTML=(lastResult.questions||[]).map((q,i)=>{
+    const yourAns=lastResult.answers?.[q.qId]||null;
+    const isRight=yourAns===q.correct;
+    return `<div class="review-item ${isRight?'correct':'wrong'}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span class="badge ${isRight?'badge-success':'badge-primary'}">Q${i+1}</span>
+        <span style="font-size:.8em;font-weight:600;color:${isRight?'var(--success)':'var(--danger)'}">${isRight?'✅ Correct':'❌ Wrong'}</span>
+      </div>
+      <pre class="review-q">${escHtml(q.question)}</pre>
+      <div>${['A','B','C','D'].map(l=>{
+        const opt=q['option'+l]||'';
+        let cls='review-opt';
+        if(l===q.correct) cls+=' correct-ans';
+        else if(l===yourAns&&!isRight) cls+=' your-wrong';
+        return `<div class="${cls}">${l}) ${escHtml(opt)}${l===q.correct?' ✅':''}${l===yourAns&&!isRight?' ← your answer':''}</div>`;
+      }).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function backToQuizzes() {
+  document.getElementById('quizResultScreen').classList.add('hidden');
+  document.getElementById('quizTakingScreen').classList.add('hidden');
+  document.getElementById('myQuizzesScreen').classList.remove('hidden');
+  loadMyQuizzes();
+}
+
+// ════════════════════════════════════════════════════════════════
+//  QUESTION PARSER (preserves indentation)
+// ════════════════════════════════════════════════════════════════
+function parseQuestions(text) {
+  const parsed=[];
+  text.split(/(?=Q\d+[.)]\s*)/i).filter(b=>b.trim()).forEach(block=>{
+    try {
+      const rawLines=block.split('\n'), lines=rawLines.map(l=>l.trim());
+      let qText='',qStart=0;
+      for(let i=0;i<rawLines.length;i++){
+        if(/^[A-D][.)]\s*/i.test(lines[i])){ qStart=i; break; }
+        if(i===0) qText+=rawLines[i].replace(/^Q\d+[.)]\s*/i,'')+'\n';
+        else if(rawLines[i].trim()) qText+=rawLines[i]+'\n';
+      }
+      qText=qText.trimEnd(); if(!qText) return;
+      const opts=[]; let correct='';
+      for(let i=qStart;i<lines.length;i++){
+        const m=lines[i].match(/^([A-D])[.)]\s*(.*)/i);
+        if(m&&opts.length<4){ opts.push(m[2]); continue; }
+        const cm=lines[i].match(/Correct:\s*([A-D])/i);
+        if(cm){ correct=cm[1].toUpperCase(); break; }
+        if(opts.length>0&&opts.length<4&&lines[i]) opts[opts.length-1]+='\n'+rawLines[i];
+      }
+      const cleaned=opts.map(o=>o.trim());
+      if(qText&&cleaned.length===4&&correct) parsed.push({question:qText,optionA:cleaned[0],optionB:cleaned[1],optionC:cleaned[2],optionD:cleaned[3],correct});
+    } catch(e){ console.error(e); }
+  });
+  return parsed;
+}
+
+function encodeIndent(text) {
+  if(!text) return text;
+  return text.split('\n').map(line=>{
+    let c=0; while(line.startsWith('    ')){ line=line.slice(4); c++; }
+    let r=0; while(line.startsWith(' ')){ line=line.slice(1); r++; }
+    return '\t'.repeat(c)+' '.repeat(r)+line;
+  }).join('\n');
+}
+
+function decodeIndent(text) {
+  if(!text) return text;
+  return text.split('\n').map(line=>{
+    let c=0; while(line.startsWith('\t')){ line=line.slice(1); c++; }
+    return ' '.repeat(c*4)+line;
+  }).join('\n');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  UTILITIES
+// ════════════════════════════════════════════════════════════════
+function toast(msg, type='success') {
+  const el=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  el.className='show'+(type==='error'?' error':type==='warning'?' warning':'');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.remove('show'),3500);
+}
+
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function diffIcon(d){ return d==='Easy'?'🟢':d==='Medium'?'🟡':d==='Hard'?'🔴':'⚪'; }
+function fmtDate(d){
+  if(!d) return '—';
+  try{ return new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); }
+  catch(e){ return String(d).slice(0,10); }
+}
+</script>
+</body>
+</html>
