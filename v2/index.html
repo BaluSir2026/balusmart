@@ -673,10 +673,6 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
 // ║  STEP 1 — Replace with your Firebase project config         ║
 // ║  Firebase Console → Project Settings → Your Apps → Config   ║
 // ╚══════════════════════════════════════════════════════════════╝
-// Import the functions you need from the SDKs you need
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -691,11 +687,6 @@ const firebaseConfig = {
   appId: "1:695902467126:web:827e86036621462ce05497",
   measurementId: "G-D860KZ1R0H"
 };
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  STEP 2 — Change this to your secret trainer access code    ║
 // ╚══════════════════════════════════════════════════════════════╝
