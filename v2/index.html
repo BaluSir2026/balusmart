@@ -41,11 +41,11 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(circle
 
 /* ── HEADER ── */
 .header{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:20px;padding:20px 28px;margin-bottom:20px;box-shadow:var(--shadow-lg);border:1px solid rgba(255,255,255,.3);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
-.brand{display:flex;align-items:center;gap:14px;}
+.brand{display:flex;align-items:center;gap:14px;min-width:0;flex:1;}
 .brand-icon{width:48px;height:48px;background:var(--grad-primary);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;color:white;box-shadow:var(--glow);animation:float 3s ease-in-out infinite;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 .brand-name{font-family:'Poppins',sans-serif;font-size:1.6em;font-weight:800;background:var(--grad-primary);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.brand-sub{color:var(--text-light);font-size:.82em;font-weight:500;}
+.brand-sub{color:var(--text-light);font-size:.82em;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px;}
 .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 #userBadge{display:none;align-items:center;gap:8px;background:rgba(126,34,206,.08);border:1.5px solid var(--border);border-radius:99px;padding:8px 16px;font-size:.84em;font-weight:600;color:var(--primary);}
 #roleBadge{display:none;font-size:.75em;padding:3px 10px;border-radius:99px;font-weight:700;}
@@ -123,21 +123,23 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:99px;transition:width .4s ease;}
 .q-card{background:white;border-radius:18px;padding:28px;margin-bottom:18px;box-shadow:var(--shadow-sm);border:2px solid var(--border-light);box-sizing:border-box;width:100%;overflow:hidden;}
 .q-number{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#e91e8c,#ff6eb4);color:white;font-weight:700;font-size:.95em;padding:6px 16px;border-radius:99px;margin-bottom:16px;}
-.q-text{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:18px;border-radius:12px;font-size:1em;line-height:1.8;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;overflow-x:auto;tab-size:4;display:block;max-width:100%;width:100%;box-sizing:border-box;margin-bottom:18px;}
+.q-text{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:18px;border-radius:12px;font-size:1em;line-height:1.8;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;overflow-x:auto;tab-size:4;display:block;max-width:100%;width:100%;box-sizing:border-box;margin-bottom:18px;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
 .options-list{display:flex;flex-direction:column;gap:12px;}
 .option-item{position:relative;}
 .option-item input[type=radio]{position:absolute;opacity:0;}
 .option-label{display:flex;align-items:flex-start;gap:14px;padding:15px 20px;background:white;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:var(--ease);font-size:1em;word-break:break-word;overflow-wrap:break-word;width:100%;box-sizing:border-box;}
 .option-label:hover{border-color:var(--primary);background:var(--surface-hover);}
 .option-item input:checked+.option-label{background:var(--grad-primary);color:white;border-color:var(--primary);box-shadow:var(--shadow-md);}
+.option-item input:checked+.option-label span,
+.option-item input:checked+.option-label pre{color:white;background:rgba(255,255,255,0.15);font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
 .option-marker{width:32px;height:32px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;font-size:.95em;background:white;color:var(--text);}
 .option-item input:checked+.option-label .option-marker{background:white;border-color:white;color:var(--primary);}
 
 /* ── PALETTE ── */
 .palette{background:white;border-radius:16px;padding:18px;margin-bottom:16px;border:2px solid var(--border-light);box-shadow:var(--shadow-sm);}
 .palette-title{font-size:.82em;font-weight:700;color:var(--text-light);margin-bottom:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;}
-.palette-grid{display:flex;flex-wrap:wrap;gap:7px;}
-.palette-btn{width:34px;height:34px;border:2px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-weight:700;font-size:.8em;transition:var(--ease);color:var(--text);}
+.palette-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.palette-btn{width:38px;height:38px;border:2px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-weight:700;font-size:.88em;transition:var(--ease);color:var(--text);}
 .palette-btn.answered{background:var(--success);border-color:var(--success);color:white;}
 .palette-btn.current{background:var(--primary);border-color:var(--primary);color:white;}
 .pal-dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
@@ -158,7 +160,7 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
 .review-item{background:white;border-radius:14px;padding:18px;margin-bottom:12px;box-shadow:var(--shadow-sm);border-left:4px solid var(--border);}
 .review-item.correct{border-left-color:var(--success);}
 .review-item.wrong{border-left-color:var(--danger);}
-.review-q{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.83em;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;overflow-x:auto;tab-size:4;display:block;margin-bottom:10px;box-sizing:border-box;width:100%;}
+.review-q{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.83em;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;overflow-x:auto;tab-size:4;display:block;margin-bottom:10px;box-sizing:border-box;width:100%;font-variant-ligatures:none;font-feature-settings:"liga" 0,"calt" 0;}
 .review-opt{padding:7px 12px;border-radius:8px;background:#f8f9fa;font-size:.88em;margin-bottom:4px;}
 .review-opt.correct-ans{background:rgba(16,185,129,.1);color:#065f46;font-weight:600;}
 .review-opt.your-wrong{background:rgba(239,68,68,.1);color:#991b1b;font-weight:600;}
@@ -252,7 +254,7 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
   .option-marker{width:28px;height:28px;font-size:.88em;flex-shrink:0;}
   .timer-bar{padding:10px 14px;gap:8px;top:4px;}
   .timer-display{font-size:1.2em;}
-  .palette-btn{width:30px;height:30px;font-size:.74em;}
+  .palette-btn{width:36px;height:36px;font-size:.82em;}
   .progress-wrap{min-width:120px;}
   .btn{padding:9px 14px;font-size:.82em;}
   .q-number{font-size:.88em;}
@@ -312,7 +314,7 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
   .option-marker{width:24px;height:24px;font-size:.76em;flex-shrink:0;margin-top:1px;}
   .timer-bar{padding:12px 14px;gap:8px;}
   .timer-display{font-size:1.1em;letter-spacing:1px;}
-  .palette-btn{width:30px;height:30px;font-size:.74em;}
+  .palette-btn{width:36px;height:36px;font-size:.82em;}
   .review-q{font-size:.74em;padding:10px;}
   .options-list{gap:8px;}
   .q-number{font-size:.75em;}
@@ -347,7 +349,7 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
         <span class="auth-brand-name">BALU</span>
         <span class="auth-brand-badge">SMART QUIZ</span>
       </div>
-      <div class="auth-subtitle" id="authTrainerTaglineEl">Technical Trainer</div>
+      <div class="auth-subtitle" id="authTrainerTaglineEl">Test Your Knowledge Daily</div>
     </div>
     <div class="auth-tabs">
       <button class="auth-tab-btn active" id="siTab" onclick="switchAuthTab('si')">🔑 Sign In</button>
@@ -481,9 +483,9 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
   <div class="header">
     <div class="brand">
       <div class="brand-icon">🧠</div>
-      <div>
+      <div style="min-width:0;flex:1;">
         <div class="brand-name">BALU Smart Quiz</div>
-        <div class="brand-sub"><span class="live-dot">Technical Trainer . Assistant Professor.</span></div>
+        <div class="brand-sub"><span class="live-dot"></span>Technical Trainer . Assistant Professor</div>
       </div>
     </div>
     <div class="header-right">
@@ -889,7 +891,7 @@ const firebaseConfig = {
 const TRAINER_CODE = 'Balu$2026';
 // ── TRAINER PROFILE (visible in login & student dashboard) ──────────
 const TRAINER_NAME        = 'Bala Subrahmanyam Undru';       // Change to your name
-const TRAINER_SUBJECT     = 'Technical Trainer . Assistant Professor';
+const TRAINER_SUBJECT     = 'Technical Trainer . Assistant Professor . M.Tech in Data Science . MCA. UGC NET . AP SET . NPTEL';
 const TRAINER_TAGLINE     = '🎓 Learn • Practice • Excel';
 const TRAINER_PHOTO_URL   = '';               // Paste your photo URL here (optional)
 // ─────────────────────────────────────────────────────────────────────
@@ -1702,6 +1704,15 @@ async function startQuiz(quizId, title, timeMinutes) {
   startTimer();
 }
 
+// Remove common leading whitespace from multiline text (dedent)
+function dedent(text) {
+  const lines = text.split('\n');
+  const nonEmpty = lines.filter(l => l.trim().length > 0);
+  if (!nonEmpty.length) return text;
+  const minIndent = Math.min(...nonEmpty.map(l => l.match(/^(\s*)/)[1].length));
+  return lines.map(l => l.slice(minIndent)).join('\n').trim();
+}
+
 function renderQuestions() {
   document.getElementById('questionsContainer').innerHTML=quizQuestions.map((q,i)=>`
     <div class="q-card" id="qcard_${i}" style="display:none">
@@ -1709,13 +1720,15 @@ function renderQuestions() {
       <pre class="q-text">${escHtml(q.question)}</pre>
       <div class="options-list">
         ${['A','B','C','D'].map(l=>{
-          const opt=q['option'+l]; const multi=opt.includes('\n');
+          const rawOpt=q['option'+l]||'';
+          const opt=rawOpt.includes('\n')?dedent(rawOpt):rawOpt.trim();
+          const multi=opt.includes('\n');
           return `<div class="option-item">
             <input type="radio" name="q_${i}" id="opt_${i}_${l}" value="${l}" onchange="onAnswer()">
             <label class="option-label" for="opt_${i}_${l}">
               <span class="option-marker">${l}</span>
               ${multi
-                ?`<pre style="margin:0;font-family:'JetBrains Mono',monospace;font-size:.95em;background:#f8fafc;border-radius:6px;padding:8px;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;overflow-x:auto;tab-size:4;flex:1;min-width:0;box-sizing:border-box;">${escHtml(opt)}</pre>`
+                ?`<pre style="margin:0;font-family:'JetBrains Mono',monospace;font-size:.95em;background:#f8fafc;border-radius:6px;padding:8px;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;overflow-x:auto;tab-size:4;flex:1;min-width:0;box-sizing:border-box;font-variant-ligatures:none;font-feature-settings:'liga' 0,'calt' 0;">${escHtml(opt)}</pre>`
                 :`<span style="font-family:'JetBrains Mono',monospace;font-size:1em;word-break:break-word;overflow-wrap:break-word;flex:1;min-width:0;">${escHtml(opt)}</span>`
               }
             </label>
@@ -2010,7 +2023,7 @@ function downloadResultPDF() {
         doc.setFont('helvetica','normal');
         doc.text('Answer Response Report', W/2, 17, {align:'center'});
         doc.setFontSize(8);
-        doc.text('Technical Trainer . Assistant Professor. M.Tech in Data Science . MCA . UGC NET . AP SET . NPTEL', W/2, 24, {align:'center'});
+        doc.text('Technical Trainer . Assistant Professor . M.Tech in Data Science . MCA. UGC NET . AP SET . NPTEL', W/2, 24, {align:'center'});
       } else {
         doc.setFontSize(8);
         doc.text('BALU SMART QUIZ  |  Answer Response Report  (continued)', W/2, 8, {align:'center'});
