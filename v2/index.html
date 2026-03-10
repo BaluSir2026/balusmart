@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -120,13 +121,13 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
 .progress-label{display:flex;justify-content:space-between;font-size:.78em;font-weight:600;color:var(--text-light);margin-bottom:5px;}
 .progress-track{height:8px;background:#ede9fe;border-radius:99px;overflow:hidden;}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:99px;transition:width .4s ease;}
-.q-card{background:white;border-radius:18px;padding:28px;margin-bottom:18px;box-shadow:var(--shadow-sm);border:2px solid var(--border-light);}
+.q-card{background:white;border-radius:18px;padding:28px;margin-bottom:18px;box-shadow:var(--shadow-sm);border:2px solid var(--border-light);box-sizing:border-box;width:100%;overflow:hidden;}
 .q-number{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#e91e8c,#ff6eb4);color:white;font-weight:700;font-size:.82em;padding:5px 14px;border-radius:99px;margin-bottom:16px;}
-.q-text{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:16px;border-radius:12px;font-size:.87em;line-height:1.7;white-space:pre;overflow-x:auto;tab-size:4;display:block;max-width:100%;margin-bottom:18px;}
+.q-text{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:16px;border-radius:12px;font-size:.87em;line-height:1.7;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;overflow-x:auto;tab-size:4;display:block;max-width:100%;width:100%;box-sizing:border-box;margin-bottom:18px;}
 .options-list{display:flex;flex-direction:column;gap:10px;}
 .option-item{position:relative;}
 .option-item input[type=radio]{position:absolute;opacity:0;}
-.option-label{display:flex;align-items:center;gap:12px;padding:13px 18px;background:white;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:var(--ease);font-size:.93em;}
+.option-label{display:flex;align-items:flex-start;gap:12px;padding:13px 18px;background:white;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:var(--ease);font-size:.93em;word-break:break-word;overflow-wrap:break-word;width:100%;box-sizing:border-box;}
 .option-label:hover{border-color:var(--primary);background:var(--surface-hover);}
 .option-item input:checked+.option-label{background:var(--grad-primary);color:white;border-color:var(--primary);box-shadow:var(--shadow-md);}
 .option-marker{width:28px;height:28px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700;font-size:.82em;background:white;color:var(--text);}
@@ -157,7 +158,7 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
 .review-item{background:white;border-radius:14px;padding:18px;margin-bottom:12px;box-shadow:var(--shadow-sm);border-left:4px solid var(--border);}
 .review-item.correct{border-left-color:var(--success);}
 .review-item.wrong{border-left-color:var(--danger);}
-.review-q{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.83em;white-space:pre;overflow-x:auto;tab-size:4;display:block;margin-bottom:10px;}
+.review-q{font-family:'JetBrains Mono',monospace;background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-size:.83em;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;overflow-x:auto;tab-size:4;display:block;margin-bottom:10px;box-sizing:border-box;width:100%;}
 .review-opt{padding:7px 12px;border-radius:8px;background:#f8f9fa;font-size:.88em;margin-bottom:4px;}
 .review-opt.correct-ans{background:rgba(16,185,129,.1);color:#065f46;font-weight:600;}
 .review-opt.your-wrong{background:rgba(239,68,68,.1);color:#991b1b;font-weight:600;}
@@ -229,6 +230,11 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
 .auth-success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;border-radius:8px;padding:8px 12px;font-size:.83em;font-weight:600;margin-bottom:12px;display:none;}
 .auth-footer-link{text-align:center;margin-top:14px;font-size:.83em;color:var(--text-light);}
 .auth-footer-link span{color:var(--primary);font-weight:700;cursor:pointer;text-decoration:underline;}
+.forgot-link{text-align:right;margin-top:-8px;margin-bottom:12px;}
+.forgot-link span{color:var(--primary);font-size:.82em;font-weight:600;cursor:pointer;text-decoration:underline;}
+.forgot-link span:hover{color:#a855f7;}
+#fpPanel{display:none;border-top:1.5px solid #e9d5ff;margin-top:16px;padding-top:14px;}
+#fpPanel.show{display:block;animation:fadeIn .3s;}
 
 /* ── TOAST ── */
 #toast{position:fixed;top:22px;right:22px;background:white;padding:16px 22px;border-radius:14px;box-shadow:var(--shadow-xl);border-left:4px solid var(--success);z-index:100001;display:none;min-width:260px;animation:slideIn .4s cubic-bezier(.68,-.55,.265,1.55);}
@@ -237,7 +243,45 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
 #toast.error{border-left-color:var(--danger);}
 #toast.warning{border-left-color:var(--warning);}
 
-/* ── INFO BOXES ── */
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:600px){
+  .container{padding:10px;}
+  .q-card{padding:16px;}
+  .q-text{font-size:.78em;padding:12px;line-height:1.6;}
+  .option-label{padding:10px 12px;gap:8px;font-size:.88em;}
+  .option-marker{width:24px;height:24px;font-size:.76em;flex-shrink:0;}
+  .timer-bar{padding:10px 14px;gap:8px;top:4px;}
+  .timer-display{font-size:1.2em;}
+  .palette-btn{width:30px;height:30px;font-size:.74em;}
+  .progress-wrap{min-width:120px;}
+  .btn{padding:9px 14px;font-size:.82em;}
+  .q-number{font-size:.76em;}
+  .tab-btn{min-width:80px;padding:8px 10px;font-size:.78em;}
+  .card{padding:16px;}
+  .section-title{font-size:1.1em;}
+  .result-stats{gap:10px;}
+  .stat-box{padding:10px 14px;}
+}
+@media(max-width:400px){
+  .q-card{padding:12px;}
+  .q-text{font-size:.74em;padding:10px;}
+  .option-label{padding:8px 10px;gap:7px;}
+}
+
+/* ── SECURITY: no select / no drag on quiz content ── */
+#quizTakingScreen{
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+  user-select:none;
+}
+/* allow text selection inside question for readability on desktop */
+#quizTakingScreen .q-text,
+#quizTakingScreen .option-label span,
+#quizTakingScreen .option-label pre{
+  -webkit-user-select:text;
+  user-select:text;
+}
 .info-box{background:rgba(59,130,246,.06);border:2px solid rgba(59,130,246,.2);border-radius:14px;padding:18px;margin:14px 0;}
 .success-box{background:rgba(16,185,129,.06);border:2px solid rgba(16,185,129,.2);border-radius:14px;padding:18px;margin:14px 0;}
 .warning-box{background:rgba(245,158,11,.06);border:2px solid rgba(245,158,11,.2);border-radius:14px;padding:18px;margin:14px 0;}
@@ -262,6 +306,19 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
   .quiz-grid{grid-template-columns:1fr;}
   .steps{flex-direction:column;}
   .step{border-right:none;border-bottom:2px solid var(--border);}
+  .q-card{padding:14px;}
+  .q-text{font-size:.76em;padding:10px;line-height:1.55;}
+  .option-label{padding:10px 12px;font-size:.84em;gap:8px;align-items:flex-start;}
+  .option-marker{width:24px;height:24px;font-size:.76em;flex-shrink:0;margin-top:1px;}
+  .timer-bar{padding:12px 14px;gap:8px;}
+  .timer-display{font-size:1.1em;letter-spacing:1px;}
+  .palette-btn{width:30px;height:30px;font-size:.74em;}
+  .review-q{font-size:.74em;padding:10px;}
+  .options-list{gap:8px;}
+  .q-number{font-size:.75em;}
+  .result-msg{font-size:1.4em;}
+  .score-circle{width:140px;height:140px;}
+  .score-big{font-size:2.8em;}
 }
 ::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-track{background:var(--surface-hover);border-radius:8px;}
@@ -274,11 +331,23 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
 <div id="authOverlay">
   <div id="authCard">
     <div class="auth-header">
+      <div id="authTrainerPhoto" style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:14px;">
+        <div id="authPhotoRing" style="width:78px;height:78px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#ea580c);padding:3px;box-shadow:0 0 24px rgba(168,85,247,.5);">
+          <div id="authPhotoInner" style="width:100%;height:100%;border-radius:50%;background:#1e0040;display:flex;align-items:center;justify-content:center;font-size:2.2em;overflow:hidden;">
+            <img id="authTrainerImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;">
+            <span id="authTrainerEmoji">👨‍🏫</span>
+          </div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:1.1em;color:white;" id="authTrainerNameEl"></div>
+          <div style="font-size:.75em;color:rgba(255,255,255,.6);margin-top:2px;" id="authTrainerSubjectEl"></div>
+        </div>
+      </div>
       <div class="auth-brand">
         <span class="auth-brand-name">BALU</span>
         <span class="auth-brand-badge">SMART QUIZ</span>
       </div>
-      <div class="auth-subtitle">Powered by Firebase · Language → Topic → Quiz</div>
+      <div class="auth-subtitle" id="authTrainerTaglineEl">Test Your Knowledge Every Day</div>
     </div>
     <div class="auth-tabs">
       <button class="auth-tab-btn active" id="siTab" onclick="switchAuthTab('si')">🔑 Sign In</button>
@@ -304,8 +373,30 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
             <button class="auth-pw-toggle" onclick="togglePw('siPass',this)" type="button">👁️</button>
           </div>
         </div>
+        <div class="forgot-link"><span onclick="showForgotPanel()">Forgot Password?</span></div>
         <button class="auth-submit-btn" id="siBtn" onclick="doSignIn()">🔑 Sign In</button>
         <div class="auth-footer-link">No account? <span onclick="switchAuthTab('su')">Sign Up here</span></div>
+
+        <!-- ── FORGOT PASSWORD PANEL ── -->
+        <div id="fpPanel">
+          <hr style="border:none;border-top:1.5px solid #e9d5ff;margin:18px 0 14px">
+          <div style="font-weight:700;font-size:.95em;margin-bottom:10px;">🔑 Reset Password</div>
+          <div class="auth-error" id="fpError"></div>
+          <div class="auth-success" id="fpSuccess"></div>
+          <div class="auth-field">
+            <label>Enter your registered email *</label>
+            <div class="auth-input-wrap">
+              <span class="auth-input-icon">📧</span>
+              <input class="auth-input" id="fpEmail" type="email" placeholder="your@email.com" autocomplete="email">
+            </div>
+          </div>
+          <button class="auth-submit-btn" id="fpBtn" onclick="doForgotPassword()" style="background:linear-gradient(135deg,#ea580c,#f97316);">
+            📨 Send Reset Email
+          </button>
+          <div class="auth-footer-link" style="margin-top:10px;">
+            <span onclick="hideForgotPanel()">← Back to Sign In</span>
+          </div>
+        </div>
       </div>
       <!-- Sign Up -->
       <div class="auth-form" id="suForm">
@@ -593,6 +684,23 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
         <button class="tab-btn" id="stuTab2" onclick="stuTab('history',this)">📊 My History</button>
       </div>
       <div id="stuTabQuizzes">
+        <!-- ABOUT TRAINER CARD -->
+        <div id="aboutTrainerCard" class="card" style="margin-bottom:16px;background:linear-gradient(135deg,#f5f0ff,#fff7ed);border:2px solid #e9d5ff;">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <div id="stuTrainerPhotoWrap" style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#ea580c);padding:3px;flex-shrink:0;box-shadow:0 4px 16px rgba(126,34,206,.25);">
+              <div style="width:100%;height:100%;border-radius:50%;background:#f5f0ff;display:flex;align-items:center;justify-content:center;font-size:1.8em;overflow:hidden;">
+                <img id="stuTrainerImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                <span id="stuTrainerEmoji">👨‍🏫</span>
+              </div>
+            </div>
+            <div style="flex:1;min-width:160px;">
+              <div style="font-weight:800;font-size:1.1em;color:var(--text);" id="stuTrainerNameEl"></div>
+              <div style="color:var(--text-light);font-size:.85em;margin-top:2px;" id="stuTrainerSubjectEl"></div>
+              <div style="color:var(--primary);font-size:.82em;font-weight:600;margin-top:4px;" id="stuTrainerTaglineEl"></div>
+            </div>
+          </div>
+        </div>
+        <!-- QUIZZES HEADER -->
         <div class="card" style="margin-bottom:16px;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
             <div class="section-title" style="margin:0">📋 My Assigned Quizzes</div>
@@ -651,6 +759,7 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
         <div class="result-stats" id="resultStats"></div>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px;">
           <button class="btn btn-secondary" onclick="toggleReview()">📖 Review Answers</button>
+          <button class="btn btn-secondary" onclick="downloadResultPDF()" id="pdfBtn">⬇️ Download PDF</button>
           <button class="btn btn-primary" onclick="backToQuizzes()">← Back to My Quizzes</button>
         </div>
         <div class="hidden" id="reviewSection">
@@ -667,7 +776,98 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
 
 <div id="toast"><span id="toastMsg"></span></div>
 
-<!-- ═══ FIREBASE CONFIG & APP SCRIPT ════════════════════════════════ -->
+<!-- ═══ SECURITY BLOCK ═══════════════════════════════════════════ -->
+<script>
+(function(){
+  // ── Block right-click context menu ──────────────────────────────
+  document.addEventListener('contextmenu', function(e){
+    e.preventDefault();
+    return false;
+  });
+
+  // ── Block keyboard shortcuts ────────────────────────────────────
+  document.addEventListener('keydown', function(e){
+    const k = e.key ? e.key.toLowerCase() : '';
+    const ctrl = e.ctrlKey || e.metaKey;
+    const shift = e.shiftKey;
+
+    // F12 — DevTools
+    if (e.key === 'F12') { e.preventDefault(); return false; }
+
+    // Ctrl+U — View Source
+    if (ctrl && k === 'u') { e.preventDefault(); return false; }
+
+    // Ctrl+S — Save page
+    if (ctrl && k === 's') { e.preventDefault(); return false; }
+
+    // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C — DevTools
+    if (ctrl && shift && (k==='i'||k==='j'||k==='c')) { e.preventDefault(); return false; }
+
+    // Ctrl+P — Print
+    if (ctrl && k === 'p') { e.preventDefault(); return false; }
+
+    // Ctrl+A — Select All (inside quiz screen only)
+    // Allow Ctrl+A in inputs/textareas
+    if (ctrl && k === 'a') {
+      const tag = document.activeElement.tagName;
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+        e.preventDefault(); return false;
+      }
+    }
+
+    // Windows + Shift + S — Snip & Sketch (Win key = e.key === 'Meta' on some browsers)
+    // We intercept what JS can see; OS-level snip cannot be fully blocked
+    if (shift && k === 's' && (e.metaKey || e.key === 'Meta')) {
+      e.preventDefault(); return false;
+    }
+
+    // Ctrl+Shift+S — Save As / Screenshot tools
+    if (ctrl && shift && k === 's') { e.preventDefault(); return false; }
+  });
+
+  // ── Disable drag-and-drop on images ─────────────────────────────
+  document.addEventListener('dragstart', function(e){
+    if (e.target.tagName === 'IMG') { e.preventDefault(); return false; }
+  });
+
+  // ── DevTools detection (resize method) ──────────────────────────
+  let devtoolsOpen = false;
+  const threshold = 160;
+  function checkDevtools() {
+    if (window.outerWidth - window.innerWidth > threshold ||
+        window.outerHeight - window.innerHeight > threshold) {
+      if (!devtoolsOpen) {
+        devtoolsOpen = true;
+        // Optionally blur content when devtools open
+        const app = document.getElementById('mainApp');
+        if (app) app.style.filter = 'blur(8px)';
+        const msg = document.createElement('div');
+        msg.id = 'devtools-warn';
+        msg.style.cssText = 'position:fixed;inset:0;z-index:999999;background:rgba(126,34,206,.97);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;';
+        msg.innerHTML = '<div style="font-size:3em">🔒</div><div style="color:white;font-family:Poppins,sans-serif;font-size:1.4em;font-weight:700">Developer Tools Detected</div><div style="color:rgba(255,255,255,.8);font-size:.95em">Please close DevTools to continue</div>';
+        document.body.appendChild(msg);
+      }
+    } else {
+      if (devtoolsOpen) {
+        devtoolsOpen = false;
+        const app = document.getElementById('mainApp');
+        if (app) app.style.filter = '';
+        const warn = document.getElementById('devtools-warn');
+        if (warn) warn.remove();
+      }
+    }
+  }
+  setInterval(checkDevtools, 1000);
+
+  // ── Disable print ────────────────────────────────────────────────
+  window.addEventListener('beforeprint', function(e){ e.preventDefault(); });
+})();
+</script>
+<style>
+/* ── Hide content from print ── */
+@media print { body { display: none !important; } }
+</style>
+
 <script>
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  STEP 1 — Replace with your Firebase project config         ║
@@ -687,6 +887,12 @@ const firebaseConfig = {
 // ║  STEP 2 — Change this to your secret trainer access code    ║
 // ╚══════════════════════════════════════════════════════════════╝
 const TRAINER_CODE = 'Balu$2026';
+// ── TRAINER PROFILE (visible in login & student dashboard) ──────────
+const TRAINER_NAME        = 'Balu Sir';       // Change to your name
+const TRAINER_SUBJECT     = 'Technical Trainer, Assistant Professor';
+const TRAINER_TAGLINE     = '🎓 Learn • Practice • Excel';
+const TRAINER_PHOTO_URL   = '';               // Paste your photo URL here (optional)
+// ─────────────────────────────────────────────────────────────────────
 
 // ── FIREBASE INIT ──────────────────────────────────────────────
 firebase.initializeApp(firebaseConfig);
@@ -710,6 +916,32 @@ let resultsListener = null; // Firestore real-time listener
 // ════════════════════════════════════════════════════════════════
 //  AUTH
 // ════════════════════════════════════════════════════════════════
+// Populate trainer profile fields from constants
+function populateTrainerProfile() {
+  const fields = [
+    ['authTrainerNameEl',    TRAINER_NAME],
+    ['authTrainerSubjectEl', TRAINER_SUBJECT],
+    ['stuTrainerNameEl',     TRAINER_NAME],
+    ['stuTrainerSubjectEl',  TRAINER_SUBJECT],
+    ['stuTrainerTaglineEl',  TRAINER_TAGLINE],
+  ];
+  fields.forEach(([id, val]) => { const el=document.getElementById(id); if(el) el.textContent=val; });
+  // Auth tagline
+  const tTag = document.getElementById('authTrainerTaglineEl');
+  if (tTag) tTag.textContent = TRAINER_TAGLINE;
+  // Photos
+  if (TRAINER_PHOTO_URL) {
+    ['authTrainerImg','stuTrainerImg'].forEach(id => {
+      const img=document.getElementById(id);
+      if(img){ img.src=TRAINER_PHOTO_URL; img.style.display='block'; }
+    });
+    ['authTrainerEmoji','stuTrainerEmoji'].forEach(id => {
+      const el=document.getElementById(id); if(el) el.style.display='none';
+    });
+  }
+}
+populateTrainerProfile();
+
 auth.onAuthStateChanged(async fbUser => {
   if (fbUser) {
     try {
@@ -749,6 +981,40 @@ function authMsg(id, msg, isErr) {
   el.style.display = 'block';
 }
 
+function showForgotPanel() {
+  const panel = document.getElementById('fpPanel');
+  const email = document.getElementById('siEmail')?.value||'';
+  if (panel) panel.classList.add('show');
+  const fpEmail = document.getElementById('fpEmail');
+  if (fpEmail && email) fpEmail.value = email;
+  document.getElementById('fpError').style.display='none';
+  document.getElementById('fpSuccess').style.display='none';
+}
+function hideForgotPanel() {
+  document.getElementById('fpPanel')?.classList.remove('show');
+}
+async function doForgotPassword() {
+  const email = document.getElementById('fpEmail').value.trim();
+  const errEl = document.getElementById('fpError');
+  const okEl  = document.getElementById('fpSuccess');
+  const btn   = document.getElementById('fpBtn');
+  errEl.style.display='none'; okEl.style.display='none';
+  if (!email) { errEl.textContent='Please enter your email.'; errEl.style.display='block'; return; }
+  btn.disabled=true; btn.textContent='Sending…';
+  try {
+    await auth.sendPasswordResetEmail(email);
+    okEl.textContent='Reset email sent to '+email+'. Check your inbox (and spam folder).';
+    okEl.style.display='block';
+    btn.textContent='Sent!';
+    setTimeout(()=>{ hideForgotPanel(); btn.disabled=false; btn.textContent='📨 Send Reset Email'; }, 4000);
+  } catch(e) {
+    const msg = e.code==='auth/user-not-found' ? 'No account found with this email.'
+               : e.code==='auth/invalid-email'  ? 'Invalid email address.'
+               : e.message;
+    errEl.textContent='❌ '+msg; errEl.style.display='block';
+    btn.disabled=false; btn.textContent='📨 Send Reset Email';
+  }
+}
 function togglePw(id, btn) {
   const inp = document.getElementById(id);
   inp.type = inp.type==='password' ? 'text' : 'password';
@@ -1365,8 +1631,16 @@ async function loadMyQuizzes() {
 async function loadAttemptHistory() {
   const el=document.getElementById('attemptHistoryGrid');
   el.innerHTML='<div class="loading"><div class="spinner"></div>Loading…</div>';
-  const snap=await db.collection('attempts').where('studentId','==',currentUser.uid).orderBy('completedAt','desc').get();
-  const attempts=snap.docs.map(d=>({attId:d.id,...d.data()}));
+  try {
+  // ── No orderBy here — avoids Firestore composite index requirement ──
+  const snap=await db.collection('attempts').where('studentId','==',currentUser.uid).get();
+  // Sort newest first on client side
+  const attempts=snap.docs.map(d=>({attId:d.id,...d.data()}))
+    .sort((a,b)=>{
+      const ta=a.completedAt?.toDate?.()||new Date(a.completedAt||0);
+      const tb=b.completedAt?.toDate?.()||new Date(b.completedAt||0);
+      return tb-ta;
+    });
   if (!attempts.length){
     el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📊</div>No attempts yet.<br><span style="font-size:.85em">Complete a quiz to see history here!</span></div>'; return;
   }
@@ -1395,6 +1669,10 @@ async function loadAttemptHistory() {
       <div style="text-align:center;margin-top:8px"><span class="badge ${pass?'badge-success':'badge-primary'}">${pass?'✅ Passed':'❌ Failed'}</span></div>
     </div>`;
   }).join('');
+  } catch(e) {
+    console.error('History error:',e);
+    el.innerHTML='<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">⚠️</div>Could not load history.<br><span style="font-size:.85em;color:var(--danger)">'+e.message+'</span></div>';
+  }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1437,8 +1715,8 @@ function renderQuestions() {
             <label class="option-label" for="opt_${i}_${l}">
               <span class="option-marker">${l}</span>
               ${multi
-                ?`<pre style="margin:0;font-family:'JetBrains Mono',monospace;font-size:.83em;background:#f8fafc;border-radius:6px;padding:8px;white-space:pre;overflow-x:auto;tab-size:4;flex:1">${escHtml(opt)}</pre>`
-                :`<span style="font-family:'JetBrains Mono',monospace;font-size:.9em">${escHtml(opt)}</span>`
+                ?`<pre style="margin:0;font-family:'JetBrains Mono',monospace;font-size:.83em;background:#f8fafc;border-radius:6px;padding:8px;white-space:pre-wrap;word-break:break-word;overflow-wrap:break-word;overflow-x:auto;tab-size:4;flex:1;min-width:0;box-sizing:border-box;">${escHtml(opt)}</pre>`
+                :`<span style="font-family:'JetBrains Mono',monospace;font-size:.9em;word-break:break-word;overflow-wrap:break-word;flex:1;min-width:0;">${escHtml(opt)}</span>`
               }
             </label>
           </div>`;
@@ -1679,6 +1957,117 @@ function fmtDate(d){
   try{ return new Date(d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); }
   catch(e){ return String(d).slice(0,10); }
 }
+// ════ PDF DOWNLOAD ════
+function downloadResultPDF() {
+  try {
+    const { jsPDF } = window.jspdf;
+    if (!jsPDF) { showToast('❌ PDF library not loaded', 'error'); return; }
+    const doc = new jsPDF({ orientation:'p', unit:'mm', format:'a4' });
+    const W = doc.internal.pageSize.getWidth();
+    let y = 20;
+    // Header
+    doc.setFillColor(126,34,206);
+    doc.rect(0,0,W,18,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(14);
+    doc.text('BALU SMART QUIZ — Result Certificate', W/2, 12, {align:'center'});
+    y = 30;
+    doc.setTextColor(30,27,46);
+    // Student info
+    doc.setFontSize(11);
+    doc.setFont('helvetica','bold');
+    doc.text('Student: ', 15, y);
+    doc.setFont('helvetica','normal');
+    doc.text((currentUser?.name||currentUser?.email||'—'), 38, y);
+    y += 8;
+    doc.setFont('helvetica','bold');
+    doc.text('Quiz: ', 15, y);
+    doc.setFont('helvetica','normal');
+    doc.text(document.getElementById('quizScreenTitle')?.textContent||'—', 30, y);
+    y += 8;
+    doc.setFont('helvetica','bold');
+    doc.text('Date: ', 15, y);
+    doc.setFont('helvetica','normal');
+    doc.text(new Date().toLocaleString(), 30, y);
+    y += 8;
+    doc.setFont('helvetica','bold');
+    doc.text('Trainer: ', 15, y);
+    doc.setFont('helvetica','normal');
+    doc.text(TRAINER_NAME + ' · ' + TRAINER_SUBJECT, 34, y);
+    y += 6;
+    // Score circle (text based)
+    const scoreEl = document.querySelector('#scoreCircleWrap .score-big');
+    const pctEl   = document.querySelector('#scoreCircleWrap .score-pct');
+    const score = scoreEl?.textContent || '?';
+    const pct   = pctEl?.textContent  || '?';
+    doc.setFillColor(126,34,206);
+    doc.circle(W/2, y+18, 22, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(22);
+    doc.setFont('helvetica','bold');
+    doc.text(score, W/2, y+16, {align:'center'});
+    doc.setFontSize(10);
+    doc.text(pct, W/2, y+24, {align:'center'});
+    y += 48;
+    doc.setTextColor(30,27,46);
+    // Result message
+    const msgEl = document.getElementById('resultMsg');
+    if (msgEl) {
+      doc.setFontSize(13);
+      doc.setFont('helvetica','bold');
+      doc.setTextColor(126,34,206);
+      doc.text(msgEl.textContent, W/2, y, {align:'center'});
+      y += 8;
+    }
+    // Stats
+    const statsEl = document.getElementById('resultStats');
+    if (statsEl) {
+      doc.setFontSize(9);
+      doc.setFont('helvetica','normal');
+      doc.setTextColor(100,116,139);
+      const statsText = statsEl.innerText.replace(/\s+/g,' ').trim();
+      const lines = doc.splitTextToSize(statsText, W-30);
+      doc.text(lines, W/2, y, {align:'center'});
+      y += lines.length*5 + 6;
+    }
+    doc.setTextColor(30,27,46);
+    // Review section
+    const reviewItems = document.querySelectorAll('#reviewList .review-item');
+    if (reviewItems.length > 0) {
+      doc.setDrawColor(233,213,255);
+      doc.line(15, y, W-15, y); y += 8;
+      doc.setFontSize(11);
+      doc.setFont('helvetica','bold');
+      doc.text('Answer Review', 15, y); y += 8;
+      reviewItems.forEach((item, idx) => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        const qNum = item.querySelector('.review-q-num')?.textContent || `Q${idx+1}`;
+        const qText = item.querySelector('pre')?.textContent || item.querySelector('.review-q')?.textContent || '';
+        const verdict = item.querySelector('.review-verdict')?.textContent || '';
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(9);
+        doc.text(qNum + ' ' + verdict, 15, y); y += 5;
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(8);
+        doc.setTextColor(100,116,139);
+        const qLines = doc.splitTextToSize(qText.slice(0,200), W-30);
+        doc.text(qLines, 18, y);
+        y += qLines.length*4 + 5;
+        doc.setTextColor(30,27,46);
+      });
+    }
+    // Footer
+    doc.setFontSize(8);
+    doc.setTextColor(148,163,184);
+    doc.text('Generated by Balu Smart Quiz · ' + TRAINER_NAME, W/2, 290, {align:'center'});
+    const fname = (currentUser?.name||'student').replace(/\s+/g,'_') + '_result.pdf';
+    doc.save(fname);
+    showToast('✅ PDF downloaded!', 'success');
+  } catch(e) { console.error(e); showToast('❌ PDF error: ' + e.message, 'error'); }
+}
+
+// ════ END APP ════
 </script>
 </body>
 </html>
