@@ -524,6 +524,9 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
           <div class="card-sm" style="border-left:4px solid var(--accent);cursor:pointer" onclick="trainerTab('questions',null)"><strong>Step 3 ❓</strong><br><span style="font-size:.84em;color:var(--text-light)">Upload questions for a quiz</span></div>
           <div class="card-sm" style="border-left:4px solid var(--success);cursor:pointer" onclick="trainerTab('assign',null)"><strong>Step 4 📤</strong><br><span style="font-size:.84em;color:var(--text-light)">Assign quiz to students</span></div>
         </div>
+        <div style="margin-top:16px;">
+          <button class="btn btn-secondary" onclick="exportStudentsCSV()">⬇️ Export Students List (CSV)</button>
+        </div>
       </div>
     </div>
 
@@ -670,7 +673,12 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
             <select class="input" id="resLangFilter" onchange="loadResTopics()" style="width:auto;padding:8px 12px;font-size:.85em"><option value="">All Languages</option></select>
             <select class="input" id="resTopicFilter" onchange="loadResQuizFilter()" style="width:auto;padding:8px 12px;font-size:.85em"><option value="">All Topics</option></select>
             <select class="input" id="resQuizFilter" style="width:auto;padding:8px 12px;font-size:.85em"><option value="">All Quizzes</option></select>
+            <select class="input" id="resViewMode" style="width:auto;padding:8px 12px;font-size:.85em">
+              <option value="all">📋 All Results</option>
+              <option value="topic">📚 Topic-wise</option>
+            </select>
             <button class="btn btn-primary btn-sm" onclick="loadResults()">🔍 Load</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportResultsCSV()">⬇️ Export CSV</button>
           </div>
         </div>
         <div id="resultsTableWrap"><div class="empty-state"><div class="empty-icon">📈</div>Select filters and click Load</div></div>
@@ -774,6 +782,17 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
   </div>
 
 </div>
+</div>
+
+<!-- ═══ TOPPERS POPUP ═══════════════════════════════════════════ -->
+<div id="toppersOverlay" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:24px;padding:32px 28px;max-width:480px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.3);animation:popIn .5s cubic-bezier(.68,-.55,.265,1.55);text-align:center;">
+    <div style="font-size:2.8em;margin-bottom:8px;">🏆</div>
+    <div style="font-family:'Poppins',sans-serif;font-size:1.5em;font-weight:800;background:linear-gradient(135deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;">Quiz Toppers!</div>
+    <div id="toppersQuizName" style="font-size:.85em;color:var(--text-light);margin-bottom:20px;"></div>
+    <div id="toppersListEl" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;"></div>
+    <button class="btn btn-primary" onclick="closeToppersPopup()" style="width:100%;justify-content:center;">✅ Close</button>
+  </div>
 </div>
 
 <div id="toast"><span id="toastMsg"></span></div>
@@ -1695,6 +1714,11 @@ async function startQuiz(quizId, title, timeMinutes) {
       correct:data.correct };
   });
   if (!quizQuestions.length){ toast('❌ No questions in this quiz yet','error'); backToQuizzes(); return; }
+  // ── Shuffle questions for each student ──
+  for (let i=quizQuestions.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [quizQuestions[i],quizQuestions[j]]=[quizQuestions[j],quizQuestions[i]];
+  }
   currentQuizId=quizId; currentQIndex=0;
   quizStartedAt=new Date().toISOString();
   timeLeft=timeMinutes*60;
@@ -1853,6 +1877,8 @@ async function submitQuiz() {
   if (!asnSnap.empty) await asnSnap.docs[0].ref.update({status:'completed'});
   lastResult={score,total,percentage,questions:quizQuestions,answers};
   showResults(lastResult);
+  const quizTitle=document.getElementById('quizScreenTitle')?.textContent||'';
+  checkAndShowToppers(currentQuizId, quizTitle);
 }
 
 function showResults(data) {
@@ -2210,6 +2236,205 @@ function downloadResultPDF() {
     doc.save(fname);
     toast('✅ PDF downloaded!','success');
   } catch(e){ console.error(e); toast('❌ PDF error: '+e.message,'error'); }
+}
+
+// ════ FEATURE 2: TOPIC-WISE RESULTS (replaces loadResults) ════
+async function loadResults() {
+  const quizId   = document.getElementById('resQuizFilter').value;
+  const viewMode = document.getElementById('resViewMode')?.value||'all';
+  const wrap     = document.getElementById('resultsTableWrap');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div>Loading results…</div>';
+  if (resultsListener){ resultsListener(); resultsListener=null; }
+
+  let query = db.collection('attempts').orderBy('completedAt','desc');
+  if (quizId) query = db.collection('attempts').where('quizId','==',quizId).orderBy('completedAt','desc');
+
+  resultsListener = query.onSnapshot(async snap=>{
+    const attempts = snap.docs.map(d=>({attId:d.id,...d.data()}));
+    if (!attempts.length){ wrap.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>No results yet.</div>'; return; }
+
+    const [usersSnap,quizzesSnap,topicsSnap,langsSnap]=await Promise.all([
+      db.collection('users').get(), db.collection('quizzes').get(),
+      db.collection('topics').get(), db.collection('languages').get()
+    ]);
+    const users={},quizzes={},topics={},langs={};
+    usersSnap.docs.forEach(d=>users[d.id]={...d.data()});
+    quizzesSnap.docs.forEach(d=>quizzes[d.id]={...d.data()});
+    topicsSnap.docs.forEach(d=>topics[d.id]={...d.data()});
+    langsSnap.docs.forEach(d=>langs[d.id]={...d.data()});
+
+    // Store for CSV export
+    window._lastResultsData = attempts.map(a=>({...a,
+      _user:users[a.studentId]||{},
+      _quiz:quizzes[a.quizId]||{},
+      _topic:topics[(quizzes[a.quizId]||{}).topicId]||{},
+      _lang:langs[(quizzes[a.quizId]||{}).langId]||{}
+    }));
+
+    if (viewMode==='topic') {
+      // ── TOPIC-WISE GROUPED VIEW ──────────────────────────────
+      const grouped={};
+      attempts.forEach(a=>{
+        const q=quizzes[a.quizId]||{};
+        const t=topics[q.topicId]||{};
+        const l=langs[q.langId]||{};
+        const key=(l.name||'Unknown')+' › '+(t.name||'Unknown');
+        if(!grouped[key]) grouped[key]={label:key,attempts:[],pass:0,total:0,scores:[]};
+        grouped[key].attempts.push({...a,_user:users[a.studentId]||{},_quiz:q});
+        grouped[key].total++;
+        if((a.percentage||0)>=60) grouped[key].pass++;
+        grouped[key].scores.push(Number(a.percentage)||0);
+      });
+      wrap.innerHTML=Object.entries(grouped).map(([key,g])=>{
+        const avg=Math.round(g.scores.reduce((s,v)=>s+v,0)/g.scores.length);
+        const passRate=Math.round(g.pass/g.total*100);
+        return `<div class="card" style="margin-bottom:16px;border-left:4px solid var(--primary);">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1.05em;">${escHtml(key)}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <span class="badge badge-success">${g.pass}/${g.total} Passed</span>
+              <span class="badge badge-primary">Avg: ${avg}%</span>
+              <span class="badge" style="background:#e9d5ff;color:var(--primary)">Pass Rate: ${passRate}%</span>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="results-table">
+              <thead><tr><th>#</th><th>Student</th><th>Score</th><th>%</th><th>Status</th><th>Date</th></tr></thead>
+              <tbody>${g.attempts.sort((a,b)=>(b.percentage||0)-(a.percentage||0)).map((a,i)=>{
+                const pass=(a.percentage||0)>=60;
+                return `<tr>
+                  <td style="color:var(--text-light)">${i+1}</td>
+                  <td><strong>${escHtml(a._user.name||'')}</strong><br><span style="font-size:.77em;color:var(--text-light)">${escHtml(a._user.studentId||a._user.email||'')}</span></td>
+                  <td style="font-weight:700">${a.score}/${a.total}</td>
+                  <td><strong style="color:${pass?'var(--success)':'var(--danger)'}">${a.percentage}%</strong></td>
+                  <td><span class="badge ${pass?'badge-success':'badge-primary'}">${pass?'Passed':'Failed'}</span></td>
+                  <td style="font-size:.79em;color:var(--text-light)">${fmtDate(a.completedAt?.toDate?.()||a.completedAt)}</td>
+                </tr>`;
+              }).join('')}</tbody>
+            </table>
+          </div>
+        </div>`;
+      }).join('');
+    } else {
+      // ── ALL RESULTS TABLE VIEW ───────────────────────────────
+      wrap.innerHTML=`<div style="overflow-x:auto"><table class="results-table">
+        <thead><tr><th>#</th><th>Student</th><th>Language / Topic</th><th>Difficulty</th><th>Score</th><th>Percentage</th><th>Date</th></tr></thead>
+        <tbody>${attempts.map((a,i)=>{
+          const u=users[a.studentId]||{};
+          const q=quizzes[a.quizId]||{};
+          const t=topics[q.topicId]||{};
+          const l=langs[q.langId]||{};
+          const pct=Number(a.percentage)||0;
+          const pass=pct>=60;
+          return `<tr>
+            <td style="color:var(--text-light)">${i+1}</td>
+            <td><strong>${escHtml(u.name||'')}</strong><br><span style="font-size:.77em;color:var(--text-light)">${escHtml(u.studentId||u.email||'')}</span></td>
+            <td><strong>${escHtml(l.name||'')}</strong><br><span style="font-size:.77em;color:var(--text-light)">${escHtml(t.name||'')}</span></td>
+            <td><span class="badge badge-${(q.difficulty||'easy').toLowerCase()}">${diffIcon(q.difficulty)} ${q.difficulty||'—'}</span></td>
+            <td style="font-weight:700">${a.score}/${a.total}</td>
+            <td><strong style="color:${pass?'var(--success)':'var(--danger)'}">${pct}%</strong>
+              <div class="pct-bar"><div class="pct-fill" style="width:${pct}%;background:${pass?'linear-gradient(90deg,#10b981,#34d399)':'linear-gradient(90deg,#ef4444,#f87171)'}"></div></div>
+            </td>
+            <td style="font-size:.79em;color:var(--text-light)">${fmtDate(a.completedAt?.toDate?.()||a.completedAt)}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table></div>`;
+    }
+  });
+}
+
+// ════ FEATURE 3A: EXPORT STUDENTS CSV ════
+async function exportStudentsCSV() {
+  toast('⏳ Preparing students list…');
+  try {
+    const snap = await db.collection('users').where('role','==','student').get();
+    const students = snap.docs.map(d=>d.data());
+    if (!students.length){ toast('❌ No students found','error'); return; }
+    const headers = ['Name','Email','Student ID','Registered Date'];
+    const rows = students.map(s=>[
+      '"'+(s.name||'').replace(/"/g,'""')+'"',
+      '"'+(s.email||'')+'"',
+      '"'+(s.studentId||s.rollNo||'')+'"',
+      '"'+(s.createdAt?.toDate?.()||s.createdAt||'')+'"'
+    ]);
+    const csv = [headers.join(','),...rows.map(r=>r.join(','))].join('\n');
+    const blob = new Blob([csv],{type:'text/csv'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href=url; a.download='students_list_'+new Date().toISOString().slice(0,10)+'.csv';
+    a.click(); URL.revokeObjectURL(url);
+    toast('✅ Students list downloaded!');
+  } catch(e){ toast('❌ Error: '+e.message,'error'); }
+}
+
+// ════ FEATURE 3B: EXPORT RESULTS CSV ════
+function exportResultsCSV() {
+  const data = window._lastResultsData;
+  if (!data||!data.length){ toast('❌ Load results first then export','error'); return; }
+  const headers = ['#','Student Name','Email','Student ID','Language','Topic','Difficulty','Score','Total','Percentage','Status','Date'];
+  const rows = data.map((a,i)=>[
+    i+1,
+    '"'+(a._user.name||'').replace(/"/g,'""')+'"',
+    '"'+(a._user.email||'')+'"',
+    '"'+(a._user.studentId||'')+'"',
+    '"'+(a._lang.name||'')+'"',
+    '"'+(a._topic.name||'')+'"',
+    '"'+(a._quiz.difficulty||'')+'"',
+    a.score, a.total, (a.percentage||0)+'%',
+    ((a.percentage||0)>=60?'Passed':'Failed'),
+    '"'+fmtDate(a.completedAt?.toDate?.()||a.completedAt)+'"'
+  ]);
+  const csv = [headers.join(','),...rows.map(r=>r.join(','))].join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download='results_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+  toast('✅ Results exported!');
+}
+
+// ════ FEATURE 4: TOPPERS POPUP ════
+async function showToppersPopup(quizId, quizTitle) {
+  const overlay = document.getElementById('toppersOverlay');
+  document.getElementById('toppersQuizName').textContent = quizTitle||'';
+  document.getElementById('toppersListEl').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  overlay.style.display='flex';
+  try {
+    const snap = await db.collection('attempts').where('quizId','==',quizId).get();
+    const attempts = snap.docs.map(d=>d.data()).sort((a,b)=>(b.percentage||0)-(a.percentage||0));
+    const top5 = attempts.slice(0,5);
+    if (!top5.length){ document.getElementById('toppersListEl').innerHTML='<div style="color:var(--text-light)">No attempts yet</div>'; return; }
+    const usersSnap = await db.collection('users').get();
+    const users={};
+    usersSnap.docs.forEach(d=>users[d.id]={...d.data()});
+    const medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
+    document.getElementById('toppersListEl').innerHTML=top5.map((a,i)=>{
+      const u=users[a.studentId]||{};
+      const pass=(a.percentage||0)>=60;
+      return `<div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:${i===0?'linear-gradient(135deg,#fef9c3,#fef3c7)':i===1?'linear-gradient(135deg,#f1f5f9,#e2e8f0)':i===2?'linear-gradient(135deg,#fff7ed,#fed7aa)':'#f8fafc'};border-radius:12px;border:2px solid ${i===0?'#f59e0b':i===1?'#94a3b8':i===2?'#fb923c':'var(--border)'};">
+        <div style="font-size:1.8em;flex-shrink:0">${medals[i]}</div>
+        <div style="flex:1;text-align:left;">
+          <div style="font-weight:700;font-size:.97em;">${escHtml(u.name||u.email||'Student')}</div>
+          <div style="font-size:.78em;color:var(--text-light)">${escHtml(u.studentId||u.email||'')}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'Poppins',sans-serif;font-size:1.3em;font-weight:800;color:${pass?'var(--success)':'var(--danger)'}">${a.percentage}%</div>
+          <div style="font-size:.75em;color:var(--text-light)">${a.score}/${a.total}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){ document.getElementById('toppersListEl').innerHTML='<div style="color:var(--danger)">Error loading toppers</div>'; }
+}
+
+function closeToppersPopup() {
+  document.getElementById('toppersOverlay').style.display='none';
+}
+
+async function checkAndShowToppers(quizId, quizTitle) {
+  try {
+    const snap = await db.collection('attempts').where('quizId','==',quizId).get();
+    if (snap.size >= 2) setTimeout(()=>showToppersPopup(quizId,quizTitle), 1800);
+  } catch(e){}
 }
 
 // ════ END APP ════
