@@ -662,6 +662,25 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
         </div>
         <button class="btn btn-primary" onclick="doAssign()">📤 Assign Quiz</button>
       </div>
+
+      <!-- ── ASSIGNMENT OVERVIEW ── -->
+      <div class="card" style="margin-top:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+          <div class="section-title" style="margin:0">📋 Assignment Overview</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <select class="input" id="ovLangFilter" onchange="loadAssignmentOverview()" style="width:auto;padding:8px 12px;font-size:.85em"><option value="">All Languages</option></select>
+            <select class="input" id="ovTopicFilter" onchange="loadAssignmentOverview()" style="width:auto;padding:8px 12px;font-size:.85em"><option value="">All Topics</option></select>
+            <select class="input" id="ovStatusFilter" onchange="loadAssignmentOverview()" style="width:auto;padding:8px 12px;font-size:.85em">
+              <option value="">All Status</option>
+              <option value="pending">⏳ Pending</option>
+              <option value="completed">✅ Completed</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="loadAssignmentOverview()">🔄 Refresh</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportAssignmentsCSV()">⬇️ Export CSV</button>
+          </div>
+        </div>
+        <div id="assignmentOverviewWrap"><div class="empty-state"><div class="empty-icon">📋</div>Click Refresh to load assignments</div></div>
+      </div>
     </div>
 
     <!-- Results -->
@@ -1145,7 +1164,7 @@ function trainerTab(name, btn) {
   if (name==='languages')  loadLanguages();
   if (name==='topics')     populateLangDropdown('topicLangSel');
   if (name==='questions')  populateLangDropdown('qLangSel');
-  if (name==='assign')     { populateLangDropdown('aLangSel'); loadStudentsList(); }
+  if (name==='assign')     { populateLangDropdown('aLangSel'); loadStudentsList(); loadAssignmentOverview(); }
   if (name==='results')    { populateLangDropdown('resLangFilter'); }
 }
 
@@ -2441,6 +2460,138 @@ async function checkAndShowToppers(quizId, quizTitle) {
     const snap = await db.collection('attempts').where('quizId','==',quizId).get();
     if (snap.size >= 2) setTimeout(()=>showToppersPopup(quizId,quizTitle), 1800);
   } catch(e){}
+}
+
+// ════ ASSIGNMENT OVERVIEW ════
+async function loadAssignmentOverview() {
+  const wrap = document.getElementById('assignmentOverviewWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div>Loading assignments…</div>';
+
+  try {
+    const [asnSnap, usersSnap, quizzesSnap, topicsSnap, langsSnap] = await Promise.all([
+      db.collection('assignments').get(),
+      db.collection('users').where('role','==','student').get(),
+      db.collection('quizzes').get(),
+      db.collection('topics').get(),
+      db.collection('languages').get()
+    ]);
+
+    const users={}, quizzes={}, topics={}, langs={};
+    usersSnap.docs.forEach(d=>users[d.id]={...d.data()});
+    quizzesSnap.docs.forEach(d=>quizzes[d.id]={...d.data()});
+    topicsSnap.docs.forEach(d=>topics[d.id]={...d.data()});
+    langsSnap.docs.forEach(d=>langs[d.id]={...d.data()});
+
+    // Populate filter dropdowns
+    const ovLang  = document.getElementById('ovLangFilter');
+    const ovTopic = document.getElementById('ovTopicFilter');
+    if (ovLang.options.length<=1) {
+      langsSnap.docs.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent=d.data().name; ovLang.appendChild(o); });
+    }
+    if (ovTopic.options.length<=1) {
+      topicsSnap.docs.forEach(d=>{ const o=document.createElement('option'); o.value=d.id; o.textContent=d.data().name; ovTopic.appendChild(o); });
+    }
+
+    const filterLang   = ovLang?.value||'';
+    const filterTopic  = document.getElementById('ovTopicFilter')?.value||'';
+    const filterStatus = document.getElementById('ovStatusFilter')?.value||'';
+
+    let assignments = asnSnap.docs.map(d=>({asnId:d.id,...d.data()}));
+
+    // Apply filters
+    assignments = assignments.filter(a=>{
+      const q = quizzes[a.quizId]||{};
+      if (filterLang   && q.langId  !== filterLang)   return false;
+      if (filterTopic  && q.topicId !== filterTopic)   return false;
+      if (filterStatus && (a.status||'pending') !== filterStatus) return false;
+      return true;
+    });
+
+    // Store for export
+    window._lastAssignmentsData = assignments.map(a=>({...a,
+      _user:users[a.studentId]||{},
+      _quiz:quizzes[a.quizId]||{},
+      _topic:topics[(quizzes[a.quizId]||{}).topicId]||{},
+      _lang:langs[(quizzes[a.quizId]||{}).langId]||{}
+    }));
+
+    if (!assignments.length) {
+      wrap.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div>No assignments found</div>'; return;
+    }
+
+    // Group by Language › Topic
+    const grouped={};
+    assignments.forEach(a=>{
+      const q = quizzes[a.quizId]||{};
+      const t = topics[q.topicId]||{};
+      const l = langs[q.langId]||{};
+      const key = (l.name||'Unknown')+' › '+(t.name||'Unknown');
+      if (!grouped[key]) grouped[key]={langName:l.name||'?', topicName:t.name||'?', icon:l.icon||'💻', difficulty:q.difficulty||'', rows:[], pending:0, completed:0};
+      grouped[key].rows.push({...a, _user:users[a.studentId]||{}});
+      if ((a.status||'pending')==='completed') grouped[key].completed++;
+      else grouped[key].pending++;
+    });
+
+    wrap.innerHTML = Object.entries(grouped).map(([key,g])=>`
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px;padding:12px 16px;background:linear-gradient(135deg,#f5f0ff,#fff7ed);border-radius:12px;border:2px solid #e9d5ff;">
+          <span style="font-size:1.5em">${g.icon}</span>
+          <div style="flex:1;">
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1em;color:var(--text)">${escHtml(key)}</div>
+            <div style="font-size:.78em;color:var(--text-light);margin-top:2px;">
+              <span class="badge badge-${(g.difficulty||'easy').toLowerCase()}" style="margin-right:6px">${diffIcon(g.difficulty)} ${g.difficulty||'—'}</span>
+              <span style="color:var(--success);font-weight:600">✅ ${g.completed} completed</span>
+              &nbsp;·&nbsp;
+              <span style="color:var(--accent);font-weight:600">⏳ ${g.pending} pending</span>
+              &nbsp;·&nbsp;
+              <span style="color:var(--text-light)">${g.rows.length} total</span>
+            </div>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="results-table">
+            <thead><tr><th>#</th><th>Student Name</th><th>Student ID</th><th>Email</th><th>Status</th><th>Due Date</th></tr></thead>
+            <tbody>${g.rows.map((a,i)=>{
+              const done=(a.status||'pending')==='completed';
+              return `<tr>
+                <td style="color:var(--text-light)">${i+1}</td>
+                <td><strong>${escHtml(a._user.name||'—')}</strong></td>
+                <td style="font-size:.85em;color:var(--text-light)">${escHtml(a._user.studentId||'—')}</td>
+                <td style="font-size:.82em;color:var(--text-light)">${escHtml(a._user.email||'—')}</td>
+                <td><span class="badge ${done?'badge-success':'badge-primary'}">${done?'✅ Completed':'⏳ Pending'}</span></td>
+                <td style="font-size:.82em;color:var(--text-light)">${a.dueDate||'—'}</td>
+              </tr>`;
+            }).join('')}</tbody>
+          </table>
+        </div>
+      </div>`).join('');
+
+  } catch(e){ wrap.innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div>Error: '+e.message+'</div>'; }
+}
+
+// ════ EXPORT ASSIGNMENTS CSV ════
+function exportAssignmentsCSV() {
+  const data = window._lastAssignmentsData;
+  if (!data||!data.length){ toast('❌ Click Refresh first','error'); return; }
+  const headers = ['Student Name','Student ID','Email','Language','Topic','Difficulty','Status','Due Date'];
+  const rows = data.map(a=>[
+    '"'+(a._user.name||'').replace(/"/g,'""')+'"',
+    '"'+(a._user.studentId||'')+'"',
+    '"'+(a._user.email||'')+'"',
+    '"'+(a._lang.name||'')+'"',
+    '"'+(a._topic.name||'')+'"',
+    '"'+(a._quiz.difficulty||'')+'"',
+    '"'+(a.status||'pending')+'"',
+    '"'+(a.dueDate||'')+'"'
+  ]);
+  const csv = [headers.join(','),...rows.map(r=>r.join(','))].join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download='assignments_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+  toast('✅ Assignments exported!');
 }
 
 // ════ END APP ════
