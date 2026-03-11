@@ -814,6 +814,30 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
   </div>
 </div>
 
+<!-- ═══ SUBMIT QUIZ CONFIRM MODAL ════════════════════════════════ -->
+<div id="submitModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:20px;padding:36px 32px;max-width:400px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.25);animation:popIn .35s cubic-bezier(.68,-.55,.265,1.55);text-align:center;">
+    <div style="width:64px;height:64px;background:linear-gradient(135deg,#e9d5ff,#ddd6fe);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2em;margin:0 auto 16px;">✅</div>
+    <div style="font-family:'Poppins',sans-serif;font-size:1.25em;font-weight:800;color:var(--text);margin-bottom:8px;">Submit Quiz?</div>
+    <div id="submitModalMsg" style="color:var(--text-light);font-size:.9em;margin-bottom:28px;"></div>
+    <div style="display:flex;gap:12px;">
+      <button onclick="closeSubmitModal()" style="flex:1;padding:12px;border-radius:10px;border:2px solid var(--border);background:white;font-family:'Inter',sans-serif;font-weight:600;font-size:.95em;cursor:pointer;color:var(--text);transition:var(--ease);" onmouseover="this.style.background='#f5f0ff'" onmouseout="this.style.background='white'">Cancel</button>
+      <button onclick="closeSubmitModal();submitQuiz()" style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--grad-primary);color:white;font-family:'Inter',sans-serif;font-weight:700;font-size:.95em;cursor:pointer;box-shadow:0 4px 15px rgba(126,34,206,.35);transition:var(--ease);">Yes, Submit</button>
+    </div>
+  </div>
+</div>
+<div id="logoutModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:20px;padding:36px 32px;max-width:380px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.25);animation:popIn .35s cubic-bezier(.68,-.55,.265,1.55);text-align:center;">
+    <div style="width:64px;height:64px;background:linear-gradient(135deg,#fee2e2,#fecaca);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2em;margin:0 auto 16px;">🚪</div>
+    <div style="font-family:'Poppins',sans-serif;font-size:1.25em;font-weight:800;color:var(--text);margin-bottom:8px;">Logout?</div>
+    <div style="color:var(--text-light);font-size:.9em;margin-bottom:28px;">Are you sure you want to logout from <strong>Balu Smart Quiz</strong>?</div>
+    <div style="display:flex;gap:12px;">
+      <button onclick="closeLogoutModal()" style="flex:1;padding:12px;border-radius:10px;border:2px solid var(--border);background:white;font-family:'Inter',sans-serif;font-weight:600;font-size:.95em;cursor:pointer;color:var(--text);transition:var(--ease);" onmouseover="this.style.background='#f5f0ff'" onmouseout="this.style.background='white'">Cancel</button>
+      <button onclick="confirmLogout()" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#ef4444,#f87171);color:white;font-family:'Inter',sans-serif;font-weight:700;font-size:.95em;cursor:pointer;box-shadow:0 4px 15px rgba(239,68,68,.35);transition:var(--ease);">Yes, Logout</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"><span id="toastMsg"></span></div>
 
 <!-- ═══ SECURITY BLOCK ═══════════════════════════════════════════ -->
@@ -1118,10 +1142,36 @@ async function doSignUp() {
 }
 
 async function doLogout() {
-  if (!confirm('Logout?')) return;
+  showLogoutModal();
+}
+
+async function confirmLogout() {
+  closeLogoutModal();
   if (resultsListener) { resultsListener(); resultsListener=null; }
   await auth.signOut();
   location.reload();
+}
+
+function showLogoutModal() {
+  document.getElementById('logoutModal').style.display='flex';
+}
+
+function closeLogoutModal() {
+  document.getElementById('logoutModal').style.display='none';
+}
+
+function showSubmitModal(unanswered) {
+  const total = quizQuestions.length;
+  const answered = total - unanswered;
+  const msg = unanswered > 0
+    ? `You have answered <strong style="color:var(--success)">${answered}</strong> out of <strong>${total}</strong> questions.<br><span style="color:var(--danger);font-weight:600">⚠️ ${unanswered} question(s) still unanswered!</span>`
+    : `You have answered all <strong style="color:var(--success)">${total}</strong> questions.<br><span style="color:var(--success);">Ready to submit!</span>`;
+  document.getElementById('submitModalMsg').innerHTML = msg;
+  document.getElementById('submitModal').style.display='flex';
+}
+
+function closeSubmitModal() {
+  document.getElementById('submitModal').style.display='none';
 }
 
 function showMainApp() {
@@ -1870,8 +1920,7 @@ function clearAutoSave(){ if(currentUser) localStorage.removeItem('bsq_save_'+cu
 
 function confirmSubmit() {
   const unanswered=quizQuestions.filter((_,i)=>!document.querySelector(`input[name="q_${i}"]:checked`)).length;
-  if (unanswered>0&&!confirm(`${unanswered} question(s) unanswered. Submit anyway?`)) return;
-  submitQuiz();
+  showSubmitModal(unanswered);
 }
 
 async function submitQuiz() {
