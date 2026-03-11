@@ -2246,11 +2246,17 @@ async function loadResults() {
   wrap.innerHTML = '<div class="loading"><div class="spinner"></div>Loading results…</div>';
   if (resultsListener){ resultsListener(); resultsListener=null; }
 
-  let query = db.collection('attempts').orderBy('completedAt','desc');
-  if (quizId) query = db.collection('attempts').where('quizId','==',quizId).orderBy('completedAt','desc');
+  let query = db.collection('attempts');
+  if (quizId) query = db.collection('attempts').where('quizId','==',quizId);
 
   resultsListener = query.onSnapshot(async snap=>{
-    const attempts = snap.docs.map(d=>({attId:d.id,...d.data()}));
+    // Sort newest first on client side — avoids Firestore composite index
+    const attempts = snap.docs.map(d=>({attId:d.id,...d.data()}))
+      .sort((a,b)=>{
+        const ta=a.completedAt?.toDate?.()||new Date(a.completedAt||0);
+        const tb=b.completedAt?.toDate?.()||new Date(b.completedAt||0);
+        return tb-ta;
+      });
     if (!attempts.length){ wrap.innerHTML='<div class="empty-state"><div class="empty-icon">📭</div>No results yet.</div>'; return; }
 
     const [usersSnap,quizzesSnap,topicsSnap,langsSnap]=await Promise.all([
