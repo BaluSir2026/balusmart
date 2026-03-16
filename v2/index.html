@@ -504,6 +504,7 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
       <button class="tab-btn" onclick="trainerTab('questions',this)">❓ Questions</button>
       <button class="tab-btn" onclick="trainerTab('assign',this)">📤 Assign</button>
       <button class="tab-btn" onclick="trainerTab('results',this)">📈 Results</button>
+      <button class="tab-btn" onclick="trainerTab('feedback',this)">💬 Feedback</button>
     </div>
 
     <!-- Dashboard -->
@@ -527,6 +528,24 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
         <div style="margin-top:16px;">
           <button class="btn btn-secondary" onclick="exportStudentsCSV()">⬇️ Export Students List (CSV)</button>
         </div>
+      </div>
+
+      <!-- ANNOUNCEMENTS BOARD -->
+      <div class="card" style="margin-top:16px;">
+        <div class="section-title">📢 Announcements / Notice Board</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+          <input class="input" id="noticeTitle" placeholder="Notice title (e.g. Python Quiz Due Friday)">
+          <textarea class="input" id="noticeBody" rows="3" placeholder="Write your announcement here…" style="resize:vertical;font-family:'Inter',sans-serif;"></textarea>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <select class="input" id="noticePriority" style="width:auto;padding:8px 12px;font-size:.85em">
+              <option value="normal">📌 Normal</option>
+              <option value="important">⚠️ Important</option>
+              <option value="urgent">🔴 Urgent</option>
+            </select>
+            <button class="btn btn-primary" onclick="postNotice()">📤 Post Notice</button>
+          </div>
+        </div>
+        <div id="noticesTrainerWrap"><div class="loading"><div class="spinner"></div>Loading notices…</div></div>
       </div>
     </div>
 
@@ -703,6 +722,31 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
         <div id="resultsTableWrap"><div class="empty-state"><div class="empty-icon">📈</div>Select filters and click Load</div></div>
       </div>
     </div>
+
+    <!-- FEEDBACK TAB -->
+    <div class="tab-content" id="tab-feedback">
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+          <div class="section-title" style="margin:0">💬 Student Feedback & Reviews</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <select class="input" id="fbFilterQuiz" style="width:auto;padding:8px 12px;font-size:.85em"><option value="">All Quizzes</option></select>
+            <select class="input" id="fbFilterRating" style="width:auto;padding:8px 12px;font-size:.85em">
+              <option value="">All Ratings</option>
+              <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+              <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+              <option value="3">⭐⭐⭐ 3 Stars</option>
+              <option value="2">⭐⭐ 2 Stars</option>
+              <option value="1">⭐ 1 Star</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="loadTrainerFeedback()">🔍 Load</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportFeedbackCSV()">⬇️ Export CSV</button>
+          </div>
+        </div>
+        <!-- Summary Stats -->
+        <div id="feedbackSummary" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px;"></div>
+        <div id="feedbackTrainerList"><div class="empty-state"><div class="empty-icon">💬</div>Click Load to see student feedback</div></div>
+      </div>
+    </div>
   </div>
 
   <!-- ══ STUDENT VIEW ══ -->
@@ -711,6 +755,8 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
       <div class="tab-nav" style="margin-bottom:16px;">
         <button class="tab-btn active" id="stuTab1" onclick="stuTab('quizzes',this)">📋 My Quizzes</button>
         <button class="tab-btn" id="stuTab2" onclick="stuTab('history',this)">📊 My History</button>
+        <button class="tab-btn" id="stuTab3" onclick="stuTab('performance',this)">🏅 Performance</button>
+        <button class="tab-btn" id="stuTab4" onclick="stuTab('notices',this)">📢 Notices</button>
       </div>
       <div id="stuTabQuizzes">
         <!-- ABOUT TRAINER CARD -->
@@ -746,6 +792,16 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
           </div>
         </div>
         <div id="attemptHistoryGrid" class="quiz-grid"><div class="loading"><div class="spinner"></div>Loading…</div></div>
+      </div>
+
+      <!-- PERFORMANCE TAB -->
+      <div id="stuTabPerformance" class="hidden">
+        <div id="performanceDashboard"><div class="empty-state"><div class="empty-icon">🏅</div>Loading your performance…</div></div>
+      </div>
+
+      <!-- NOTICES TAB -->
+      <div id="stuTabNotices" class="hidden">
+        <div id="noticesStudentWrap"><div class="empty-state"><div class="empty-icon">📢</div>Loading notices…</div></div>
       </div>
     </div>
     <div id="quizTakingScreen" class="hidden">
@@ -789,6 +845,7 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px;">
           <button class="btn btn-secondary" onclick="toggleReview()">📖 Review Answers</button>
           <button class="btn btn-secondary" onclick="downloadResultPDF()" id="pdfBtn">⬇️ Download PDF</button>
+          <button class="btn btn-success hidden" onclick="downloadCertificate()" id="certBtn" style="background:linear-gradient(135deg,#f59e0b,#d97706);border:none;color:white;">🏆 Download Certificate</button>
           <button class="btn btn-primary" onclick="backToQuizzes()">← Back to My Quizzes</button>
         </div>
         <div class="hidden" id="reviewSection">
@@ -796,8 +853,59 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
           <div class="section-title">📖 Answer Review</div>
           <div id="reviewList"></div>
         </div>
+
+        <!-- FEEDBACK SECTION -->
+        <div id="feedbackSection">
+          <hr style="border:none;border-top:2px solid var(--border);margin:24px 0">
+          <div class="section-title">💬 Rate & Review This Quiz</div>
+          <div id="feedbackAlreadyDone" class="hidden" style="text-align:center;padding:16px;background:#f0fdf4;border-radius:12px;color:var(--success);font-weight:600;">✅ You have already submitted feedback for this quiz. Thank you!</div>
+          <div id="feedbackForm">
+            <!-- Star Rating -->
+            <div style="text-align:center;margin-bottom:20px;">
+              <div style="font-size:.9em;color:var(--text-light);margin-bottom:10px;font-weight:600;">How would you rate this quiz?</div>
+              <div id="starRating" style="display:flex;justify-content:center;gap:8px;font-size:2.4em;cursor:pointer;">
+                ${[1,2,3,4,5].map(i=>`<span class="star-btn" data-val="${i}" onclick="setRating(${i})" style="transition:transform .15s;color:#d1d5db;" title="${i} star${i>1?'s':''}">★</span>`).join('')}
+              </div>
+              <div id="ratingLabel" style="font-size:.82em;color:var(--text-light);margin-top:6px;font-weight:600;min-height:18px;"></div>
+            </div>
+
+            <!-- Difficulty -->
+            <div style="margin-bottom:16px;">
+              <div style="font-size:.88em;font-weight:600;color:var(--text);margin-bottom:8px;">Quiz Difficulty felt:</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                ${['Too Easy','Just Right','Challenging','Very Hard'].map(d=>`
+                  <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:2px solid var(--border);border-radius:99px;cursor:pointer;font-size:.85em;transition:all .2s;" class="diff-opt">
+                    <input type="radio" name="fbDiff" value="${d}" style="display:none;" onchange="highlightDiff(this)">
+                    <span>${d}</span>
+                  </label>`).join('')}
+              </div>
+            </div>
+
+            <!-- Like / Dislike -->
+            <div style="margin-bottom:16px;">
+              <div style="font-size:.88em;font-weight:600;color:var(--text);margin-bottom:8px;">Overall experience:</div>
+              <div style="display:flex;gap:10px;">
+                <button id="likeBtn" onclick="toggleLike('like')" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--border);background:white;font-size:1.1em;cursor:pointer;transition:all .2s;">👍 Liked it</button>
+                <button id="dislikeBtn" onclick="toggleLike('dislike')" style="flex:1;padding:10px;border-radius:12px;border:2px solid var(--border);background:white;font-size:1.1em;cursor:pointer;transition:all .2s;">👎 Needs work</button>
+              </div>
+            </div>
+
+            <!-- Comment -->
+            <div style="margin-bottom:16px;">
+              <div style="font-size:.88em;font-weight:600;color:var(--text);margin-bottom:8px;">Your comment (optional):</div>
+              <textarea id="fbComment" class="input" rows="3" placeholder="Share your thoughts about this quiz — what was good, what could be improved…" style="resize:vertical;font-family:'Inter',sans-serif;font-size:.9em;"></textarea>
+            </div>
+
+            <button onclick="submitFeedback()" class="btn btn-primary" style="width:100%;justify-content:center;">📤 Submit Feedback</button>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <!-- FEEDBACK WALL (public reviews) -->
+      <div class="card" id="feedbackWall" style="margin-top:16px;">
+        <div class="section-title">🌟 What Others Say</div>
+        <div id="feedbackWallList"><div class="loading"><div class="spinner"></div>Loading reviews…</div></div>
+      </div>
   </div>
 
 </div>
@@ -811,6 +919,26 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
     <div id="toppersQuizName" style="font-size:.85em;color:var(--text-light);margin-bottom:20px;"></div>
     <div id="toppersListEl" style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;"></div>
     <button class="btn btn-primary" onclick="closeToppersPopup()" style="width:100%;justify-content:center;">✅ Close</button>
+  </div>
+</div>
+
+<!-- ═══ TIMER WARNING MODAL ══════════════════════════════════════ -->
+<div id="timerWarnModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:20px;padding:32px 28px;max-width:360px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.25);animation:popIn .35s cubic-bezier(.68,-.55,.265,1.55);text-align:center;">
+    <div style="font-size:3em;margin-bottom:10px;" id="timerWarnIcon">⚠️</div>
+    <div style="font-family:'Poppins',sans-serif;font-size:1.2em;font-weight:800;color:var(--danger);margin-bottom:8px;" id="timerWarnTitle">5 Minutes Left!</div>
+    <div style="color:var(--text-light);font-size:.9em;margin-bottom:24px;" id="timerWarnMsg">Please review your answers and submit soon.</div>
+    <button onclick="document.getElementById('timerWarnModal').style.display='none'" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#ef4444,#f87171);color:white;font-family:'Inter',sans-serif;font-weight:700;font-size:.95em;cursor:pointer;">OK, Got it!</button>
+  </div>
+</div>
+
+<!-- ═══ TIME UP MODAL ════════════════════════════════════════════ -->
+<div id="timeUpModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:20px;padding:36px 28px;max-width:380px;width:90%;box-shadow:0 25px 60px rgba(0,0,0,0.3);animation:popIn .4s cubic-bezier(.68,-.55,.265,1.55);text-align:center;">
+    <div style="font-size:3.5em;margin-bottom:10px;">⏰</div>
+    <div style="font-family:'Poppins',sans-serif;font-size:1.3em;font-weight:800;color:var(--danger);margin-bottom:8px;">Time's Up!</div>
+    <div style="color:var(--text-light);font-size:.9em;margin-bottom:8px;">Your quiz is being submitted automatically…</div>
+    <div class="spinner" style="margin:16px auto;width:28px;height:28px;border-width:3px;"></div>
   </div>
 </div>
 
@@ -1205,17 +1333,18 @@ function trainerTab(name, btn) {
   if (btn) btn.classList.add('active');
   else {
     const btns = document.querySelectorAll('#trainerTabNav .tab-btn');
-    const names = ['dashboard','languages','topics','questions','assign','results'];
+    const names = ['dashboard','languages','topics','questions','assign','results','feedback'];
     const idx = names.indexOf(name);
     if (idx>=0) btns[idx]?.classList.add('active');
   }
   document.getElementById('tab-'+name).classList.add('active');
-  if (name==='dashboard')  loadDashboard();
+  if (name==='dashboard')  { loadDashboard(); loadNoticesTrainer(); }
   if (name==='languages')  loadLanguages();
   if (name==='topics')     populateLangDropdown('topicLangSel');
   if (name==='questions')  populateLangDropdown('qLangSel');
   if (name==='assign')     { populateLangDropdown('aLangSel'); loadStudentsList(); loadAssignmentOverview(); }
   if (name==='results')    { populateLangDropdown('resLangFilter'); }
+  if (name==='feedback')   { loadTrainerFeedback(); populateFeedbackQuizFilter(); }
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1653,11 +1782,17 @@ async function loadResults() {
 //  STUDENT — QUIZZES
 // ════════════════════════════════════════════════════════════════
 function stuTab(tab, btn) {
-  document.getElementById('stuTabQuizzes').classList.toggle('hidden', tab!=='quizzes');
-  document.getElementById('stuTabHistory').classList.toggle('hidden', tab!=='history');
-  document.getElementById('stuTab1').classList.toggle('active', tab==='quizzes');
-  document.getElementById('stuTab2').classList.toggle('active', tab==='history');
+  ['stuTabQuizzes','stuTabHistory','stuTabPerformance','stuTabNotices'].forEach(id=>{
+    document.getElementById(id)?.classList.add('hidden');
+  });
+  ['stuTab1','stuTab2','stuTab3','stuTab4'].forEach(id=>{
+    document.getElementById(id)?.classList.remove('active');
+  });
+  document.getElementById('stuTab'+({'quizzes':'1','history':'2','performance':'3','notices':'4'}[tab]))?.classList.add('active');
+  document.getElementById('stuTab'+tab.charAt(0).toUpperCase()+tab.slice(1))?.classList.remove('hidden');
   if (tab==='history') loadAttemptHistory();
+  if (tab==='performance') loadPerformanceDashboard();
+  if (tab==='notices') loadNoticesStudent();
 }
 
 async function loadMyQuizzes() {
@@ -1875,8 +2010,23 @@ function startTimer() {
   timerInterval=setInterval(()=>{
     timeLeft--;
     updateTimerDisplay();
-    if (timeLeft<=0){ clearInterval(timerInterval); toast('⏰ Time up! Submitting…','warning'); setTimeout(submitQuiz,1500); }
-    if (timeLeft===60) toast('⚠️ 1 minute remaining!','warning');
+    if (timeLeft<=0){
+      clearInterval(timerInterval);
+      document.getElementById('timeUpModal').style.display='flex';
+      setTimeout(()=>{ document.getElementById('timeUpModal').style.display='none'; submitQuiz(); },2500);
+    }
+    if (timeLeft===300){ // 5 minutes
+      document.getElementById('timerWarnIcon').textContent='⚠️';
+      document.getElementById('timerWarnTitle').textContent='5 Minutes Left!';
+      document.getElementById('timerWarnMsg').textContent='Please review your answers and submit soon.';
+      document.getElementById('timerWarnModal').style.display='flex';
+    }
+    if (timeLeft===60){ // 1 minute
+      document.getElementById('timerWarnIcon').textContent='🔴';
+      document.getElementById('timerWarnTitle').textContent='Only 1 Minute Left!';
+      document.getElementById('timerWarnMsg').textContent='Hurry! Submit your quiz before time runs out!';
+      document.getElementById('timerWarnModal').style.display='flex';
+    }
     if (timeLeft%60===0&&timeLeft>0) autoSaveProgress();
   },1000);
 }
@@ -1965,6 +2115,21 @@ function showResults(data) {
     <div class="stat-box"><div class="stat-num" style="color:var(--danger)">${data.total-data.score}</div><div class="stat-lbl">Wrong</div></div>
     <div class="stat-box"><div class="stat-num">${data.total}</div><div class="stat-lbl">Total</div></div>
     <div class="stat-box"><div class="stat-num" style="color:${pass?'var(--success)':'var(--danger)'}">${data.percentage}%</div><div class="stat-lbl">Score</div></div>`;
+  // Show certificate button only if passed
+  const certBtn=document.getElementById('certBtn');
+  if (certBtn) certBtn.classList.toggle('hidden', !pass);
+  // Reset feedback form
+  currentFbRating=0; currentFbLike=null;
+  document.querySelectorAll('.star-btn').forEach(s=>{ s.style.color='#d1d5db'; s.style.transform='scale(1)'; });
+  document.getElementById('ratingLabel').textContent='';
+  const fbComment=document.getElementById('fbComment'); if(fbComment) fbComment.value='';
+  document.querySelectorAll('input[name="fbDiff"]').forEach(r=>r.checked=false);
+  document.querySelectorAll('.diff-opt').forEach(l=>{ l.style.borderColor='var(--border)'; l.style.background='white'; l.style.color='var(--text)'; });
+  const likeBtn=document.getElementById('likeBtn'); if(likeBtn){ likeBtn.style.background='white'; likeBtn.style.borderColor='var(--border)'; }
+  const dislikeBtn=document.getElementById('dislikeBtn'); if(dislikeBtn){ dislikeBtn.style.background='white'; dislikeBtn.style.borderColor='var(--border)'; }
+  // Check if already submitted feedback & load wall
+  checkExistingFeedback(currentQuizId);
+  loadFeedbackWall(currentQuizId);
 }
 
 function toggleReview() {
@@ -2641,6 +2806,512 @@ function exportAssignmentsCSV() {
   a.href=url; a.download='assignments_'+new Date().toISOString().slice(0,10)+'.csv';
   a.click(); URL.revokeObjectURL(url);
   toast('✅ Assignments exported!');
+}
+
+// ════ CERTIFICATE GENERATION ════
+function downloadCertificate() {
+  try {
+    const { jsPDF } = window.jspdf;
+    if (!jsPDF) { toast('❌ PDF library not loaded','error'); return; }
+    if (!lastResult) { toast('❌ No result data','error'); return; }
+    const { score, total, percentage } = lastResult;
+    const studentName = stripEmoji(currentUser?.name||currentUser?.email||'Student');
+    const quizTitle   = stripEmoji(document.getElementById('quizScreenTitle')?.textContent||'Quiz');
+    const dateStr     = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+
+    const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+    const W=297, H=210;
+
+    // Background gradient-style
+    doc.setFillColor(245,240,255); doc.rect(0,0,W,H,'F');
+
+    // Gold border double frame
+    doc.setDrawColor(212,175,55); doc.setLineWidth(3);
+    doc.rect(8,8,W-16,H-16);
+    doc.setLineWidth(1);
+    doc.rect(12,12,W-24,H-24);
+
+    // Header purple band
+    doc.setFillColor(126,34,206); doc.rect(0,0,W,32,'F');
+    doc.setFillColor(234,88,12);  doc.rect(0,30,W,4,'F');
+
+    // App name
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(18);
+    doc.text('BALU SMART QUIZ', W/2, 12, {align:'center'});
+    doc.setFontSize(10); doc.setFont('helvetica','normal');
+    doc.text('Aditya Degree & PG College for Women (A), Kakinada', W/2, 22, {align:'center'});
+
+    // Certificate title
+    doc.setTextColor(126,34,206); doc.setFont('helvetica','bold'); doc.setFontSize(28);
+    doc.text('CERTIFICATE OF ACHIEVEMENT', W/2, 58, {align:'center'});
+
+    // Decorative line
+    doc.setDrawColor(212,175,55); doc.setLineWidth(1);
+    doc.line(40,63,W-40,63);
+
+    // This is to certify
+    doc.setTextColor(100,116,139); doc.setFont('helvetica','normal'); doc.setFontSize(12);
+    doc.text('This is to certify that', W/2, 76, {align:'center'});
+
+    // Student name
+    doc.setTextColor(30,27,46); doc.setFont('helvetica','bold'); doc.setFontSize(26);
+    doc.text(studentName, W/2, 92, {align:'center'});
+
+    // Underline name
+    const nameW=doc.getTextWidth(studentName);
+    doc.setDrawColor(212,175,55); doc.setLineWidth(0.8);
+    doc.line(W/2-nameW/2, 95, W/2+nameW/2, 95);
+
+    // has successfully completed
+    doc.setTextColor(100,116,139); doc.setFont('helvetica','normal'); doc.setFontSize(12);
+    doc.text('has successfully completed the quiz', W/2, 106, {align:'center'});
+
+    // Quiz title
+    doc.setTextColor(126,34,206); doc.setFont('helvetica','bold'); doc.setFontSize(16);
+    const titleLines = doc.splitTextToSize(quizTitle, W-80);
+    doc.text(titleLines, W/2, 118, {align:'center'});
+
+    // Score badge
+    const bx=W/2-35, by=132, bw=70, bh=20;
+    doc.setFillColor(16,185,129); doc.roundedRect(bx,by,bw,bh,4,4,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(14);
+    doc.text(`Score: ${score}/${total}  (${percentage}%)`, W/2, by+13, {align:'center'});
+
+    // Date and trainer
+    doc.setTextColor(100,116,139); doc.setFont('helvetica','normal'); doc.setFontSize(10);
+    doc.text('Date: '+dateStr, 50, 168);
+
+    // Trainer signature area
+    doc.setDrawColor(180,180,180); doc.setLineWidth(0.5);
+    doc.line(W-110,165,W-40,165);
+    doc.setTextColor(100,116,139); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.text(stripEmoji(TRAINER_NAME), W-75, 170, {align:'center'});
+    doc.text(stripEmoji(TRAINER_SUBJECT), W-75, 176, {align:'center'});
+    doc.text('Trainer & Assistant Professor', W-75, 182, {align:'center'});
+
+    // Stars decoration
+    doc.setTextColor(212,175,55); doc.setFontSize(16);
+    doc.text('★ ★ ★', W/2, 165, {align:'center'});
+
+    // Footer
+    doc.setFillColor(126,34,206); doc.rect(0,H-14,W,14,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+    doc.text('Generated by Balu Smart Quiz  |  '+stripEmoji(TRAINER_NAME)+'  |  Aditya Degree & PG College for Women (A), Kakinada', W/2, H-5, {align:'center'});
+
+    doc.save(studentName.replace(/\s+/g,'_')+'_Certificate.pdf');
+    toast('🏆 Certificate downloaded!');
+  } catch(e){ console.error(e); toast('❌ Certificate error: '+e.message,'error'); }
+}
+
+// ════ STUDENT PERFORMANCE DASHBOARD ════
+async function loadPerformanceDashboard() {
+  const wrap = document.getElementById('performanceDashboard');
+  wrap.innerHTML = '<div class="loading"><div class="spinner"></div>Loading your performance…</div>';
+  try {
+    const snap = await db.collection('attempts').where('studentId','==',currentUser.uid).get();
+    const attempts = snap.docs.map(d=>d.data());
+    if (!attempts.length) {
+      wrap.innerHTML='<div class="empty-state"><div class="empty-icon">🏅</div>Complete quizzes to see your performance!</div>'; return;
+    }
+    const total      = attempts.length;
+    const passed     = attempts.filter(a=>(a.percentage||0)>=60).length;
+    const failed     = total-passed;
+    const avgScore   = Math.round(attempts.reduce((s,a)=>s+(a.percentage||0),0)/total);
+    const best       = Math.max(...attempts.map(a=>a.percentage||0));
+    const passRate   = Math.round(passed/total*100);
+
+    // Get quiz/topic info
+    const [quizzesSnap,topicsSnap,langsSnap]=await Promise.all([
+      db.collection('quizzes').get(), db.collection('topics').get(), db.collection('languages').get()
+    ]);
+    const quizzes={},topics={},langs={};
+    quizzesSnap.docs.forEach(d=>quizzes[d.id]={...d.data()});
+    topicsSnap.docs.forEach(d=>topics[d.id]={...d.data()});
+    langsSnap.docs.forEach(d=>langs[d.id]={...d.data()});
+
+    // Topic-wise breakdown
+    const topicMap={};
+    attempts.forEach(a=>{
+      const q=quizzes[a.quizId]||{};
+      const t=topics[q.topicId]||{};
+      const l=langs[q.langId]||{};
+      const key=(l.name||'?')+' › '+(t.name||'?');
+      if(!topicMap[key]) topicMap[key]={attempts:0,totalPct:0,passed:0};
+      topicMap[key].attempts++;
+      topicMap[key].totalPct+=(a.percentage||0);
+      if((a.percentage||0)>=60) topicMap[key].passed++;
+    });
+
+    // Recent 5 attempts
+    const recent = attempts.sort((a,b)=>{
+      const ta=a.completedAt?.toDate?.()||new Date(a.completedAt||0);
+      const tb=b.completedAt?.toDate?.()||new Date(b.completedAt||0);
+      return tb-ta;
+    }).slice(0,5);
+
+    wrap.innerHTML=`
+      <!-- Summary Stats -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:20px;">
+        ${[
+          {icon:'📝',val:total,   lbl:'Total Quizzes',  c:'var(--primary)'},
+          {icon:'✅',val:passed,  lbl:'Passed',         c:'var(--success)'},
+          {icon:'❌',val:failed,  lbl:'Failed',         c:'var(--danger)'},
+          {icon:'📊',val:avgScore+'%',lbl:'Avg Score',  c:'var(--accent)'},
+          {icon:'🏆',val:best+'%',lbl:'Best Score',     c:'#f59e0b'},
+          {icon:'🎯',val:passRate+'%',lbl:'Pass Rate',  c:'var(--success)'},
+        ].map(s=>`
+          <div class="stat-box" style="text-align:center;">
+            <div style="font-size:1.6em;margin-bottom:4px;">${s.icon}</div>
+            <div style="font-family:'Poppins',sans-serif;font-size:1.5em;font-weight:800;color:${s.c}">${s.val}</div>
+            <div style="font-size:.75em;color:var(--text-light);font-weight:600">${s.lbl}</div>
+          </div>`).join('')}
+      </div>
+
+      <!-- Topic Breakdown -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="section-title">📚 Topic-wise Performance</div>
+        ${Object.entries(topicMap).map(([key,t])=>{
+          const avg=Math.round(t.totalPct/t.attempts);
+          const pass=Math.round(t.passed/t.attempts*100);
+          return `<div style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.9em;">
+              <strong>${escHtml(key)}</strong>
+              <span style="color:${avg>=60?'var(--success)':'var(--danger)'};font-weight:700">${avg}%</span>
+            </div>
+            <div style="height:10px;background:#ede9fe;border-radius:99px;overflow:hidden;">
+              <div style="height:100%;width:${avg}%;background:${avg>=60?'linear-gradient(90deg,#10b981,#34d399)':'linear-gradient(90deg,#ef4444,#f87171)'};border-radius:99px;transition:width .6s ease;"></div>
+            </div>
+            <div style="font-size:.75em;color:var(--text-light);margin-top:3px;">${t.attempts} attempt(s) · ${pass}% pass rate</div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <!-- Recent Attempts -->
+      <div class="card">
+        <div class="section-title">🕒 Recent Attempts</div>
+        <div style="overflow-x:auto"><table class="results-table">
+          <thead><tr><th>#</th><th>Quiz</th><th>Score</th><th>%</th><th>Status</th></tr></thead>
+          <tbody>${recent.map((a,i)=>{
+            const q=quizzes[a.quizId]||{};
+            const t=topics[q.topicId]||{};
+            const l=langs[q.langId]||{};
+            const pass=(a.percentage||0)>=60;
+            return `<tr>
+              <td style="color:var(--text-light)">${i+1}</td>
+              <td><strong>${escHtml(l.name||'')} › ${escHtml(t.name||'')}</strong></td>
+              <td style="font-weight:700">${a.score}/${a.total}</td>
+              <td style="color:${pass?'var(--success)':'var(--danger)'};font-weight:700">${a.percentage}%</td>
+              <td><span class="badge ${pass?'badge-success':'badge-primary'}">${pass?'✅ Pass':'❌ Fail'}</span></td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table></div>
+      </div>`;
+  } catch(e){ wrap.innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div>Error: '+e.message+'</div>'; }
+}
+
+// ════ ANNOUNCEMENTS / NOTICE BOARD ════
+async function postNotice() {
+  const title    = document.getElementById('noticeTitle').value.trim();
+  const body     = document.getElementById('noticeBody').value.trim();
+  const priority = document.getElementById('noticePriority').value;
+  if (!title||!body){ toast('❌ Title and message required','error'); return; }
+  try {
+    await db.collection('notices').add({
+      title, body, priority,
+      trainerName: TRAINER_NAME,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    document.getElementById('noticeTitle').value='';
+    document.getElementById('noticeBody').value='';
+    toast('✅ Notice posted!');
+    loadNoticesTrainer();
+  } catch(e){ toast('❌ Error: '+e.message,'error'); }
+}
+
+async function loadNoticesTrainer() {
+  const wrap = document.getElementById('noticesTrainerWrap');
+  if (!wrap) return;
+  wrap.innerHTML='<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const snap = await db.collection('notices').get();
+    const notices = snap.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.toDate?.()||0)-(a.createdAt?.toDate?.()||0));
+    if (!notices.length){ wrap.innerHTML='<div class="empty-state" style="padding:20px"><div class="empty-icon">📢</div>No notices posted yet</div>'; return; }
+    wrap.innerHTML=notices.map(n=>{
+      const colors={normal:'#e9d5ff',important:'#fef3c7',urgent:'#fee2e2'};
+      const icons={normal:'📌',important:'⚠️',urgent:'🔴'};
+      return `<div style="background:${colors[n.priority]||'#e9d5ff'};border-radius:12px;padding:14px 18px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:.95em;margin-bottom:4px;">${icons[n.priority]||'📌'} ${escHtml(n.title)}</div>
+          <div style="font-size:.85em;color:var(--text-light);line-height:1.5;">${escHtml(n.body)}</div>
+          <div style="font-size:.75em;color:var(--text-light);margin-top:6px;">${fmtDate(n.createdAt?.toDate?.()||n.createdAt)}</div>
+        </div>
+        <button onclick="deleteNotice('${n.id}')" class="btn btn-danger btn-sm" style="flex-shrink:0;font-size:.75em;padding:4px 10px;">🗑️</button>
+      </div>`;
+    }).join('');
+  } catch(e){ wrap.innerHTML='<div style="color:var(--danger);padding:12px">Error: '+e.message+'</div>'; }
+}
+
+async function deleteNotice(id) {
+  if (!id) return;
+  await db.collection('notices').doc(id).delete();
+  toast('🗑️ Notice deleted');
+  loadNoticesTrainer();
+}
+
+async function loadNoticesStudent() {
+  const wrap = document.getElementById('noticesStudentWrap');
+  if (!wrap) return;
+  wrap.innerHTML='<div class="loading"><div class="spinner"></div>Loading notices…</div>';
+  try {
+    const snap = await db.collection('notices').get();
+    const notices = snap.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.toDate?.()||0)-(a.createdAt?.toDate?.()||0));
+    if (!notices.length){ wrap.innerHTML='<div class="empty-state"><div class="empty-icon">📢</div>No notices yet from your trainer</div>'; return; }
+    const colors={normal:'white',important:'#fffbeb',urgent:'#fff1f2'};
+    const borders={normal:'#e9d5ff',important:'#f59e0b',urgent:'#ef4444'};
+    const icons={normal:'📌',important:'⚠️',urgent:'🔴'};
+    wrap.innerHTML=notices.map(n=>`
+      <div class="card" style="margin-bottom:14px;background:${colors[n.priority]||'white'};border-left:4px solid ${borders[n.priority]||'#e9d5ff'};">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <span style="font-size:1.3em;">${icons[n.priority]||'📌'}</span>
+          <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:1em;">${escHtml(n.title)}</div>
+          ${n.priority==='urgent'?'<span class="badge" style="background:#fee2e2;color:#ef4444;margin-left:auto">URGENT</span>':n.priority==='important'?'<span class="badge" style="background:#fef3c7;color:#d97706;margin-left:auto">IMPORTANT</span>':''}
+        </div>
+        <div style="font-size:.9em;color:var(--text);line-height:1.6;">${escHtml(n.body)}</div>
+        <div style="font-size:.75em;color:var(--text-light);margin-top:8px;">Posted by ${escHtml(n.trainerName||'Trainer')} · ${fmtDate(n.createdAt?.toDate?.()||n.createdAt)}</div>
+      </div>`).join('');
+  } catch(e){ wrap.innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div>Error loading notices</div>'; }
+}
+
+// ════ STUDENT FEEDBACK SYSTEM ════
+
+let currentFbRating = 0;
+let currentFbLike   = null;
+
+function setRating(val) {
+  currentFbRating = val;
+  const labels = ['','😞 Poor','😐 Fair','🙂 Good','😊 Very Good','🤩 Excellent!'];
+  document.getElementById('ratingLabel').textContent = labels[val]||'';
+  document.querySelectorAll('.star-btn').forEach((s,i)=>{
+    s.style.color   = i<val ? '#f59e0b' : '#d1d5db';
+    s.style.transform = i<val ? 'scale(1.2)' : 'scale(1)';
+  });
+}
+
+function highlightDiff(input) {
+  document.querySelectorAll('.diff-opt').forEach(l=>{
+    l.style.borderColor = 'var(--border)';
+    l.style.background  = 'white';
+    l.style.color       = 'var(--text)';
+  });
+  const lbl = input.closest('label');
+  lbl.style.borderColor = 'var(--primary)';
+  lbl.style.background  = '#f5f0ff';
+  lbl.style.color       = 'var(--primary)';
+}
+
+function toggleLike(type) {
+  currentFbLike = currentFbLike===type ? null : type;
+  const likeBtn    = document.getElementById('likeBtn');
+  const dislikeBtn = document.getElementById('dislikeBtn');
+  likeBtn.style.background    = currentFbLike==='like'    ? '#dcfce7' : 'white';
+  likeBtn.style.borderColor   = currentFbLike==='like'    ? 'var(--success)' : 'var(--border)';
+  dislikeBtn.style.background = currentFbLike==='dislike' ? '#fee2e2' : 'white';
+  dislikeBtn.style.borderColor= currentFbLike==='dislike' ? 'var(--danger)'  : 'var(--border)';
+}
+
+async function submitFeedback() {
+  if (!currentFbRating) { toast('⭐ Please select a star rating first','error'); return; }
+  if (!currentQuizId)   { toast('❌ No quiz found','error'); return; }
+
+  // Check duplicate
+  const existing = await db.collection('feedback')
+    .where('studentId','==',currentUser.uid)
+    .where('quizId','==',currentQuizId).get();
+  if (!existing.empty) {
+    toast('⚠️ You already submitted feedback for this quiz','warning'); return;
+  }
+
+  const difficulty = document.querySelector('input[name="fbDiff"]:checked')?.value||'';
+  const comment    = document.getElementById('fbComment')?.value.trim()||'';
+  const quizTitle  = document.getElementById('quizScreenTitle')?.textContent||'';
+
+  try {
+    await db.collection('feedback').add({
+      studentId:   currentUser.uid,
+      studentName: currentUser.name||currentUser.email||'Student',
+      quizId:      currentQuizId,
+      quizTitle,
+      rating:      currentFbRating,
+      like:        currentFbLike,
+      difficulty,
+      comment,
+      createdAt:   firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast('✅ Feedback submitted! Thank you!');
+    document.getElementById('feedbackForm').classList.add('hidden');
+    document.getElementById('feedbackAlreadyDone').classList.remove('hidden');
+    document.getElementById('feedbackAlreadyDone').textContent='✅ Thank you for your feedback!';
+    // Reload feedback wall
+    loadFeedbackWall(currentQuizId);
+  } catch(e){ toast('❌ Error: '+e.message,'error'); }
+}
+
+async function checkExistingFeedback(quizId) {
+  try {
+    const snap = await db.collection('feedback')
+      .where('studentId','==',currentUser.uid)
+      .where('quizId','==',quizId).get();
+    if (!snap.empty) {
+      document.getElementById('feedbackForm').classList.add('hidden');
+      document.getElementById('feedbackAlreadyDone').classList.remove('hidden');
+    } else {
+      document.getElementById('feedbackForm').classList.remove('hidden');
+      document.getElementById('feedbackAlreadyDone').classList.add('hidden');
+    }
+  } catch(e){}
+}
+
+async function loadFeedbackWall(quizId) {
+  const wall = document.getElementById('feedbackWallList');
+  if (!wall) return;
+  try {
+    const snap = await db.collection('feedback').where('quizId','==',quizId).get();
+    const feedbacks = snap.docs.map(d=>d.data())
+      .sort((a,b)=>(b.createdAt?.toDate?.()||0)-(a.createdAt?.toDate?.()||0));
+    if (!feedbacks.length){ wall.innerHTML='<div style="color:var(--text-light);font-size:.9em;text-align:center;padding:12px">No reviews yet. Be the first!</div>'; return; }
+    wall.innerHTML = feedbacks.map(f=>`
+      <div style="padding:14px;border-bottom:1px solid var(--border-light);display:flex;gap:12px;align-items:flex-start;">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:.9em;flex-shrink:0;">
+          ${(f.studentName||'?').charAt(0).toUpperCase()}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+            <strong style="font-size:.9em;">${escHtml(f.studentName||'Student')}</strong>
+            <span style="color:#f59e0b;font-size:.95em;">${'★'.repeat(f.rating||0)}${'☆'.repeat(5-(f.rating||0))}</span>
+            ${f.like==='like'?'<span style="font-size:.8em;">👍</span>':f.like==='dislike'?'<span style="font-size:.8em;">👎</span>':''}
+            ${f.difficulty?`<span style="font-size:.75em;background:#f1f5f9;padding:2px 8px;border-radius:99px;color:var(--text-light);">${escHtml(f.difficulty)}</span>`:''}
+          </div>
+          ${f.comment?`<div style="font-size:.87em;color:var(--text);line-height:1.5;">${escHtml(f.comment)}</div>`:''}
+          <div style="font-size:.72em;color:var(--text-light);margin-top:4px;">${fmtDate(f.createdAt?.toDate?.()||f.createdAt)}</div>
+        </div>
+      </div>`).join('');
+  } catch(e){ wall.innerHTML='<div style="color:var(--danger);padding:12px">Error loading reviews</div>'; }
+}
+
+// ════ TRAINER FEEDBACK VIEW ════
+async function populateFeedbackQuizFilter() {
+  const sel = document.getElementById('fbFilterQuiz');
+  if (sel.options.length > 1) return;
+  const snap = await db.collection('quizzes').get();
+  const [topicsSnap,langsSnap] = await Promise.all([db.collection('topics').get(),db.collection('languages').get()]);
+  const topics={},langs={};
+  topicsSnap.docs.forEach(d=>topics[d.id]={...d.data()});
+  langsSnap.docs.forEach(d=>langs[d.id]={...d.data()});
+  snap.docs.forEach(d=>{
+    const q=d.data(); const t=topics[q.topicId]||{}; const l=langs[q.langId]||{};
+    const o=document.createElement('option');
+    o.value=d.id; o.textContent=(l.name||'?')+' › '+(t.name||'?')+' ('+q.difficulty+')';
+    sel.appendChild(o);
+  });
+}
+
+async function loadTrainerFeedback() {
+  const wrap      = document.getElementById('feedbackTrainerList');
+  const summary   = document.getElementById('feedbackSummary');
+  const quizId    = document.getElementById('fbFilterQuiz')?.value||'';
+  const ratingF   = document.getElementById('fbFilterRating')?.value||'';
+  wrap.innerHTML  = '<div class="loading"><div class="spinner"></div>Loading feedback…</div>';
+  summary.innerHTML = '';
+
+  try {
+    let query = db.collection('feedback');
+    if (quizId) query = query.where('quizId','==',quizId);
+    const snap = await query.get();
+
+    let feedbacks = snap.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.toDate?.()||0)-(a.createdAt?.toDate?.()||0));
+    if (ratingF) feedbacks = feedbacks.filter(f=>String(f.rating)===ratingF);
+
+    // Store for CSV
+    window._lastFeedbackData = feedbacks;
+
+    if (!feedbacks.length){ wrap.innerHTML='<div class="empty-state"><div class="empty-icon">💬</div>No feedback yet</div>'; return; }
+
+    // Summary stats
+    const avgRating = (feedbacks.reduce((s,f)=>s+(f.rating||0),0)/feedbacks.length).toFixed(1);
+    const likes     = feedbacks.filter(f=>f.like==='like').length;
+    const dislikes  = feedbacks.filter(f=>f.like==='dislike').length;
+    const ratingDist= [1,2,3,4,5].map(r=>feedbacks.filter(f=>f.rating===r).length);
+
+    summary.innerHTML=`
+      <div class="stat-box" style="text-align:center;flex:1;min-width:110px;">
+        <div style="font-size:2em;font-weight:800;color:#f59e0b;font-family:'Poppins',sans-serif;">${avgRating}</div>
+        <div style="color:#f59e0b;font-size:1.1em;">${'★'.repeat(Math.round(avgRating))}${'☆'.repeat(5-Math.round(avgRating))}</div>
+        <div style="font-size:.75em;color:var(--text-light)">Avg Rating</div>
+      </div>
+      <div class="stat-box" style="text-align:center;flex:1;min-width:110px;">
+        <div style="font-size:1.8em;font-weight:800;color:var(--success);font-family:'Poppins',sans-serif;">${feedbacks.length}</div>
+        <div style="font-size:.75em;color:var(--text-light)">Total Reviews</div>
+      </div>
+      <div class="stat-box" style="text-align:center;flex:1;min-width:110px;">
+        <div style="font-size:1.4em;font-weight:800;font-family:'Poppins',sans-serif;">👍 ${likes} 👎 ${dislikes}</div>
+        <div style="font-size:.75em;color:var(--text-light)">Likes / Dislikes</div>
+      </div>
+      <div class="stat-box" style="flex:2;min-width:180px;">
+        <div style="font-size:.78em;font-weight:600;color:var(--text-light);margin-bottom:6px;">Rating Distribution</div>
+        ${[5,4,3,2,1].map(r=>`
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+            <span style="font-size:.75em;width:16px;color:#f59e0b;">${'★'.repeat(r)}</span>
+            <div style="flex:1;height:6px;background:#ede9fe;border-radius:99px;overflow:hidden;">
+              <div style="height:100%;width:${feedbacks.length?ratingDist[r-1]/feedbacks.length*100:0}%;background:#f59e0b;border-radius:99px;"></div>
+            </div>
+            <span style="font-size:.72em;color:var(--text-light);width:20px;">${ratingDist[r-1]}</span>
+          </div>`).join('')}
+      </div>`;
+
+    // Feedback cards
+    wrap.innerHTML = feedbacks.map(f=>`
+      <div style="padding:16px;border-bottom:1px solid var(--border-light);display:flex;gap:14px;align-items:flex-start;">
+        <div style="width:42px;height:42px;border-radius:50%;background:var(--grad-primary);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:.95em;flex-shrink:0;">
+          ${(f.studentName||'?').charAt(0).toUpperCase()}
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+            <strong style="font-size:.92em;">${escHtml(f.studentName||'Student')}</strong>
+            <span style="color:#f59e0b;font-size:1em;">${'★'.repeat(f.rating||0)}${'☆'.repeat(5-(f.rating||0))}</span>
+            ${f.like==='like'?'<span class="badge badge-success" style="font-size:.72em;">👍 Liked</span>':f.like==='dislike'?'<span class="badge badge-primary" style="font-size:.72em;background:#fee2e2;color:var(--danger);">👎 Needs Work</span>':''}
+            ${f.difficulty?`<span style="font-size:.75em;background:#f1f5f9;padding:3px 10px;border-radius:99px;color:var(--text-light);">${escHtml(f.difficulty)}</span>`:''}
+          </div>
+          ${f.quizTitle?`<div style="font-size:.78em;color:var(--primary);margin-bottom:4px;">📋 ${escHtml(f.quizTitle)}</div>`:''}
+          ${f.comment?`<div style="font-size:.88em;color:var(--text);line-height:1.6;background:#f8fafc;padding:10px 14px;border-radius:8px;">"${escHtml(f.comment)}"</div>`:'<div style="font-size:.82em;color:var(--text-light);font-style:italic;">No comment</div>'}
+          <div style="font-size:.73em;color:var(--text-light);margin-top:6px;">${fmtDate(f.createdAt?.toDate?.()||f.createdAt)}</div>
+        </div>
+      </div>`).join('');
+  } catch(e){ wrap.innerHTML='<div class="empty-state"><div class="empty-icon">⚠️</div>Error: '+e.message+'</div>'; }
+}
+
+function exportFeedbackCSV() {
+  const data = window._lastFeedbackData;
+  if (!data||!data.length){ toast('❌ Load feedback first','error'); return; }
+  const headers=['Student','Quiz','Rating','Like/Dislike','Difficulty','Comment','Date'];
+  const rows=data.map(f=>[
+    '"'+(f.studentName||'').replace(/"/g,'""')+'"',
+    '"'+(f.quizTitle||'').replace(/"/g,'""')+'"',
+    f.rating||'',
+    '"'+(f.like||'')+'"',
+    '"'+(f.difficulty||'')+'"',
+    '"'+(f.comment||'').replace(/"/g,'""')+'"',
+    '"'+fmtDate(f.createdAt?.toDate?.()||f.createdAt)+'"'
+  ]);
+  const csv=[headers.join(','),...rows.map(r=>r.join(','))].join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='feedback_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+  toast('✅ Feedback exported!');
 }
 
 // ════ END APP ════
