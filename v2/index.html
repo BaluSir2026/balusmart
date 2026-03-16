@@ -191,11 +191,11 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
 .pct-fill{height:100%;border-radius:99px;}
 
 /* ── STUDENT CHECKS ── */
-.student-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-height:280px;overflow-y:auto;border:2px solid var(--border);border-radius:12px;padding:14px;}
-.student-check{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;border:1.5px solid var(--border-light);background:white;cursor:pointer;transition:var(--ease);}
+.student-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;max-height:340px;overflow-y:auto;border:2px solid var(--border);border-radius:12px;padding:14px;}
+.student-check{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;border:1.5px solid var(--border-light);background:white;cursor:pointer;transition:var(--ease);}
 .student-check:hover{border-color:var(--primary);}
 .student-check.selected{border-color:var(--primary);background:rgba(126,34,206,.05);}
-.student-check input{width:16px;height:16px;cursor:pointer;accent-color:var(--primary);}
+.student-check input{width:16px;height:16px;cursor:pointer;accent-color:var(--primary);margin-top:3px;flex-shrink:0;}
 
 /* ── DASHBOARD STATS ── */
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:24px;}
@@ -672,12 +672,27 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
         </div>
         <div class="form-group">
           <label>Select Students *</label>
-          <div style="display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
-            <button class="btn btn-sm btn-secondary" onclick="selectAll(true)">☑️ All</button>
-            <button class="btn btn-sm btn-secondary" onclick="selectAll(false)">⬜ Clear</button>
-            <span id="selCount" style="font-size:.84em;color:var(--text-light);align-self:center"></span>
+          <!-- Search + Sort + Controls bar -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center;">
+            <input class="input" id="stuSearch" placeholder="🔍 Search by name or ID…" oninput="filterStudentList()" style="flex:1;min-width:160px;padding:8px 12px;font-size:.85em;">
+            <select class="input" id="stuSort" onchange="filterStudentList()" style="width:auto;padding:8px 12px;font-size:.85em;">
+              <option value="name">A → Z Name</option>
+              <option value="name_desc">Z → A Name</option>
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
           </div>
-          <div class="student-list" id="studentListEl"><div class="loading" style="padding:20px"><div class="spinner"></div></div></div>
+          <!-- Stats bar -->
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px;padding:8px 12px;background:#f5f0ff;border-radius:10px;font-size:.83em;">
+            <span>👨‍🎓 Total: <strong id="stuTotalCount">0</strong></span>
+            <span style="color:var(--primary);">✅ Selected: <strong id="selCount">0</strong></span>
+            <span style="color:var(--text-light);" id="stuFilterCount"></span>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+              <button class="btn btn-sm btn-secondary" onclick="selectAll(true)">☑️ Select All</button>
+              <button class="btn btn-sm btn-secondary" onclick="selectAll(false)">⬜ Clear</button>
+            </div>
+          </div>
+          <div class="student-list" id="studentListEl" style="max-height:340px;"><div class="loading" style="padding:20px"><div class="spinner"></div></div></div>
         </div>
         <button class="btn btn-primary" onclick="doAssign()">📤 Assign Quiz</button>
       </div>
@@ -864,7 +879,11 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
             <div style="text-align:center;margin-bottom:20px;">
               <div style="font-size:.9em;color:var(--text-light);margin-bottom:10px;font-weight:600;">How would you rate this quiz?</div>
               <div id="starRating" style="display:flex;justify-content:center;gap:8px;font-size:2.4em;cursor:pointer;">
-                ${[1,2,3,4,5].map(i=>`<span class="star-btn" data-val="${i}" onclick="setRating(${i})" style="transition:transform .15s;color:#d1d5db;" title="${i} star${i>1?'s':''}">★</span>`).join('')}
+                <span class="star-btn" data-val="1" onclick="setRating(1)" style="transition:transform .15s;color:#d1d5db;">★</span>
+                <span class="star-btn" data-val="2" onclick="setRating(2)" style="transition:transform .15s;color:#d1d5db;">★</span>
+                <span class="star-btn" data-val="3" onclick="setRating(3)" style="transition:transform .15s;color:#d1d5db;">★</span>
+                <span class="star-btn" data-val="4" onclick="setRating(4)" style="transition:transform .15s;color:#d1d5db;">★</span>
+                <span class="star-btn" data-val="5" onclick="setRating(5)" style="transition:transform .15s;color:#d1d5db;">★</span>
               </div>
               <div id="ratingLabel" style="font-size:.82em;color:var(--text-light);margin-top:6px;font-weight:600;min-height:18px;"></div>
             </div>
@@ -873,11 +892,18 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
             <div style="margin-bottom:16px;">
               <div style="font-size:.88em;font-weight:600;color:var(--text);margin-bottom:8px;">Quiz Difficulty felt:</div>
               <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                ${['Too Easy','Just Right','Challenging','Very Hard'].map(d=>`
-                  <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:2px solid var(--border);border-radius:99px;cursor:pointer;font-size:.85em;transition:all .2s;" class="diff-opt">
-                    <input type="radio" name="fbDiff" value="${d}" style="display:none;" onchange="highlightDiff(this)">
-                    <span>${d}</span>
-                  </label>`).join('')}
+                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:2px solid var(--border);border-radius:99px;cursor:pointer;font-size:.85em;transition:all .2s;" class="diff-opt">
+                  <input type="radio" name="fbDiff" value="Too Easy" style="display:none;" onchange="highlightDiff(this)"><span>Too Easy</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:2px solid var(--border);border-radius:99px;cursor:pointer;font-size:.85em;transition:all .2s;" class="diff-opt">
+                  <input type="radio" name="fbDiff" value="Just Right" style="display:none;" onchange="highlightDiff(this)"><span>Just Right</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:2px solid var(--border);border-radius:99px;cursor:pointer;font-size:.85em;transition:all .2s;" class="diff-opt">
+                  <input type="radio" name="fbDiff" value="Challenging" style="display:none;" onchange="highlightDiff(this)"><span>Challenging</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:2px solid var(--border);border-radius:99px;cursor:pointer;font-size:.85em;transition:all .2s;" class="diff-opt">
+                  <input type="radio" name="fbDiff" value="Very Hard" style="display:none;" onchange="highlightDiff(this)"><span>Very Hard</span>
+                </label>
               </div>
             </div>
 
@@ -893,7 +919,7 @@ textarea.input{resize:vertical;min-height:160px;font-family:'JetBrains Mono',mon
             <!-- Comment -->
             <div style="margin-bottom:16px;">
               <div style="font-size:.88em;font-weight:600;color:var(--text);margin-bottom:8px;">Your comment (optional):</div>
-              <textarea id="fbComment" class="input" rows="3" placeholder="Share your thoughts about this quiz — what was good, what could be improved…" style="resize:vertical;font-family:'Inter',sans-serif;font-size:.9em;"></textarea>
+              <textarea id="fbComment" class="input" rows="3" placeholder="Share your thoughts about this quiz…" style="resize:vertical;font-family:'Inter',sans-serif;font-size:.9em;"></textarea>
             </div>
 
             <button onclick="submitFeedback()" class="btn btn-primary" style="width:100%;justify-content:center;">📤 Submit Feedback</button>
@@ -1645,18 +1671,72 @@ async function loadAsnQuizzes() {
 }
 
 async function loadStudentsList() {
-  const snap=await db.collection('users').where('role','==','student').get();
-  cachedStudents=snap.docs.map(d=>({uid:d.id,...d.data()}));
-  const el=document.getElementById('studentListEl');
-  if (!cachedStudents.length){ el.innerHTML='<div class="empty-state" style="padding:20px"><div class="empty-icon">👨‍🎓</div>No students registered yet</div>'; return; }
-  el.innerHTML=cachedStudents.map(s=>`
-    <label class="student-check" onclick="updateSelCount()">
+  const snap = await db.collection('users').where('role','==','student').get();
+  cachedStudents = snap.docs.map(d=>({uid:d.id,...d.data()}));
+  document.getElementById('stuTotalCount').textContent = cachedStudents.length;
+  filterStudentList();
+}
+
+function filterStudentList() {
+  const el       = document.getElementById('studentListEl');
+  const search   = (document.getElementById('stuSearch')?.value||'').toLowerCase().trim();
+  const sortBy   = document.getElementById('stuSort')?.value||'name';
+
+  if (!cachedStudents.length) {
+    el.innerHTML='<div class="empty-state" style="padding:20px"><div class="empty-icon">👨‍🎓</div>No students registered yet</div>';
+    return;
+  }
+
+  // Filter
+  let list = cachedStudents.filter(s=>{
+    if (!search) return true;
+    return (s.name||'').toLowerCase().includes(search) ||
+           (s.studentId||'').toLowerCase().includes(search) ||
+           (s.email||'').toLowerCase().includes(search);
+  });
+
+  // Sort
+  list = list.sort((a,b)=>{
+    if (sortBy==='name')      return (a.name||'').localeCompare(b.name||'');
+    if (sortBy==='name_desc') return (b.name||'').localeCompare(a.name||'');
+    const ta = a.createdAt?.toDate?.()||new Date(a.createdAt||0);
+    const tb = b.createdAt?.toDate?.()||new Date(b.createdAt||0);
+    if (sortBy==='newest') return tb-ta;
+    if (sortBy==='oldest') return ta-tb;
+    return 0;
+  });
+
+  // Filter count
+  const fc = document.getElementById('stuFilterCount');
+  if (fc) fc.textContent = search ? `Showing ${list.length} of ${cachedStudents.length}` : '';
+
+  if (!list.length) {
+    el.innerHTML='<div style="padding:20px;text-align:center;color:var(--text-light);">No students match your search</div>';
+    updateSelCount(); return;
+  }
+
+  el.innerHTML = list.map((s,i)=>{
+    // Format registration date
+    const regDate = s.createdAt?.toDate?.() || (s.createdAt ? new Date(s.createdAt) : null);
+    const regStr  = regDate ? regDate.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+    // Badge: newest if registered within 7 days
+    const isNew   = regDate && (Date.now()-regDate.getTime()) < 7*24*60*60*1000;
+    return `<label class="student-check" onclick="updateSelCount()">
       <input type="checkbox" value="${s.uid}">
-      <div>
-        <div style="font-weight:600;font-size:.88em">${escHtml(s.name)}</div>
-        <div style="font-size:.75em;color:var(--text-light)">${s.studentId||s.email}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="font-weight:700;font-size:.9em;">${escHtml(s.name||'—')}</span>
+          ${isNew?'<span style="font-size:.65em;background:#dcfce7;color:#16a34a;padding:1px 7px;border-radius:99px;font-weight:700;">NEW</span>':''}
+        </div>
+        <div style="font-size:.76em;color:var(--text-light);margin-top:1px;">
+          ID: ${escHtml(s.studentId||'—')} &nbsp;·&nbsp; ${escHtml(s.email||'')}
+        </div>
+        <div style="font-size:.72em;color:var(--text-light);margin-top:1px;">
+          📅 Registered: ${regStr}
+        </div>
       </div>
-    </label>`).join('');
+    </label>`;
+  }).join('');
   updateSelCount();
 }
 
@@ -1668,9 +1748,12 @@ function selectAll(v) {
 }
 
 function updateSelCount() {
-  const n=document.querySelectorAll('#studentListEl input:checked').length;
-  document.getElementById('selCount').textContent=n?`${n} selected`:'';
-  document.querySelectorAll('#studentListEl input').forEach(c=>c.closest('.student-check').classList.toggle('selected',c.checked));
+  const n = document.querySelectorAll('#studentListEl input:checked').length;
+  const el = document.getElementById('selCount');
+  if (el) el.textContent = n || '0';
+  document.querySelectorAll('#studentListEl input').forEach(c=>
+    c.closest('.student-check').classList.toggle('selected',c.checked)
+  );
 }
 
 async function doAssign() {
@@ -2822,81 +2905,85 @@ function downloadCertificate() {
     const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
     const W=297, H=210;
 
-    // Background gradient-style
-    doc.setFillColor(245,240,255); doc.rect(0,0,W,H,'F');
+    // ── Background ──────────────────────────────────────────────
+    doc.setFillColor(250,248,255); doc.rect(0,0,W,H,'F');
 
-    // Gold border double frame
-    doc.setDrawColor(212,175,55); doc.setLineWidth(3);
-    doc.rect(8,8,W-16,H-16);
-    doc.setLineWidth(1);
-    doc.rect(12,12,W-24,H-24);
+    // ── Gold outer border ────────────────────────────────────────
+    doc.setDrawColor(212,175,55); doc.setLineWidth(2.5);
+    doc.rect(6,6,W-12,H-12);
+    doc.setLineWidth(0.7);
+    doc.rect(10,10,W-20,H-20);
 
-    // Header purple band
-    doc.setFillColor(126,34,206); doc.rect(0,0,W,32,'F');
-    doc.setFillColor(234,88,12);  doc.rect(0,30,W,4,'F');
+    // ── Purple header band ───────────────────────────────────────
+    doc.setFillColor(126,34,206); doc.rect(0,0,W,28,'F');
+    doc.setFillColor(234,88,12);  doc.rect(0,26,W,3,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold'); doc.setFontSize(16);
+    doc.text('BALU SMART QUIZ', W/2, 11, {align:'center'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    doc.text('Aditya Degree & PG College for Women (A), Kakinada', W/2, 20, {align:'center'});
 
-    // App name
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(18);
-    doc.text('BALU SMART QUIZ', W/2, 12, {align:'center'});
-    doc.setFontSize(10); doc.setFont('helvetica','normal');
-    doc.text('Aditya Degree & PG College for Women (A), Kakinada', W/2, 22, {align:'center'});
+    // ── CERTIFICATE title ────────────────────────────────────────
+    doc.setTextColor(126,34,206); doc.setFont('helvetica','bold'); doc.setFontSize(24);
+    doc.text('CERTIFICATE OF ACHIEVEMENT', W/2, 48, {align:'center'});
 
-    // Certificate title
-    doc.setTextColor(126,34,206); doc.setFont('helvetica','bold'); doc.setFontSize(28);
-    doc.text('CERTIFICATE OF ACHIEVEMENT', W/2, 58, {align:'center'});
-
-    // Decorative line
-    doc.setDrawColor(212,175,55); doc.setLineWidth(1);
-    doc.line(40,63,W-40,63);
-
-    // This is to certify
-    doc.setTextColor(100,116,139); doc.setFont('helvetica','normal'); doc.setFontSize(12);
-    doc.text('This is to certify that', W/2, 76, {align:'center'});
-
-    // Student name
-    doc.setTextColor(30,27,46); doc.setFont('helvetica','bold'); doc.setFontSize(26);
-    doc.text(studentName, W/2, 92, {align:'center'});
-
-    // Underline name
-    const nameW=doc.getTextWidth(studentName);
+    // Gold decorative line
     doc.setDrawColor(212,175,55); doc.setLineWidth(0.8);
-    doc.line(W/2-nameW/2, 95, W/2+nameW/2, 95);
+    doc.line(50,52,W-50,52);
 
-    // has successfully completed
-    doc.setTextColor(100,116,139); doc.setFont('helvetica','normal'); doc.setFontSize(12);
-    doc.text('has successfully completed the quiz', W/2, 106, {align:'center'});
+    // ── This is to certify ───────────────────────────────────────
+    doc.setTextColor(100,116,139); doc.setFont('helvetica','normal'); doc.setFontSize(11);
+    doc.text('This is to certify that', W/2, 64, {align:'center'});
 
-    // Quiz title
-    doc.setTextColor(126,34,206); doc.setFont('helvetica','bold'); doc.setFontSize(16);
-    const titleLines = doc.splitTextToSize(quizTitle, W-80);
-    doc.text(titleLines, W/2, 118, {align:'center'});
+    // ── Student name ─────────────────────────────────────────────
+    doc.setTextColor(30,27,46); doc.setFont('helvetica','bold'); doc.setFontSize(24);
+    doc.text(studentName, W/2, 78, {align:'center'});
+    const nw = doc.getTextWidth(studentName);
+    doc.setDrawColor(212,175,55); doc.setLineWidth(0.7);
+    doc.line(W/2-nw/2, 81, W/2+nw/2, 81);
 
-    // Score badge
-    const bx=W/2-35, by=132, bw=70, bh=20;
-    doc.setFillColor(16,185,129); doc.roundedRect(bx,by,bw,bh,4,4,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(14);
-    doc.text(`Score: ${score}/${total}  (${percentage}%)`, W/2, by+13, {align:'center'});
+    // ── Text lines ───────────────────────────────────────────────
+    doc.setTextColor(100,116,139); doc.setFont('helvetica','normal'); doc.setFontSize(10.5);
+    doc.text('has successfully completed the quiz', W/2, 92, {align:'center'});
 
-    // Date and trainer
-    doc.setTextColor(100,116,139); doc.setFont('helvetica','normal'); doc.setFontSize(10);
-    doc.text('Date: '+dateStr, 50, 168);
+    // ── Quiz title ───────────────────────────────────────────────
+    doc.setTextColor(126,34,206); doc.setFont('helvetica','bold'); doc.setFontSize(14);
+    const titleLines = doc.splitTextToSize(quizTitle, W-100);
+    doc.text(titleLines, W/2, 102, {align:'center'});
 
-    // Trainer signature area
-    doc.setDrawColor(180,180,180); doc.setLineWidth(0.5);
-    doc.line(W-110,165,W-40,165);
+    // ── Score badge ──────────────────────────────────────────────
+    const badgeY = 102 + titleLines.length*7 + 2;
+    const badgeW = 72, badgeH = 14;
+    doc.setFillColor(16,185,129);
+    doc.roundedRect(W/2-badgeW/2, badgeY, badgeW, badgeH, 3, 3, 'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+    doc.text('Score: '+score+'/'+total+'  ('+percentage+'%)', W/2, badgeY+9.5, {align:'center'});
+
+    // ── Stars ────────────────────────────────────────────────────
+    doc.setTextColor(212,175,55); doc.setFontSize(14);
+    doc.text('* * * * *', W/2, badgeY+22, {align:'center'});
+
+    // ── Left: Date ───────────────────────────────────────────────
     doc.setTextColor(100,116,139); doc.setFont('helvetica','normal'); doc.setFontSize(9);
-    doc.text(stripEmoji(TRAINER_NAME), W-75, 170, {align:'center'});
-    doc.text(stripEmoji(TRAINER_SUBJECT), W-75, 176, {align:'center'});
-    doc.text('Trainer & Assistant Professor', W-75, 182, {align:'center'});
+    doc.text('Date of Completion', 40, 170);
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(30,27,46);
+    doc.text(dateStr, 40, 177);
+    doc.setDrawColor(200,200,200); doc.setLineWidth(0.4);
+    doc.line(28,181,100,181);
 
-    // Stars decoration
-    doc.setTextColor(212,175,55); doc.setFontSize(16);
-    doc.text('★ ★ ★', W/2, 165, {align:'center'});
+    // ── Right: Trainer signature ─────────────────────────────────
+    doc.setDrawColor(200,200,200);
+    doc.line(W-110,175,W-28,175);
+    doc.setTextColor(30,27,46); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text(stripEmoji(TRAINER_NAME), W-69, 180, {align:'center'});
+    doc.setTextColor(100,116,139); doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    doc.text(stripEmoji(TRAINER_SUBJECT), W-69, 186, {align:'center'});
+    doc.text('Trainer & Assistant Professor', W-69, 192, {align:'center'});
 
-    // Footer
-    doc.setFillColor(126,34,206); doc.rect(0,H-14,W,14,'F');
-    doc.setTextColor(255,255,255); doc.setFont('helvetica','normal'); doc.setFontSize(8);
-    doc.text('Generated by Balu Smart Quiz  |  '+stripEmoji(TRAINER_NAME)+'  |  Aditya Degree & PG College for Women (A), Kakinada', W/2, H-5, {align:'center'});
+    // ── Purple footer ────────────────────────────────────────────
+    doc.setFillColor(126,34,206); doc.rect(0,H-12,W,12,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+    doc.text('Generated by Balu Smart Quiz  |  '+stripEmoji(TRAINER_NAME)+'  |  Aditya Degree & PG College for Women (A), Kakinada', W/2, H-4, {align:'center'});
 
     doc.save(studentName.replace(/\s+/g,'_')+'_Certificate.pdf');
     toast('🏆 Certificate downloaded!');
